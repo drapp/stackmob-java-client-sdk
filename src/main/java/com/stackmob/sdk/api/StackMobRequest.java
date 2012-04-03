@@ -129,7 +129,7 @@ public abstract class StackMobRequest {
                 sendDeleteRequest();
             }
             else {
-                StackMobException ex = new StackMobException("The StackMob SDK doesn't support the HTTP verb %s at this time");
+                StackMobException ex = new StackMobException(String.format("The StackMob SDK doesn't support the HTTP verb %s at this time", httpVerb.toString()));
                 return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, ex);
             }
             return new StackMobRequestSendResult();
