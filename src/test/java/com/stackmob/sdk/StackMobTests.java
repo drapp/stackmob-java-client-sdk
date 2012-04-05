@@ -660,8 +660,6 @@ public class StackMobTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
     }
 
-    /*
-     * uncomment once schemas are updated to support forgot and reset password
     @Test public void forgotPassword() throws Exception {
         final String username = getRandomString();
         final String password = getRandomString();
@@ -761,5 +759,4 @@ public class StackMobTests extends StackMobTestCommon {
         });
         asserter.assertLatchFinished(latch);
     }
-         */
 }
