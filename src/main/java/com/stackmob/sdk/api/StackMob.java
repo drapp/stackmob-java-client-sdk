@@ -153,8 +153,7 @@ public class StackMob {
     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
     */
     public StackMob(String apiKey, String apiSecret, String userObjectName, Integer apiVersionNumber) {
-        this.session = new StackMobSession(apiKey, apiSecret, userObjectName, apiVersionNumber);
-        this.executor = createNewExecutor();
+        this(apiKey, apiSecret, userObjectName,  null, apiVersionNumber);
     }
 
     /**
@@ -187,10 +186,7 @@ public class StackMob {
                     Integer apiVersionNumber,
                     String urlFormat,
                     StackMobRedirectedCallback redirectedCallback) {
-        this(apiKey, apiSecret, userObjectName, apiVersionNumber);
-        this.userRedirectedCallback = redirectedCallback;
-        this.apiUrlFormat = urlFormat;
-        this.executor = createNewExecutor();
+        this(apiKey, apiSecret, userObjectName, null, apiVersionNumber, urlFormat, StackMobRequest.DEFAULT_PUSH_URL_FORMAT, redirectedCallback);
     }
 
     public StackMob(String apiKey,
@@ -200,7 +196,20 @@ public class StackMob {
                     String apiUrlFormat,
                     String pushUrlFormat,
                     StackMobRedirectedCallback redirectedCallback) {
-        this(apiKey, apiSecret, userObjectName, apiVersionNumber, apiUrlFormat, redirectedCallback);
+        this(apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
+    }
+
+    public StackMob(String apiKey,
+                    String apiSecret,
+                    String userObjectName,
+                    String appName,
+                    Integer apiVersionNumber,
+                    String apiUrlFormat,
+                    String pushUrlFormat,
+                    StackMobRedirectedCallback redirectedCallback) {
+        this(apiKey, apiSecret, appName, userObjectName, apiVersionNumber);
+        this.userRedirectedCallback = redirectedCallback;
+        this.apiUrlFormat = apiUrlFormat;
         this.pushUrlFormat = pushUrlFormat;
     }
 
