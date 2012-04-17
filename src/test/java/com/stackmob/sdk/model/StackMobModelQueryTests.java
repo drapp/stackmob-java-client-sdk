@@ -67,4 +67,35 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
         });
         asserter.assertLatchFinished(latch);
     }
+    
+    private static class User extends StackMobModel {
+        public User(String username) {
+            super(User.class);
+        }
+
+        @Override
+        public String getIDFieldName() {
+            return "username";
+        }
+    }
+    
+    @Test public void testDefaultCtor() throws Exception {
+        StackMobModelQuery<User> loginUserQuery = new StackMobModelQuery<User>(User.class);
+        loginUserQuery.fieldIsEqualTo("username", "drapp");
+        loginUserQuery.send(new StackMobQueryCallback<User>() {
+            @Override
+            public void success(List<User> result) {
+                asserter.markEquals(1, result.size());
+                asserter.markNotNull(result.get(0).getID());
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+
+    }
 }

@@ -104,6 +104,10 @@ public abstract class StackMobModel {
         return id;
     }
 
+    protected void setActualClass(Class<? extends StackMobModel> actualClass) {
+        this.actualClass = actualClass;
+    }
+
     /**
      * Determines the schema connected to this class on the server. By
      * default it's the name of the class in lower case. Override in

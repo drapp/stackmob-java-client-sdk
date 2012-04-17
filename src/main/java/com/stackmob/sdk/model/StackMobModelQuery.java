@@ -51,6 +51,7 @@ public class StackMobModelQuery<T extends StackMobModel>{
                 List<T> resultList = new ArrayList<T>();
                 for(JsonElement elt : array) {
                     T newObject = new Gson().fromJson("{}", classOfT);
+                    newObject.setActualClass(classOfT);
                     try {
                         newObject.fillFromJson(elt);
                         resultList.add(newObject);
