@@ -207,7 +207,7 @@ public class StackMob {
                     String apiUrlFormat,
                     String pushUrlFormat,
                     StackMobRedirectedCallback redirectedCallback) {
-        this(apiKey, apiSecret, appName, userObjectName, apiVersionNumber);
+        this(apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
         this.userRedirectedCallback = redirectedCallback;
         this.apiUrlFormat = apiUrlFormat;
         this.pushUrlFormat = pushUrlFormat;
