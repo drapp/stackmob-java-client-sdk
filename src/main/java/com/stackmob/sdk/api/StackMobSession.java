@@ -17,16 +17,19 @@
 package com.stackmob.sdk.api;
 
 import com.google.gson.Gson;
+import com.stackmob.sdk.util.Http;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class StackMobSession {
+    public static SimpleDateFormat RFC_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
+
     private String key;
     private String secret;
     private String userObjectName;
     private int apiVersionNumber;
     private String appName = null;
-    private long nextTimeCheck = 0;
     private long serverTimeDiff = 0;
 
     public StackMobSession(String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
@@ -76,20 +79,15 @@ public class StackMobSession {
         return new Date().getTime() / 1000;
     }
 
-    public boolean timeCheckRequired() {
-        return nextTimeCheck < getLocalTime();
-    }
-
     public long getServerTime() {
         return getServerTimeDiff() + getLocalTime();
     }
     
     public void recordServerTimeDiff(String timeHeader) {
         try {
-            saveServerTimeDiff(Long.parseLong(timeHeader) - getLocalTime());
-            //Set the next sync for 10 minutes
-            nextTimeCheck = getLocalTime() + 10 * 60;
-        } catch(Exception ignore) {}
+            long serverTime = RFC_DATE_FORMAT.parse(timeHeader).getTime() / 1000;
+            saveServerTimeDiff(serverTime - getLocalTime());
+        } catch(Exception ignore) { }
     }
 
     protected void saveServerTimeDiff(long serverTimeDiff) {
