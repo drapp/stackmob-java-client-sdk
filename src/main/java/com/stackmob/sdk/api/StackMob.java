@@ -16,8 +16,11 @@
 
 package com.stackmob.sdk.api;
 
+import com.stackmob.sdk.callback.StackMobCallback;
+import com.stackmob.sdk.callback.StackMobIntermediaryCallback;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
+import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
 import com.stackmob.sdk.push.StackMobPushToken;
@@ -1062,5 +1065,9 @@ public class StackMob {
      */
     public StackMobSession getSession() {
         return session;
+    }
+
+    public void setSession(StackMobSession session) {
+        this.session = session;
     }
 }

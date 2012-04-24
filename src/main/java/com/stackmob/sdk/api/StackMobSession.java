@@ -16,12 +16,18 @@
 
 package com.stackmob.sdk.api;
 
+import com.google.gson.Gson;
+
+import java.util.Date;
+
 public class StackMobSession {
     private String key;
     private String secret;
     private String userObjectName;
     private int apiVersionNumber;
     private String appName = null;
+    private long nextTimeCheck = 0;
+    private long serverTimeDiff = 0;
 
     public StackMobSession(String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
         this(key, secret, userObjectName, apiVersionNumber);
@@ -36,6 +42,14 @@ public class StackMobSession {
         this.secret = secret;
         this.userObjectName = userObjectName;
         this.apiVersionNumber = apiVersionNumber;
+    }
+
+    public StackMobSession(StackMobSession that) {
+        this.key = that.key;
+        this.secret = that.secret;
+        this.appName = that.appName;
+        this.userObjectName = that.userObjectName;
+        this.apiVersionNumber = that.apiVersionNumber;
     }
 
     public String getKey() {
@@ -57,4 +71,33 @@ public class StackMobSession {
     public String getAppName() {
         return appName;
     }
+
+    protected long getLocalTime() {
+        return new Date().getTime() / 1000;
+    }
+
+    public boolean timeCheckRequired() {
+        return nextTimeCheck < getLocalTime();
+    }
+
+    public long getServerTime() {
+        return getServerTimeDiff() + getLocalTime();
+    }
+    
+    public void recordServerTimeDiff(String timeHeader) {
+        try {
+            saveServerTimeDiff(Long.parseLong(timeHeader) - getLocalTime());
+            //Set the next sync for 10 minutes
+            nextTimeCheck = getLocalTime() + 10 * 60;
+        } catch(Exception ignore) {}
+    }
+
+    protected void saveServerTimeDiff(long serverTimeDiff) {
+        this.serverTimeDiff = serverTimeDiff;
+    }
+
+    protected long getServerTimeDiff() {
+        return serverTimeDiff;
+    }
+
 }

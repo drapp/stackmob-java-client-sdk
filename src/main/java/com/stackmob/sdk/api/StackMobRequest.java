@@ -52,6 +52,7 @@ public abstract class StackMobRequest {
     public static final String DEFAULT_URL_FORMAT = "mob1.stackmob.com";
     public static final String DEFAULT_API_URL_FORMAT = "api." + DEFAULT_URL_FORMAT;
     public static final String DEFAULT_PUSH_URL_FORMAT = "push." + DEFAULT_URL_FORMAT;
+    public static final String TIME_CHECK_HEADER = "X-StackMob-Time-Check";
     protected static final String SECURE_SCHEME = "https";
     protected static final String REGULAR_SCHEME = "http";
     private static StackMobCookieStore cookieStore = new StackMobCookieStore();
@@ -281,6 +282,9 @@ public abstract class StackMobRequest {
         headerList.add(new Pair<String, String>("Accept", accept));
         headerList.add(new Pair<String, String>("User-Agent", StackMob.getUserAgent(session.getAppName())));
         headerList.add(new Pair<String, String>("Cookie", cookieStore.cookieHeader()));
+        if(session.timeCheckRequired()) {
+            headerList.add(new Pair<String, String>(TIME_CHECK_HEADER, ""));
+        }
 
         //build user headers
         if(this.headers != null) {
@@ -331,6 +335,9 @@ public abstract class StackMobRequest {
                     StackMob.getLogger().logInfo("Sending request %s", req.toString());
                     Response ret = req.send();
                     StackMob.getLogger().logInfo("Received response %d", ret.getCode());
+                    if(ret.getHeader(TIME_CHECK_HEADER) != null) {
+                        session.recordServerTimeDiff(ret.getHeader(TIME_CHECK_HEADER));
+                    }
                     if(HttpRedirectHelper.isRedirected(ret.getCode())) {
                         StackMob.getLogger().logInfo("Response was redirected");
                         String newLocation = HttpRedirectHelper.getNewLocation(ret.getHeaders());
