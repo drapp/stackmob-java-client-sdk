@@ -17,24 +17,16 @@
 package com.stackmob.sdk.api;
 
 import com.stackmob.sdk.StackMobTestCommon;
-import com.stackmob.sdk.api.StackMobFile;
-import com.stackmob.sdk.api.StackMobQuery;
-import com.stackmob.sdk.api.StackMobQueryWithField;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.concurrencyutils.CountDownLatchUtils;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
-import com.stackmob.sdk.net.StackMobApi;
 import com.stackmob.sdk.testobjects.Game;
 import com.stackmob.sdk.testobjects.S3Object;
 import com.stackmob.sdk.testobjects.StackMobObjectOnServer;
 import com.stackmob.sdk.testobjects.User;
 import org.junit.Test;
-import org.scribe.services.TimestampService;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
@@ -584,7 +576,6 @@ public class StackMobTests extends StackMobTestCommon {
         final String fileName = "test.jpg";
         final String content = "w00t";
         final String schema = "user2";
-        final String binaryField = "photo";
         final StackMobFile obj = new StackMobFile(contentType, fileName, content.getBytes());
         final String expectedAWSPrefix = "http://s3.amazonaws.com/test-stackmob/" + schema;
 
@@ -869,7 +860,7 @@ public class StackMobTests extends StackMobTestCommon {
         final String password = getRandomString();
         final String email = getRandomString();
         final User user = new User(username, password, email);
-        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
+        createOnServer(user, User.class);
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
         stackmob.forgotPassword(username, new StackMobCallback() {
@@ -892,7 +883,7 @@ public class StackMobTests extends StackMobTestCommon {
         final String password = getRandomString();
         final String email = getRandomString();
         final User user = new User(username, password, email);
-        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
+        createOnServer(user, User.class);
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
         stackmob.forgotPassword(username, new StackMobCallback() {
@@ -930,7 +921,7 @@ public class StackMobTests extends StackMobTestCommon {
         final String password = getRandomString();
         final String email = getRandomString();
         final User user = new User(username, password, email);
-        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
+        createOnServer(user, User.class);
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 

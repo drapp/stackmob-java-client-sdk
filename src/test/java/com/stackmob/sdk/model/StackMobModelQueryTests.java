@@ -19,10 +19,8 @@ import com.stackmob.sdk.StackMobTestCommon;
 import com.stackmob.sdk.callback.StackMobQueryCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
-import com.stackmob.sdk.model.StackMobModelQuery;
 import com.stackmob.sdk.testobjects.Author;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -67,7 +65,64 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
         });
         asserter.assertLatchFinished(latch);
     }
-    
+
+    @Test public void testNotEqualQuery() throws Exception {
+        new StackMobModelQuery<Author>(Author.class).fieldIsNotEqual("name", "tolstoy").send(new StackMobQueryCallback<Author>() {
+            @Override
+            public void success(List<Author> result) {
+                asserter.markTrue(result.size() > 0);
+                for (Author a : result) {
+                    asserter.markFalse("tolstoy".equals(a.getName()));
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
+    @Test public void testIsNullQuery() throws Exception {
+        new StackMobModelQuery<Author>(Author.class).fieldIsNull("name").send(new StackMobQueryCallback<Author>() {
+            @Override
+            public void success(List<Author> result) {
+                asserter.markTrue(result.size() > 0);
+                for (Author a : result) {
+                    asserter.markTrue(a.getName() == null);
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
+    @Test public void testIsNotNullQuery() throws Exception {
+        new StackMobModelQuery<Author>(Author.class).fieldIsNotNull("name").send(new StackMobQueryCallback<Author>() {
+            @Override
+            public void success(List<Author> result) {
+                asserter.markTrue(result.size() > 0);
+                for (Author a : result) {
+                    asserter.markNotNull(a.getName());
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
     private static class User extends StackMobModel {
         public User(String username) {
             super(User.class);

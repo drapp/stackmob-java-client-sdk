@@ -21,11 +21,9 @@ import com.stackmob.sdk.api.StackMobQuery;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobQueryCallback;
 import com.stackmob.sdk.exception.StackMobException;
-import com.stackmob.sdk.model.StackMobModel;
 import com.stackmob.sdk.util.GeoPoint;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class StackMobModelQuery<T extends StackMobModel>{
@@ -162,6 +160,37 @@ public class StackMobModelQuery<T extends StackMobModel>{
      */
     public StackMobModelQuery<T> fieldIsIn(String field, List<String> values) {
         query.fieldIsIn(field, values);
+        return this;
+    }
+
+    /**
+     * add a "NE" to your query. test whether the given field's value is not equal to the given value
+     * @param field the field whose value to test
+     * @param val the value against which to match
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobModelQuery<T> fieldIsNotEqual(String field, String val) {
+        query.fieldIsNotEqual(field, val);
+        return this;
+    }
+
+    /**
+     * add a "NULL" to your query. test whether the given field's value is null
+     * @param field the field whose value to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobModelQuery<T> fieldIsNull(String field) {
+        query.fieldIsNull(field);
+        return this;
+    }
+
+    /**
+     * add a "NULL" to your query. test whether the given field's value is not null
+     * @param field the field whose value to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobModelQuery<T> fieldIsNotNull(String field) {
+        query.fieldIsNotNull(field);
         return this;
     }
 
