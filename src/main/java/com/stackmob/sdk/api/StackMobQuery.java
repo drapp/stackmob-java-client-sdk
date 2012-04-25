@@ -226,7 +226,7 @@ public class StackMobQuery {
      * @return the new query that resulted from adding this operation
      */
     public StackMobQuery fieldIsNotEqual(String field, String val) {
-      return putInMap(field, Operator.NE, val);
+        return putInMap(field, Operator.NE, val);
     }
 
     /**
@@ -235,7 +235,7 @@ public class StackMobQuery {
      * @return the new query that resulted from adding this operation
      */
     public StackMobQuery fieldIsNull(String field) {
-      return putInMap(field, Operator.NULL, "true");
+        return putInMap(field, Operator.NULL, "true");
     }
 
     /**
@@ -244,7 +244,7 @@ public class StackMobQuery {
      * @return the new query that resulted from adding this operation
      */
     public StackMobQuery fieldIsNotNull(String field) {
-      return putInMap(field, Operator.NULL, "false");
+        return putInMap(field, Operator.NULL, "false");
     }
 
     /**
