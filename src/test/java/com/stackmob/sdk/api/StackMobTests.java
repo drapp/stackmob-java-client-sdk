@@ -142,6 +142,7 @@ public class StackMobTests extends StackMobTestCommon {
         objectOnServer.delete();
     }
 
+    /*
     @Test public void startSession() throws InterruptedException, StackMobException {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
@@ -194,6 +195,7 @@ public class StackMobTests extends StackMobTestCommon {
             StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()));
         }
     }
+    */
 
     @Test public void getWithoutArguments() throws Exception {
         final Game game = new Game(Arrays.asList("one", "two"), "one");
