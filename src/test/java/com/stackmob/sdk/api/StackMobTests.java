@@ -163,32 +163,36 @@ public class StackMobTests extends StackMobTestCommon {
     }
 
     @Test public void testTimeSync() throws Exception {
-        //Hack a bad local time into the session
-        StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
-            @Override
-            public long getLocalTime() {
-                StackMob.getLogger().logWarning("Mocking incorrect time");
-                return super.getLocalTime() + 5000;
-            }
-        });
-        final CountDownLatch latch = latchOne();
-        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+        try {
+            //Hack a bad local time into the session
+            StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
+                @Override
+                public long getLocalTime() {
+                    StackMob.getLogger().logWarning("Mocking incorrect time");
+                    return super.getLocalTime() + 5000;
+                }
+            });
+            final CountDownLatch latch = latchOne();
+            final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        //This will fail, but it should cause us to sync up with the server
-        stackmob.startSession(new StackMobCallback() {
-            @Override
-            public void success(String responseBody) {
-                asserter.markException(new Exception("request with bad time succeeded"));
-            }
+            //This will fail, but it should cause us to sync up with the server
+            stackmob.startSession(new StackMobCallback() {
+                @Override
+                public void success(String responseBody) {
+                    asserter.markException(new Exception("request with bad time succeeded"));
+                }
 
-            @Override
-            public void failure(StackMobException e) {
-                latch.countDown();
-            }
-        });
-        asserter.assertLatchFinished(latch);
-        //After startSession we should be accounting for the bad local time
-        getWithoutArguments();
+                @Override
+                public void failure(StackMobException e) {
+                    latch.countDown();
+                }
+            });
+            asserter.assertLatchFinished(latch);
+            //After startSession we should be accounting for the bad local time
+            getWithoutArguments();
+        } finally {
+            StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()));
+        }
     }
 
     @Test public void getWithoutArguments() throws Exception {
