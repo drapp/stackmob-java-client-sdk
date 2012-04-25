@@ -63,6 +63,33 @@ public class StackMobQueryWithField {
         return this.isEqualTo(val.toString());
     }
 
+    public StackMobQueryWithField isNotEqualTo(String val) {
+        this.q = this.q.fieldIsNotEqual(this.field, val);
+        return this;
+    }
+
+    public StackMobQueryWithField isNotEqualTo(Integer val) {
+        return this.isNotEqualTo(val.toString());
+    }
+
+    public StackMobQueryWithField isNotEqualTo(Long val) {
+        return this.isNotEqualTo(val.toString());
+    }
+
+    public StackMobQueryWithField isNotEqualTo(Boolean val) {
+        return this.isNotEqualTo(val.toString());
+    }
+
+    public StackMobQueryWithField isNull() {
+        this.q = this.q.fieldIsNull(this.field);
+        return this;
+    }
+
+    public StackMobQueryWithField isNotNull() {
+        this.q = this.q.fieldIsNotNull(this.field);
+        return this;
+    }
+
     public StackMobQueryWithField isNear(GeoPoint point) {
         this.q = this.q.fieldIsNear(this.field, point);
         return this;

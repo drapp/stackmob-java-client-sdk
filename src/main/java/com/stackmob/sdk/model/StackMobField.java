@@ -51,6 +51,36 @@ public class StackMobField {
         return this;
     }
 
+    public StackMobField isNotEqualTo(String val) {
+        q.isNotEqualTo(val);
+        return this;
+    }
+
+    public StackMobField isNotEqualTo(Integer val) {
+        q.isNotEqualTo(val);
+        return this;
+    }
+
+    public StackMobField isNotEqualTo(Long val) {
+        q.isNotEqualTo(val);
+        return this;
+    }
+
+    public StackMobField isNotEqualTo(Boolean val) {
+        q.isNotEqualTo(val);
+        return this;
+    }
+
+    public StackMobField isNull() {
+      q.isNull();
+      return this;
+    }
+
+    public StackMobField isNotNull() {
+      q.isNotNull();
+      return this;
+    }
+
     public StackMobField isNear(GeoPoint point) {
         q.isNear(point);
         return this;

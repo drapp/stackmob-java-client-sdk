@@ -80,6 +80,39 @@ public class StackMobQueryTests extends StackMobTestCommon {
         assertEquals(valueArr, valSplit);
     }
 
+    @Test public void notEqualQuery() {
+        StackMobQuery q = new StackMobQuery(object).fieldIsNotEqual(field, "foo");
+        assertEquals(object, q.getObjectName());
+        Map<String, String> args = q.getArguments();
+        assertEquals(1, args.size());
+        assertTrue(args.containsKey(field+StackMobQuery.Operator.NE.getOperatorForURL()));
+        String val = args.get(field+StackMobQuery.Operator.NE.getOperatorForURL());
+        List<String> valSplit = Arrays.asList(val.split(","));
+        assertEquals(Arrays.asList("foo"), valSplit);
+    }
+
+    @Test public void isNullQuery() {
+        StackMobQuery q = new StackMobQuery(object).fieldIsNull(field);
+        assertEquals(object, q.getObjectName());
+        Map<String, String> args = q.getArguments();
+        assertEquals(1, args.size());
+        assertTrue(args.containsKey(field+StackMobQuery.Operator.NULL.getOperatorForURL()));
+        String val = args.get(field+StackMobQuery.Operator.NULL.getOperatorForURL());
+        List<String> valSplit = Arrays.asList(val.split(","));
+        assertEquals(Arrays.asList("true"), valSplit);
+    }
+
+    @Test public void isNotNullQuery() {
+        StackMobQuery q = new StackMobQuery(object).fieldIsNotNull(field);
+        assertEquals(object, q.getObjectName());
+        Map<String, String> args = q.getArguments();
+        assertEquals(1, args.size());
+        assertTrue(args.containsKey(field+StackMobQuery.Operator.NULL.getOperatorForURL()));
+        String val = args.get(field+StackMobQuery.Operator.NULL.getOperatorForURL());
+        List<String> valSplit = Arrays.asList(val.split(","));
+        assertEquals(Arrays.asList("false"), valSplit);
+    }
+
     @Test public void nearQuery() {
         StackMobQuery q = new StackMobQuery(object).fieldIsNearWithinMi(field, origin, 1d);
         assertEquals(object, q.getObjectName());
