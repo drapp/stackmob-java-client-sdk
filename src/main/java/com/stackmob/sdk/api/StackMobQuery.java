@@ -219,30 +219,30 @@ public class StackMobQuery {
         return putInMap(field, Operator.IN, join(values));
     }
 
-  /**
-   * add a "NE" to your query. test whether the given field's value is not equal to the given value
-   * @param field the field whose value to test
-   * @param val the value against which to match
-   * @return the new query that resulted from adding this operation
-   */
+    /**
+     * add a "NE" to your query. test whether the given field's value is not equal to the given value
+     * @param field the field whose value to test
+     * @param val the value against which to match
+     * @return the new query that resulted from adding this operation
+     */
     public StackMobQuery fieldIsNotEqual(String field, String val) {
       return putInMap(field, Operator.NE, val);
     }
 
-  /**
-   * add a "NULL" to your query. test whether the given field's value is null
-   * @param field the field whose value to test
-   * @return the new query that resulted from adding this operation
-   */
+    /**
+     * add a "NULL" to your query. test whether the given field's value is null
+     * @param field the field whose value to test
+     * @return the new query that resulted from adding this operation
+     */
     public StackMobQuery fieldIsNull(String field) {
       return putInMap(field, Operator.NULL, "true");
     }
 
-  /**
-   * add a "NULL" to your query. test whether the given field's value is not null
-   * @param field the field whose value to test
-   * @return the new query that resulted from adding this operation
-   */
+    /**
+     * add a "NULL" to your query. test whether the given field's value is not null
+     * @param field the field whose value to test
+     * @return the new query that resulted from adding this operation
+     */
     public StackMobQuery fieldIsNotNull(String field) {
       return putInMap(field, Operator.NULL, "false");
     }

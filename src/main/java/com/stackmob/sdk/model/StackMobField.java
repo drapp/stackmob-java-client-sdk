@@ -72,13 +72,13 @@ public class StackMobField {
     }
 
     public StackMobField isNull() {
-      q.isNull();
-      return this;
+        q.isNull();
+        return this;
     }
 
     public StackMobField isNotNull() {
-      q.isNotNull();
-      return this;
+        q.isNotNull();
+        return this;
     }
 
     public StackMobField isNear(GeoPoint point) {
