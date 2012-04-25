@@ -80,12 +80,16 @@ public class StackMobSession {
     }
 
     public long getServerTime() {
+        if(getServerTimeDiff() != 0) {
+            StackMob.getLogger().logDebug("Adjusting time for server by %d seconds", getServerTimeDiff());
+        }
         return getServerTimeDiff() + getLocalTime();
     }
     
     public void recordServerTimeDiff(String timeHeader) {
         try {
             long serverTime = RFC_DATE_FORMAT.parse(timeHeader).getTime() / 1000;
+            StackMob.getLogger().logDebug("Got a server time of %d versus local time %d", serverTime, getLocalTime());
             saveServerTimeDiff(serverTime - getLocalTime());
         } catch(Exception ignore) { }
     }
