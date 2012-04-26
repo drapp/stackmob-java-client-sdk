@@ -45,7 +45,7 @@ public enum SerializationMetadata {
     
     public static String getFieldNameFromJsonName(Class<?> actualClass, String jsonName) {
         ensureMetadata(actualClass);
-        StackMob.getLogger().logDebug("metadata for class %s is %s", actualClass.toString(), Arrays.toString(jsonNamesForClasses.get(actualClass).entrySet().toArray()));
+        StackMob.getLogger().logDebug("metadata for class %s is 0x%x: %s", actualClass.toString(), System.identityHashCode(jsonNamesForClasses.get(actualClass)), Arrays.toString(jsonNamesForClasses.get(actualClass).entrySet().toArray()));
         return jsonNamesForClasses.get(actualClass).get(jsonName);
     }
 
@@ -56,7 +56,9 @@ public enum SerializationMetadata {
         if(!metadataForClasses.containsKey(actualClass)) {
             StackMob.getLogger().logDebug("ensureMetadata for %s", actualClass.toString());
             metadataForClasses.put(actualClass,new HashMap<String, SerializationMetadata>());
-            jsonNamesForClasses.put(actualClass,new HashMap<String, String>());
+            HashMap<String, String> newMap = new HashMap<String, String>();
+            StackMob.getLogger().logDebug("put empty hashmap %x in bucket %s:%d", System.identityHashCode(newMap), actualClass.toString(), actualClass.hashCode() );
+            jsonNamesForClasses.put(actualClass, newMap);
             Class<?> currentClass = actualClass;
             //Sort the fields into groupings we care about for serialization
             while(!currentClass.equals(StackMobModel.class)) {
