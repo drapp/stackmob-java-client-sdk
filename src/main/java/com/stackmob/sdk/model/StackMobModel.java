@@ -133,8 +133,10 @@ public abstract class StackMobModel {
                 // The id field is special, its name doesn't match the field
                 setID(json.getAsJsonPrimitive().getAsString());
             } else {
+                StackMob.getLogger().logDebug("not an id field");
                 // undo the toLowerCase we do when sending out the json
                 String fieldName = getFieldName(jsonName);
+                StackMob.getLogger().logDebug("actual name for the field is %s", fieldName);
                 if(fieldName != null) {
                     Field field = getField(fieldName);
                     StackMob.getLogger().logDebug("got a field for %s", fieldName);

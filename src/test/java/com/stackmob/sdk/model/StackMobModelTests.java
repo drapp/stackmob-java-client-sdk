@@ -18,6 +18,7 @@ package com.stackmob.sdk.model;
 
 import com.google.gson.*;
 import com.stackmob.sdk.StackMobTestCommon;
+import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
@@ -149,6 +150,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     }
     
     @Test public void testFillComplicatedJSON() throws Exception {
+        StackMob.getLogger().logDebug("************** testFillComplicatedJSON");
         String json = "{\"number\":1338,\"strings\":[\"hello!\",\"world!\"],\"test\":true,\"mybytes\":[1,2,3],\"foo\":\"testpassed\",\"bar\":27,\"uuid\":\"00000000-0000-0003-0000-000000000005\",\"date\":0}";
         Complicated c = new Complicated();
         c.fillFromJson(new JsonParser().parse(json));

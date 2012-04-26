@@ -16,11 +16,13 @@
 
 package com.stackmob.sdk.util;
 
+import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.model.StackMobModel;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +45,7 @@ public enum SerializationMetadata {
     
     public static String getFieldNameFromJsonName(Class<?> actualClass, String jsonName) {
         ensureMetadata(actualClass);
+        StackMob.getLogger().logDebug("metadata for class %s is %s", actualClass.toString(), Arrays.toString(jsonNamesForClasses.get(actualClass).entrySet().toArray()));
         return jsonNamesForClasses.get(actualClass).get(jsonName);
     }
 
