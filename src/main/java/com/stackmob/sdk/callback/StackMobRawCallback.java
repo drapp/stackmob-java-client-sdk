@@ -51,7 +51,7 @@ public abstract class StackMobRawCallback {
         Map.Entry<String, String> contentLengthHeader = null;
 
         for(Map.Entry<String, String> header: responseHeaders) {
-            if(header.getKey().toLowerCase().equals("content-length")) {
+            if(header.getKey() != null && header.getKey().toLowerCase().equals("content-range")) {
                 contentLengthHeader = header;
             }
         }

@@ -797,4 +797,42 @@ public class StackMobTests extends StackMobTestCommon {
         });
         asserter.assertLatchFinished(latch);
     }
+    
+    private void testCount(StackMobQuery query, final int expectedCount) throws Exception {
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+
+        stackmob.count(query, new StackMobCallback() {
+            @Override public void success(String responseBody) {
+                asserter.markNotJsonError(responseBody);
+                int result = Integer.valueOf(responseBody);
+                asserter.markEquals(result, expectedCount);
+                latch.countDown();
+            }
+            @Override public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+    
+    @Test
+    public void countZero() throws Exception {
+        testCount(new StackMobQuery("justzero"), 0);
+    }
+
+    @Test
+    public void countOne() throws Exception {
+        testCount(new StackMobQuery("justone"), 1);
+    }
+
+    @Test
+    public void countMany() throws Exception {
+        testCount(new StackMobQuery("justmany"), 6);
+    }
+
+    @Test
+    public void countQuery() throws Exception {
+        testCount(new StackMobQuery("justmany").fieldIsGreaterThan("foo", "foo"), 2);
+    }
 }

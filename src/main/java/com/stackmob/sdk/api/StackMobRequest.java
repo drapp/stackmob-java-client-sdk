@@ -346,7 +346,7 @@ public abstract class StackMobRequest {
                     }
                     else {
                         List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
-                        for(Map.Entry<String, String> header : req.getHeaders().entrySet()) {
+                        for(Map.Entry<String, String> header : ret.getHeaders().entrySet()) {
                             headers.add(header);
                         }
                         if(Http.isSuccess(ret.getCode())) {
