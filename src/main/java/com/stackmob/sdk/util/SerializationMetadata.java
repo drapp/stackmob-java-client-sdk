@@ -54,16 +54,19 @@ public enum SerializationMetadata {
 
     public static void ensureMetadata(Class<?> actualClass) {
         if(!metadataForClasses.containsKey(actualClass)) {
+            StackMob.getLogger().logDebug("ensureMetadata for %s", actualClass.toString());
             metadataForClasses.put(actualClass,new HashMap<String, SerializationMetadata>());
             jsonNamesForClasses.put(actualClass,new HashMap<String, String>());
             Class<?> currentClass = actualClass;
             //Sort the fields into groupings we care about for serialization
             while(!currentClass.equals(StackMobModel.class)) {
                 for(Field field : currentClass.getDeclaredFields()) {
+                    StackMob.getLogger().logDebug("found field %s in %s", field.toString(), currentClass.toString());
                     jsonNamesForClasses.get(actualClass).put(field.getName().toLowerCase(), field.getName());
                     metadataForClasses.get(actualClass).put(field.getName(), determineMetadata(field));
                 }
                 currentClass = currentClass.getSuperclass();
+                StackMob.getLogger().logDebug("moving up to %s", currentClass);
             }
         }
     }
