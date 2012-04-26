@@ -45,7 +45,6 @@ public enum SerializationMetadata {
     
     public static String getFieldNameFromJsonName(Class<?> actualClass, String jsonName) {
         ensureMetadata(actualClass);
-        StackMob.getLogger().logDebug("metadata for class %s is 0x%x: %s", actualClass.toString(), System.identityHashCode(jsonNamesForClasses.get(actualClass)), Arrays.toString(jsonNamesForClasses.get(actualClass).entrySet().toArray()));
         return jsonNamesForClasses.get(actualClass).get(jsonName);
     }
 
@@ -53,22 +52,19 @@ public enum SerializationMetadata {
     private static Map<Class<?>,Map<String,String>> jsonNamesForClasses = new HashMap<Class<?>, Map<String, String>>();
 
     public static void ensureMetadata(Class<?> actualClass) {
-        if(!metadataForClasses.containsKey(actualClass)) {
-            StackMob.getLogger().logDebug("ensureMetadata for %s", actualClass.toString());
-            metadataForClasses.put(actualClass,new HashMap<String, SerializationMetadata>());
-            HashMap<String, String> newMap = new HashMap<String, String>();
-            StackMob.getLogger().logDebug("put empty hashmap %x in bucket %s:%d", System.identityHashCode(newMap), actualClass.toString(), actualClass.hashCode() );
-            jsonNamesForClasses.put(actualClass, newMap);
-            Class<?> currentClass = actualClass;
-            //Sort the fields into groupings we care about for serialization
-            while(!currentClass.equals(StackMobModel.class)) {
-                for(Field field : currentClass.getDeclaredFields()) {
-                    StackMob.getLogger().logDebug("found field %s in %s", field.toString(), currentClass.toString());
-                    jsonNamesForClasses.get(actualClass).put(field.getName().toLowerCase(), field.getName());
-                    metadataForClasses.get(actualClass).put(field.getName(), determineMetadata(field));
+        synchronized (SerializationMetadata.class) {
+            if(!metadataForClasses.containsKey(actualClass)) {
+                metadataForClasses.put(actualClass,new HashMap<String, SerializationMetadata>());
+                jsonNamesForClasses.put(actualClass, new HashMap<String, String>());
+                Class<?> currentClass = actualClass;
+                //Sort the fields into groupings we care about for serialization
+                while(!currentClass.equals(StackMobModel.class)) {
+                    for(Field field : currentClass.getDeclaredFields()) {
+                        jsonNamesForClasses.get(actualClass).put(field.getName().toLowerCase(), field.getName());
+                        metadataForClasses.get(actualClass).put(field.getName(), determineMetadata(field));
+                    }
+                    currentClass = currentClass.getSuperclass();
                 }
-                currentClass = currentClass.getSuperclass();
-                StackMob.getLogger().logDebug("moving up to %s", currentClass);
             }
         }
     }

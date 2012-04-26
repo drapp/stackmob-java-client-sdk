@@ -127,19 +127,15 @@ public abstract class StackMobModel {
     }
     
     protected void fillFieldFromJson(String jsonName, JsonElement json) throws StackMobException {
-        StackMob.getLogger().logDebug("fillFieldFromJson %s %s", jsonName, json.toString());
         try {
             if(jsonName.equals(getIDFieldName())) {
                 // The id field is special, its name doesn't match the field
                 setID(json.getAsJsonPrimitive().getAsString());
             } else {
-                StackMob.getLogger().logDebug("not an id field");
                 // undo the toLowerCase we do when sending out the json
                 String fieldName = getFieldName(jsonName);
-                StackMob.getLogger().logDebug("actual name for the field is %s", fieldName);
                 if(fieldName != null) {
                     Field field = getField(fieldName);
-                    StackMob.getLogger().logDebug("got a field for %s", fieldName);
                     field.setAccessible(true);
                     if(getMetadata(fieldName) == MODEL) {
                         // Delegate any expanded relations to the appropriate object
