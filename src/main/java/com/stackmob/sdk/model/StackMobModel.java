@@ -127,6 +127,7 @@ public abstract class StackMobModel {
     }
     
     protected void fillFieldFromJson(String jsonName, JsonElement json) throws StackMobException {
+        StackMob.getLogger().logDebug("fillFieldFromJson %s %s", jsonName, json.toString());
         try {
             if(jsonName.equals(getIDFieldName())) {
                 // The id field is special, its name doesn't match the field
@@ -136,6 +137,7 @@ public abstract class StackMobModel {
                 String fieldName = getFieldName(jsonName);
                 if(fieldName != null) {
                     Field field = getField(fieldName);
+                    StackMob.getLogger().logDebug("got a field for %s", fieldName);
                     field.setAccessible(true);
                     if(getMetadata(fieldName) == MODEL) {
                         // Delegate any expanded relations to the appropriate object
