@@ -16,6 +16,7 @@
 package com.stackmob.sdk.model;
 
 import com.stackmob.sdk.StackMobTestCommon;
+import com.stackmob.sdk.callback.StackMobCountCallback;
 import com.stackmob.sdk.callback.StackMobQueryCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
@@ -57,6 +58,22 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
             public void success(List<Author> result) {
                 asserter.markEquals(3, result.size());
                 asserter.markNotNull(result.get(0).getName());
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
+    @Test public void testCount() throws Exception {
+        new StackMobModelQuery<Author>(Author.class).isInRange(0,10).field(new StackMobField("name").isEqualTo("testqueryauthor")).count(new StackMobCountCallback() {
+            @Override
+            public void success(long count) {
+                asserter.markEquals(3, (int)count);
                 latch.countDown();
             }
 

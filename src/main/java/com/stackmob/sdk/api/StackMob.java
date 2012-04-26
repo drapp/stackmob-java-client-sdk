@@ -18,10 +18,7 @@ package com.stackmob.sdk.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
-import com.stackmob.sdk.callback.StackMobCallback;
-import com.stackmob.sdk.callback.StackMobIntermediaryCallback;
-import com.stackmob.sdk.callback.StackMobRawCallback;
-import com.stackmob.sdk.callback.StackMobRedirectedCallback;
+import com.stackmob.sdk.callback.*;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
@@ -1029,7 +1026,7 @@ public class StackMob {
             @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
                 if(Http.isSuccess(responseStatusCode)) {
-                    int count = getTotalNumberOfItemsFromContentRange(responseHeaders);
+                    long count = getTotalNumberOfItemsFromContentRange(responseHeaders);
                     if (count < 0) {
                         try { // No header means all available items were returned, so count them (0 or 1)
                             count = new JsonParser().parse(new String(responseBody)).getAsJsonArray().size();

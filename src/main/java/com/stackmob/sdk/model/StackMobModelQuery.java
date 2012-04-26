@@ -19,6 +19,7 @@ import com.google.gson.*;
 import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobQuery;
 import com.stackmob.sdk.callback.StackMobCallback;
+import com.stackmob.sdk.callback.StackMobCountCallback;
 import com.stackmob.sdk.callback.StackMobQueryCallback;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.model.StackMobModel;
@@ -55,7 +56,7 @@ public class StackMobModelQuery<T extends StackMobModel>{
                     try {
                         newObject.fillFromJson(elt);
                         resultList.add(newObject);
-                    } catch (StackMobException e) { }
+                    } catch (StackMobException ignore) { }
                 }
                 furtherCallback.success(resultList);
             }
@@ -65,6 +66,10 @@ public class StackMobModelQuery<T extends StackMobModel>{
                 furtherCallback.failure(e);
             }
         });
+    }
+
+    public void count(StackMobCountCallback callback) {
+        StackMob.getStackMob().count(query, callback);
     }
     
     public StackMobModelQuery<T> field(StackMobField fieldObj) {

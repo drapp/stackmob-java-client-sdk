@@ -21,6 +21,7 @@ import com.stackmob.sdk.api.StackMobFile;
 import com.stackmob.sdk.api.StackMobQuery;
 import com.stackmob.sdk.api.StackMobQueryWithField;
 import com.stackmob.sdk.callback.StackMobCallback;
+import com.stackmob.sdk.callback.StackMobCountCallback;
 import com.stackmob.sdk.concurrencyutils.CountDownLatchUtils;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
@@ -261,7 +262,8 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
         stackmob.get(query, new StackMobCallback() {
-            @Override public void success(String responseBody) {
+            @Override
+            public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
                 List<Game> games = gson.fromJson(responseBody, Game.ListTypeToken);
                 asserter.markNotNull(games);
@@ -269,7 +271,9 @@ public class StackMobTests extends StackMobTestCommon {
                 asserter.markEquals("woot", games.get(0).name);
                 latch.countDown();
             }
-            @Override public void failure(StackMobException e) {
+
+            @Override
+            public void failure(StackMobException e) {
                 asserter.markException(e);
             }
         });
@@ -611,7 +615,7 @@ public class StackMobTests extends StackMobTestCommon {
                 asserter.markTrue(jsonGame.moderators.contains("one") && jsonGame.moderators.contains("two"));
                 latch.countDown();
             }
-    
+
             @Override
             public void failure(StackMobException e) {
                 asserter.markException(e);
@@ -638,7 +642,7 @@ public class StackMobTests extends StackMobTestCommon {
                 asserter.markNotJsonError(responseBody);
                 latch.countDown();
             }
-    
+
             @Override
             public void failure(StackMobException e) {
                 asserter.markException(e);
@@ -802,11 +806,9 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.count(query, new StackMobCallback() {
-            @Override public void success(String responseBody) {
-                asserter.markNotJsonError(responseBody);
-                int result = Integer.valueOf(responseBody);
-                asserter.markEquals(result, expectedCount);
+        stackmob.count(query, new StackMobCountCallback() {
+            @Override public void success(long result) {
+                asserter.markEquals((int)result, expectedCount);
                 latch.countDown();
             }
             @Override public void failure(StackMobException e) {
