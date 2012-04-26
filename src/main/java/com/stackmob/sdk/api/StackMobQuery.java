@@ -78,7 +78,9 @@ public class StackMobQuery {
         GTE("gte"),
         IN("in"),
         NEAR("near"),
-        WITHIN("within");
+        WITHIN("within"),
+        NE("ne"),
+        NULL("null");
 
         private String operator;
 
@@ -215,6 +217,34 @@ public class StackMobQuery {
      */
     public StackMobQuery fieldIsIn(String field, List<String> values) {
         return putInMap(field, Operator.IN, join(values));
+    }
+
+    /**
+     * add a "NE" to your query. test whether the given field's value is not equal to the given value
+     * @param field the field whose value to test
+     * @param val the value against which to match
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobQuery fieldIsNotEqual(String field, String val) {
+        return putInMap(field, Operator.NE, val);
+    }
+
+    /**
+     * add a "NULL" to your query. test whether the given field's value is null
+     * @param field the field whose value to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobQuery fieldIsNull(String field) {
+        return putInMap(field, Operator.NULL, "true");
+    }
+
+    /**
+     * add a "NULL" to your query. test whether the given field's value is not null
+     * @param field the field whose value to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobQuery fieldIsNotNull(String field) {
+        return putInMap(field, Operator.NULL, "false");
     }
 
     /**
