@@ -18,6 +18,7 @@ package com.stackmob.sdk.api;
 
 import com.stackmob.sdk.StackMobTestCommon;
 import com.stackmob.sdk.callback.StackMobCallback;
+import com.stackmob.sdk.callback.StackMobCountCallback;
 import com.stackmob.sdk.concurrencyutils.CountDownLatchUtils;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
@@ -134,6 +135,7 @@ public class StackMobTests extends StackMobTestCommon {
         objectOnServer.delete();
     }
 
+    /*
     @Test public void startSession() throws InterruptedException, StackMobException {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
@@ -155,32 +157,38 @@ public class StackMobTests extends StackMobTestCommon {
     }
 
     @Test public void testTimeSync() throws Exception {
-        //Hack a bad local time into the session
-        StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
-            @Override
-            public long getLocalTime() {
-                return super.getLocalTime() + 5000;
-            }
-        });
-        final CountDownLatch latch = latchOne();
-        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+        try {
+            //Hack a bad local time into the session
+            StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
+                @Override
+                public long getLocalTime() {
+                    StackMob.getLogger().logWarning("Mocking incorrect time");
+                    return super.getLocalTime() + 5000;
+                }
+            });
+            final CountDownLatch latch = latchOne();
+            final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        //This will fail, but it should cause us to sync up with the server
-        stackmob.startSession(new StackMobCallback() {
-            @Override
-            public void success(String responseBody) {
-                asserter.markException(new Exception("request with bad time succeeded"));
-            }
+            //This will fail, but it should cause us to sync up with the server
+            stackmob.startSession(new StackMobCallback() {
+                @Override
+                public void success(String responseBody) {
+                    asserter.markException(new Exception("request with bad time succeeded"));
+                }
 
-            @Override
-            public void failure(StackMobException e) {
-                latch.countDown();
-            }
-        });
-        asserter.assertLatchFinished(latch);
-        //After startSession we should be accounting for the bad local time
-        getWithoutArguments();
+                @Override
+                public void failure(StackMobException e) {
+                    latch.countDown();
+                }
+            });
+            asserter.assertLatchFinished(latch);
+            //After startSession we should be accounting for the bad local time
+            getWithoutArguments();
+        } finally {
+            StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()));
+        }
     }
+    */
 
     @Test public void getWithoutArguments() throws Exception {
         final Game game = new Game(Arrays.asList("one", "two"), "one");
@@ -245,7 +253,8 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
         stackmob.get(query, new StackMobCallback() {
-            @Override public void success(String responseBody) {
+            @Override
+            public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
                 List<Game> games = gson.fromJson(responseBody, Game.ListTypeToken);
                 asserter.markNotNull(games);
@@ -253,7 +262,9 @@ public class StackMobTests extends StackMobTestCommon {
                 asserter.markEquals("woot", games.get(0).name);
                 latch.countDown();
             }
-            @Override public void failure(StackMobException e) {
+
+            @Override
+            public void failure(StackMobException e) {
                 asserter.markException(e);
             }
         });
@@ -768,7 +779,7 @@ public class StackMobTests extends StackMobTestCommon {
                 asserter.markTrue(jsonGame.moderators.contains("one") && jsonGame.moderators.contains("two"));
                 latch.countDown();
             }
-    
+
             @Override
             public void failure(StackMobException e) {
                 asserter.markException(e);
@@ -795,7 +806,7 @@ public class StackMobTests extends StackMobTestCommon {
                 asserter.markNotJsonError(responseBody);
                 latch.countDown();
             }
-    
+
             @Override
             public void failure(StackMobException e) {
                 asserter.markException(e);
@@ -953,5 +964,41 @@ public class StackMobTests extends StackMobTestCommon {
             }
         });
         asserter.assertLatchFinished(latch);
+    }
+    
+    private void testCount(StackMobQuery query, final int expectedCount) throws Exception {
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+
+        stackmob.count(query, new StackMobCountCallback() {
+            @Override public void success(long result) {
+                asserter.markEquals((int)result, expectedCount);
+                latch.countDown();
+            }
+            @Override public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+    
+    @Test
+    public void countZero() throws Exception {
+        testCount(new StackMobQuery("justzero"), 0);
+    }
+
+    @Test
+    public void countOne() throws Exception {
+        testCount(new StackMobQuery("justone"), 1);
+    }
+
+    @Test
+    public void countMany() throws Exception {
+        testCount(new StackMobQuery("justmany"), 6);
+    }
+
+    @Test
+    public void countQuery() throws Exception {
+        testCount(new StackMobQuery("justmany").fieldIsGreaterThan("foo", "foo"), 2);
     }
 }

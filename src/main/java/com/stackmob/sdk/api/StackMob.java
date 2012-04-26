@@ -18,9 +18,12 @@ package com.stackmob.sdk.api;
 
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
+import com.google.gson.JsonParser;
+import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
 import com.stackmob.sdk.push.StackMobPushToken;
+import com.stackmob.sdk.util.Http;
 import com.stackmob.sdk.util.Pair;
 
 import java.io.IOException;
@@ -585,7 +588,7 @@ public class StackMob {
     }
 
     ////////////////////
-    //GET/PUSH/POST/DELETE
+    //GET/PUSH/POST/DELETE/COUNT
     ////////////////////
 
     /**
@@ -997,6 +1000,43 @@ public class StackMob {
                                                  String.format("%s/%s/%s/%s", path, primaryId, field, idToDelete),
                                                  callback,
                                                  this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
+    /**
+     * retrieve the number of objects for a schema on the StackMob platform
+     * @param path the path to get
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
+     */
+    public StackMobRequestSendResult count(String path,
+                                         StackMobRawCallback callback) {
+        return count(new StackMobQuery(path), callback);
+    }
+
+    /**
+     * retrieve the number of objects for a query on the StackMob platform
+     * @param query the query to send
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
+     */
+    public StackMobRequestSendResult count(StackMobQuery query,
+                                         StackMobRawCallback callback) {
+        final StackMobRawCallback userCallback = callback;
+        return get(query.isInRange(0, 0), new StackMobRawCallback() {
+            @Override
+            public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
+                if(Http.isSuccess(responseStatusCode)) {
+                    long count = getTotalNumberOfItemsFromContentRange(responseHeaders);
+                    if (count < 0) {
+                        try { // No header means all available items were returned, so count them (0 or 1)
+                            count = new JsonParser().parse(new String(responseBody)).getAsJsonArray().size();
+                        } catch(Exception ignore) {}
+                    }
+                    responseBody = String.valueOf(count).getBytes();
+                }
+                userCallback.done(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, responseBody);
+            }
+        });
     }
     
     //Forgot/reset password

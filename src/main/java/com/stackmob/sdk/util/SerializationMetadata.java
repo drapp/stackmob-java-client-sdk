@@ -16,11 +16,13 @@
 
 package com.stackmob.sdk.util;
 
+import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.model.StackMobModel;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,17 +52,19 @@ public enum SerializationMetadata {
     private static Map<Class<?>,Map<String,String>> jsonNamesForClasses = new HashMap<Class<?>, Map<String, String>>();
 
     public static void ensureMetadata(Class<?> actualClass) {
-        if(!metadataForClasses.containsKey(actualClass)) {
-            metadataForClasses.put(actualClass,new HashMap<String, SerializationMetadata>());
-            jsonNamesForClasses.put(actualClass,new HashMap<String, String>());
-            Class<?> currentClass = actualClass;
-            //Sort the fields into groupings we care about for serialization
-            while(!currentClass.equals(StackMobModel.class)) {
-                for(Field field : currentClass.getDeclaredFields()) {
-                    jsonNamesForClasses.get(actualClass).put(field.getName().toLowerCase(), field.getName());
-                    metadataForClasses.get(actualClass).put(field.getName(), determineMetadata(field));
+        synchronized (SerializationMetadata.class) {
+            if(!metadataForClasses.containsKey(actualClass)) {
+                metadataForClasses.put(actualClass,new HashMap<String, SerializationMetadata>());
+                jsonNamesForClasses.put(actualClass, new HashMap<String, String>());
+                Class<?> currentClass = actualClass;
+                //Sort the fields into groupings we care about for serialization
+                while(!currentClass.equals(StackMobModel.class)) {
+                    for(Field field : currentClass.getDeclaredFields()) {
+                        jsonNamesForClasses.get(actualClass).put(field.getName().toLowerCase(), field.getName());
+                        metadataForClasses.get(actualClass).put(field.getName(), determineMetadata(field));
+                    }
+                    currentClass = currentClass.getSuperclass();
                 }
-                currentClass = currentClass.getSuperclass();
             }
         }
     }

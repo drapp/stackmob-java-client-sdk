@@ -18,6 +18,7 @@ package com.stackmob.sdk.model;
 
 import com.google.gson.*;
 import com.stackmob.sdk.StackMobTestCommon;
+import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;

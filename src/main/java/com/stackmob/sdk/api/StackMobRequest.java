@@ -331,7 +331,7 @@ public abstract class StackMobRequest {
                     StackMob.getLogger().logInfo("Sending request %s", req.toString());
                     Response ret = req.send();
                     StackMob.getLogger().logInfo("Received response %d", ret.getCode());
-                    session.recordServerTimeDiff(ret.getHeader("Date"));
+                    if(ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
                     if(HttpRedirectHelper.isRedirected(ret.getCode())) {
                         StackMob.getLogger().logInfo("Response was redirected");
                         String newLocation = HttpRedirectHelper.getNewLocation(ret.getHeaders());
@@ -346,8 +346,10 @@ public abstract class StackMobRequest {
                     }
                     else {
                         List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
-                        for(Map.Entry<String, String> header : req.getHeaders().entrySet()) {
-                            headers.add(header);
+                        if(ret.getHeaders() != null) {
+                            for(Map.Entry<String, String> header : ret.getHeaders().entrySet()) {
+                                headers.add(header);
+                            }
                         }
                         if(Http.isSuccess(ret.getCode())) {
                             cookieStore.storeCookies(ret);
