@@ -89,9 +89,11 @@ public class StackMobSession {
     public void recordServerTimeDiff(String timeHeader) {
         StackMob.getLogger().logDebug("Got a time header of: %s", timeHeader);
         try {
-            long serverTime = RFC_DATE_FORMAT.parse(timeHeader).getTime() / 1000;
-            StackMob.getLogger().logDebug("Got a server time of %d versus local time %d", serverTime, getLocalTime());
-            saveServerTimeDiff(serverTime - getLocalTime());
+            synchronized(this) {
+                long serverTime = RFC_DATE_FORMAT.parse(timeHeader).getTime() / 1000;
+                StackMob.getLogger().logDebug("Got a server time of %d versus local time %d", serverTime, getLocalTime());
+                saveServerTimeDiff(serverTime - getLocalTime());
+            }
         } catch(Exception ignore) { }
     }
 
