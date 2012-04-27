@@ -23,7 +23,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class StackMobSession {
-    public static SimpleDateFormat RFC_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z");
 
     private String key;
     private String secret;
@@ -85,15 +84,13 @@ public class StackMobSession {
         }
         return getServerTimeDiff() + getLocalTime();
     }
-    
+
     public void recordServerTimeDiff(String timeHeader) {
         StackMob.getLogger().logDebug("Got a time header of: %s", timeHeader);
         try {
-            synchronized(this) {
-                long serverTime = RFC_DATE_FORMAT.parse(timeHeader).getTime() / 1000;
-                StackMob.getLogger().logDebug("Got a server time of %d versus local time %d", serverTime, getLocalTime());
-                saveServerTimeDiff(serverTime - getLocalTime());
-            }
+            long serverTime = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz").parse(timeHeader).getTime() / 1000;
+            StackMob.getLogger().logDebug("Got a server time of %d versus local time %d", serverTime, getLocalTime());
+            saveServerTimeDiff(serverTime - getLocalTime());
         } catch(Exception ignore) { }
     }
 
