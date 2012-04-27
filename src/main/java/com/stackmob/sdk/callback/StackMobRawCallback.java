@@ -23,6 +23,43 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class StackMobRawCallback {
+
+    protected HttpVerb requestVerb;
+    protected String requestURL;
+    protected List<Map.Entry<String, String>> requestHeaders;
+    protected String requestBody;
+    protected Integer responseStatusCode;
+    protected List<Map.Entry<String, String>> responseHeaders;
+    protected byte[] responseBody;
+
+
+    /**
+     * the method that will be called when the call to StackMob is complete. may be executed in a background thread
+     * @param requestVerb the HTTP verb that was requested
+     * @param requestURL the URL that was requested
+     * @param requestHeaders the headers in the request
+     * @param requestBody the body of the request. will be an empty string for GET, DELETE, etc...
+     * @param responseStatusCode the status code of the HTTP response from StackMob
+     * @param responseHeaders the response headers from StackMob
+     * @param responseBody the response body from StackMob
+     */
+    public void setDone(HttpVerb requestVerb,
+                        String requestURL,
+                        List<Map.Entry<String, String>> requestHeaders,
+                        String requestBody,
+                        Integer responseStatusCode,
+                        List<Map.Entry<String, String>> responseHeaders,
+                        byte[] responseBody) {
+        this.requestVerb = requestVerb;
+        this.requestURL = requestURL;
+        this.requestHeaders = requestHeaders;
+        this.requestBody = requestBody;
+        this.responseStatusCode = responseStatusCode;
+        this.responseHeaders = responseHeaders;
+        this.responseBody = responseBody;
+        done(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, responseBody);
+    }
+
     /**
      * the method that will be called when the call to StackMob is complete. may be executed in a background thread
      * @param requestVerb the HTTP verb that was requested
@@ -43,11 +80,21 @@ public abstract class StackMobRawCallback {
 
     /**
      * get the total number of items from the Content-Range header
+     * @return the total number of items returned in the Content-Range header, -1 if there was no Content-Range header
+     * or it was malformed, -2 if the Content-Length header was present and well formed but the instance length was "*"
+     */
+    public int getTotalObjectCountFromPagination() {
+        return getTotalNumberOfItemsFromContentRange(responseHeaders);
+    }
+
+    /**
+     * get the total number of items from the Content-Range header
      * @param responseHeaders the headers that were returned in the response
      * @return the total number of items returned in the Content-Range header, -1 if there was no Content-Range header
      * or it was malformed, -2 if the Content-Length header was present and well formed but the instance length was "*"
      */
     public static Integer getTotalNumberOfItemsFromContentRange(List<Map.Entry<String, String>> responseHeaders) {
+        if(responseHeaders == null) return -1;
         Map.Entry<String, String> contentLengthHeader = null;
 
         for(Map.Entry<String, String> header: responseHeaders) {

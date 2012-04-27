@@ -216,6 +216,14 @@ public class StackMob {
         this.pushUrlFormat = pushUrlFormat;
     }
 
+    public StackMob(StackMob other) {
+        this.session = other.session;
+        this.userRedirectedCallback = other.redirectedCallback;
+        this.apiUrlFormat = other.apiUrlFormat;
+        this.pushUrlFormat = other.pushUrlFormat;
+        this.executor = other.executor;
+    }
+
     ////////////////////
     //session & login/logout
     ////////////////////
@@ -1034,7 +1042,7 @@ public class StackMob {
                     }
                     responseBody = String.valueOf(count).getBytes();
                 }
-                userCallback.done(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, responseBody);
+                userCallback.setDone(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, responseBody);
             }
         });
     }

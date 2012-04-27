@@ -105,6 +105,7 @@ public abstract class StackMobRequest {
         gson = gsonBuilder.create();
 
         oAuthService = new ServiceBuilder().provider(StackMobApi.class).apiKey(session.getKey()).apiSecret(session.getSecret()).build();
+
     }
 
     public StackMobRequest setUrlFormat(String urlFmt) {
@@ -355,7 +356,7 @@ public abstract class StackMobRequest {
                             cookieStore.storeCookies(ret);
                         }
                         try {
-                            cb.done(getRequestVerb(req),
+                            cb.setDone(getRequestVerb(req),
                                     req.getUrl(),
                                     getRequestHeaders(req),
                                     req.getBodyContents(),
@@ -370,13 +371,13 @@ public abstract class StackMobRequest {
                 }
                 catch(Throwable t) {
                     StackMob.getLogger().logWarning("Invoking callback after unexpected exception %s", StackMobLogger.getStackTrace(t));
-                    cb.done(getRequestVerb(req),
-                            req.getUrl(),
-                            getRequestHeaders(req),
-                            req.getBodyContents(),
-                            -1,
-                            EmptyHeaders,
-                            t.getMessage().getBytes());
+                    cb.setDone(getRequestVerb(req),
+                               req.getUrl(),
+                               getRequestHeaders(req),
+                               req.getBodyContents(),
+                               -1,
+                               EmptyHeaders,
+                               t.getMessage().getBytes());
                 }
                 return null;
             }
