@@ -30,11 +30,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StackMobCookieStore {
 
     protected static final String SetCookieHeaderKey = "Set-Cookie";
-    protected static final DateFormat cookieDateFormat = new SimpleDateFormat("EEE, dd-MMM-yyyy hh:mm:ss z");
     protected static final String EXPIRES = "Expires";
 
     protected final ConcurrentHashMap<String, Map.Entry<String, Date>> cookies = new ConcurrentHashMap<String, Map.Entry<String, Date>>();
 
+
+    public Map<String, Map.Entry<String, Date>> getCookies() {
+        return cookies;
+    }
 
     public void storeCookies(Response resp) {
         storeCookie(resp.getHeaders().get(SetCookieHeaderKey));
@@ -46,27 +49,27 @@ public class StackMobCookieStore {
     
     protected void addToCookieMap(Map<String,Map.Entry<String,Date>> map, String cookieString) {
         if(cookieString != null) {
-            String[] valSplit = cookieString.split(";");
-            if (valSplit.length == 1) {
-                //cookie only
-                String[] cookieSplit = cookieString.split("=");
-                if (cookieSplit.length == 2) {
-                    map.put(valSplit[0], new Pair<String, Date>( valSplit[1], null));
-                }
-            } else {
-                //cookie and expires
-                String[] cookieSplit = valSplit[0].split("=");
-                String[] expiresSplit = valSplit[1].split("=");
-                Date expires = null;
-                if (expiresSplit.length == 2 && cookieSplit.length == 2) {
-                    if (expiresSplit[0].equals(EXPIRES)) {
-                        try {
-                            expires = cookieDateFormat.parse(expiresSplit[1]);
-                        } catch (ParseException e) {
-                            //do nothing
+            String session = null;
+            String expires = null;
+            for(String cookie : cookieString.split(";")) {
+                if(cookie.startsWith("session_")) session = cookie;
+                if(cookie.startsWith(EXPIRES)) expires = cookie;
+            }
+            if(session != null) {
+                String[] sessionSplit = session.split("=");
+                if(sessionSplit.length == 2) {
+                    Date expiryDate = null;
+                    if(expires != null) {
+                        String[] expiresSplit = expires.split("=");
+                        if(expiresSplit.length == 2) {
+                            try {
+                                expiryDate = new SimpleDateFormat("EEE, dd-MMM-yyyy hh:mm:ss z").parse(expiresSplit[1]);
+                            } catch (ParseException e) {
+                                //do nothing
+                            }
                         }
                     }
-                    map.put(cookieSplit[0], new Pair<String, Date>( cookieSplit[1], expires));
+                    map.put(sessionSplit[0], new Pair<String, Date>(sessionSplit[1], expiryDate));
                 }
             }
         }
