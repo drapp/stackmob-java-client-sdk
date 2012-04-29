@@ -166,7 +166,6 @@
                       <include>**/*Tests.java</include>
                   </includes>
                   <argLine>-Xmx1024m</argLine>
-                  <parallel>both</parallel>
               </configuration>
             </plugin>
         </plugins>

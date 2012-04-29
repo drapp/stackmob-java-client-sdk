@@ -158,8 +158,7 @@ public class StackMobTests extends StackMobTestCommon {
 
     @Test public void testTimeSync() throws Exception {
         //Hack a bad local time into the session
-        StackMob localStackMob = new StackMob(StackMob.getStackMob());
-        localStackMob.setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
+        StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
             @Override
             public long getLocalTime() {
                 StackMob.getLogger().logWarning("Mocking incorrect time");
@@ -170,7 +169,7 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
         //This will fail, but it should cause us to sync up with the server
-        localStackMob.startSession(new StackMobCallback() {
+        StackMob.getStackMob().startSession(new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markException(new Exception("request with bad time succeeded"));
@@ -183,7 +182,7 @@ public class StackMobTests extends StackMobTestCommon {
         });
         asserter.assertLatchFinished(latch);
         //After startSession we should be accounting for the bad local time
-        doPostWithRequestObject(localStackMob);
+        getWithoutArguments();
     }
 
     @Test public void getWithoutArguments() throws Exception {
