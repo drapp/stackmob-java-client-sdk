@@ -37,34 +37,6 @@ import static com.stackmob.sdk.concurrencyutils.CountDownLatchUtils.latchOne;
 
 public class StackMobTests extends StackMobTestCommon {
 
-    @Test public void login() throws Exception {
-        final String username = getRandomString();
-        final String password = getRandomString();
-        final User user = new User(username, password);
-        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
-        final MultiThreadAsserter asserter = new MultiThreadAsserter();
-
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("username", user.username);
-        params.put("password", user.password);
-
-        final CountDownLatch latch = latchOne();
-
-        stackmob.login(params, new StackMobCallback() {
-            @Override public void success(String responseBody) {
-                asserter.markNotNull(responseBody);
-                asserter.markNotJsonError(responseBody);
-                latch.countDown();
-            }
-
-            @Override public void failure(StackMobException e) {
-                asserter.markException(e);
-            }
-        });
-        asserter.assertLatchFinished(latch);
-        objectOnServer.delete();
-    }
-
     @Test public void loginShouldFail() throws Exception {
         final String username = getRandomString();
         final String password = getRandomString();
@@ -90,7 +62,7 @@ public class StackMobTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
     }
 
-    @Test public void logout() throws Exception {
+    @Test public void loginLogout() throws Exception {
         final String username = getRandomString();
         final String password = getRandomString();
 
