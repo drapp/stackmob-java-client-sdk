@@ -16,6 +16,8 @@
 
 package com.stackmob.sdk.api;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.stackmob.sdk.StackMobTestCommon;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobCountCallback;
@@ -101,15 +103,28 @@ public class StackMobTests extends StackMobTestCommon {
 
         final CountDownLatch loginLatch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
+        asserter.markTrue(!stackmob.isLoggedIn());
+        asserter.markTrue(!stackmob.isLoggedOut());
+        asserter.markTrue(stackmob.getLoggedInUser() == null);
+        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
 
         stackmob.login(params, new StackMobCallback() {
             @Override public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
                 final CountDownLatch logoutLatch = latchOne();
 
+                asserter.markTrue(stackmob.isLoggedIn());
+                asserter.markTrue(!stackmob.isLoggedOut());
+                asserter.markTrue(stackmob.getLoggedInUser().equals(user.username));
+                asserter.markTrue(stackmob.isUserLoggedIn(user.username));
+
                 stackmob.logout(new StackMobCallback() {
                     @Override public void success(String responseBody2) {
                         asserter.markNotNull(responseBody2);
+                        asserter.markTrue(!stackmob.isLoggedIn());
+                        asserter.markTrue(stackmob.isLoggedOut());
+                        asserter.markTrue(stackmob.getLoggedInUser() == null);
+                        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
                         asserter.markNotJsonError(responseBody2);
                         logoutLatch.countDown();
                     }
@@ -131,64 +146,45 @@ public class StackMobTests extends StackMobTestCommon {
             }
         });
 
+        // We aren't actually logged in yet here
+        asserter.markTrue(!stackmob.isLoggedIn());
+        asserter.markTrue(!stackmob.isLoggedOut());
+        asserter.markTrue(stackmob.getLoggedInUser() == null);
+        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
+
         asserter.assertLatchFinished(loginLatch, CountDownLatchUtils.MAX_LATCH_WAIT_TIME);
         objectOnServer.delete();
     }
 
-    /*
-    @Test public void startSession() throws InterruptedException, StackMobException {
+    @Test public void testTimeSync() throws Exception {
+        //Hack a bad local time into the session
+        StackMob localStackMob = new StackMob(StackMob.getStackMob());
+        localStackMob.setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
+            @Override
+            public long getLocalTime() {
+                StackMob.getLogger().logWarning("Mocking incorrect time");
+                return super.getLocalTime() + 5000;
+            }
+        });
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.startSession(new StackMobCallback() {
+        //This will fail, but it should cause us to sync up with the server
+        localStackMob.startSession(new StackMobCallback() {
             @Override
             public void success(String responseBody) {
-                asserter.markNotNull(responseBody);
-                asserter.markNotJsonError(responseBody);
-                latch.countDown();
+                asserter.markException(new Exception("request with bad time succeeded"));
             }
 
             @Override
             public void failure(StackMobException e) {
-                asserter.markException(e);
+                latch.countDown();
             }
         });
         asserter.assertLatchFinished(latch);
+        //After startSession we should be accounting for the bad local time
+        doPostWithRequestObject(localStackMob);
     }
-
-    @Test public void testTimeSync() throws Exception {
-        try {
-            //Hack a bad local time into the session
-            StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
-                @Override
-                public long getLocalTime() {
-                    StackMob.getLogger().logWarning("Mocking incorrect time");
-                    return super.getLocalTime() + 5000;
-                }
-            });
-            final CountDownLatch latch = latchOne();
-            final MultiThreadAsserter asserter = new MultiThreadAsserter();
-
-            //This will fail, but it should cause us to sync up with the server
-            stackmob.startSession(new StackMobCallback() {
-                @Override
-                public void success(String responseBody) {
-                    asserter.markException(new Exception("request with bad time succeeded"));
-                }
-
-                @Override
-                public void failure(StackMobException e) {
-                    latch.countDown();
-                }
-            });
-            asserter.assertLatchFinished(latch);
-            //After startSession we should be accounting for the bad local time
-            getWithoutArguments();
-        } finally {
-            StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()));
-        }
-    }
-    */
 
     @Test public void getWithoutArguments() throws Exception {
         final Game game = new Game(Arrays.asList("one", "two"), "one");
@@ -259,6 +255,35 @@ public class StackMobTests extends StackMobTestCommon {
                 List<Game> games = gson.fromJson(responseBody, Game.ListTypeToken);
                 asserter.markNotNull(games);
                 asserter.markTrue(games.size() >= 1);
+                asserter.markEquals("woot", games.get(0).name);
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+        objectOnServer.delete();
+    }
+
+    @Test public void getWithPagination() throws InterruptedException, StackMobException {
+        final Game g = new Game(Arrays.asList("seven", "six"), "woot");
+        final StackMobObjectOnServer<Game> objectOnServer = createOnServer(g, Game.class);
+
+        StackMobQuery query = new StackMobQuery("game").fieldIsGreaterThanOrEqualTo("name", "sup").isInRange(0,9);
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+
+        stackmob.get(query, new StackMobCallback() {
+            @Override
+            public void success(String responseBody) {
+                asserter.markNotJsonError(responseBody);
+                List<Game> games = gson.fromJson(responseBody, Game.ListTypeToken);
+                asserter.markNotNull(games);
+                asserter.markTrue(games.size() == 10);
+                asserter.markTrue(getTotalObjectCountFromPagination() > 10);
                 asserter.markEquals("woot", games.get(0).name);
                 latch.countDown();
             }
@@ -547,13 +572,13 @@ public class StackMobTests extends StackMobTestCommon {
         g3OnServer.delete();
     }
 
-    @Test public void postWithRequestObject() throws Exception {
+    public void doPostWithRequestObject(StackMob localStackmob) throws Exception {
         final Game g = new Game(Arrays.asList("one", "two"), "newGame");
         g.name = "newGame";
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.post("game", g, new StackMobCallback() {
+        localStackmob.post("game", g, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -575,6 +600,10 @@ public class StackMobTests extends StackMobTestCommon {
             }
         });
         asserter.assertLatchFinished(latch);
+    }
+
+    @Test public void postWithRequestObject() throws Exception {
+        doPostWithRequestObject(StackMob.getStackMob());
     }
 
 

@@ -31,12 +31,20 @@ public class StackMobCookieStore {
 
     protected static final String SetCookieHeaderKey = "Set-Cookie";
     protected static final String EXPIRES = "Expires";
+    protected static final String SESSION_PREFIX = "session_";
 
     protected final ConcurrentHashMap<String, Map.Entry<String, Date>> cookies = new ConcurrentHashMap<String, Map.Entry<String, Date>>();
 
 
     public Map<String, Map.Entry<String, Date>> getCookies() {
         return cookies;
+    }
+
+    public Map.Entry<String, Date> getSessionCookie() {
+       for(String cookieName : cookies.keySet()) {
+           if(cookieName.startsWith(SESSION_PREFIX)) return cookies.get(cookieName);
+       }
+       return null;
     }
 
     public void storeCookies(Response resp) {
@@ -52,7 +60,7 @@ public class StackMobCookieStore {
             String session = null;
             String expires = null;
             for(String cookie : cookieString.split(";")) {
-                if(cookie.startsWith("session_")) session = cookie;
+                if(cookie.startsWith(SESSION_PREFIX)) session = cookie;
                 if(cookie.startsWith(EXPIRES)) expires = cookie;
             }
             if(session != null) {

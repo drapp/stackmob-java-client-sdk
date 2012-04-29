@@ -16,9 +16,6 @@
 
 package com.stackmob.sdk.api;
 
-import com.google.gson.Gson;
-import com.stackmob.sdk.util.Http;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -29,6 +26,7 @@ public class StackMobSession {
     private String userObjectName;
     private int apiVersionNumber;
     private String appName = null;
+    private String lastUserLoginName;
     private long serverTimeDiff = 0;
 
     public StackMobSession(String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
@@ -100,6 +98,14 @@ public class StackMobSession {
 
     protected long getServerTimeDiff() {
         return serverTimeDiff;
+    }
+
+    protected void setLastUserLoginName(String username) {
+        lastUserLoginName = username;
+    }
+
+    protected String getLastUserLoginName() {
+        return lastUserLoginName;
     }
 
 }

@@ -236,6 +236,7 @@ public class StackMob {
      */
     public StackMobRequestSendResult login(Map<String, String> params,
                       StackMobRawCallback callback) {
+        session.setLastUserLoginName(params.get("username"));
         return new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "login",
@@ -1100,6 +1101,30 @@ public class StackMob {
                                             "resetPassword",
                                             callback,
                                             this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
+    // Logged in user checking
+    public String getLoggedInUser() {
+        return isLoggedIn() ? session.getLastUserLoginName() : null;
+    }
+
+    public boolean isLoggedIn() {
+        Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
+        if(sessionCookie != null) {
+            boolean cookieIsStillValid = sessionCookie.getValue() == null || sessionCookie.getValue().before(new Date());
+            return cookieIsStillValid && !this.isLoggedOut();
+        }
+        return false;
+    }
+
+    public boolean isUserLoggedIn(String username) {
+        return username != null && username.equals(this.getLoggedInUser());
+    }
+
+    public boolean isLoggedOut() {
+        Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
+        //The logged out cookie is a json string.
+        return sessionCookie != null && sessionCookie.getKey().contains(":");
     }
 
 
