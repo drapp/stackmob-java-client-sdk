@@ -270,15 +270,17 @@ public abstract class StackMobRequest {
 
 
     protected OAuthRequest getOAuthRequest(HttpVerb method, String url) {
-        OAuthRequest oReq = new OAuthRequest(Verb.valueOf(method.toString()), url);
+        Verb verb = Verb.valueOf(method.toString());
+        OAuthRequest oReq = new OAuthRequest(verb, url);
         int apiVersion = session.getApiVersionNumber();
-        final String contentType = "application/vnd.stackmob+json";
-        final String accept = contentType + "; version="+apiVersion;
+        final String accept = "application/vnd.stackmob+json; version="+apiVersion;
 
         List<Map.Entry<String, String>> headerList = new ArrayList<Map.Entry<String, String>>();
 
         //build basic headers
-        headerList.add(new Pair<String, String>("Content-Type", contentType));
+        if(!verb.equals(Verb.GET) && !verb.equals(Verb.DELETE)) {
+            headerList.add(new Pair<String, String>("Content-Type", "application/json"));
+        }
         headerList.add(new Pair<String, String>("Accept", accept));
         headerList.add(new Pair<String, String>("User-Agent", StackMob.getUserAgent(session.getAppName())));
         String cookieHeader = cookieStore.cookieHeader();
