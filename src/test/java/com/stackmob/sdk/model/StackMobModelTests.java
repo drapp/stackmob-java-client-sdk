@@ -184,7 +184,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         public BadFieldName() {
             super(BadFieldName.class);
         }
-        String _foo = "fail";
+        String badfieldname_id = "fail";
     }
 
     @Test public void testBadFieldName() throws Exception {

@@ -74,16 +74,28 @@ public abstract class StackMobModel {
     public StackMobModel(Class<? extends StackMobModel> actualClass) {
         this.actualClass = actualClass;
         schemaName = actualClass.getSimpleName().toLowerCase();
-        ensureValidName(schemaName,"model");
+        ensureValidModelName(schemaName);
         ensureMetadata(actualClass);
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Date.class, new DateAsNumberTypeAdapter());
         gson = gsonBuilder.create();
     }
 
+    private void ensureValidFieldName(String name) {
+        if(name.equals(getIDFieldName())) {
+            throw new IllegalStateException(String.format("Don't create a field called %s. It's your object's id and is treated specially. Use setID and getID instead.", getIDFieldName()));
+        }
+        ensureValidName(name, "field");
+    }
+
+    private static void ensureValidModelName(String name) {
+        if(name.contains("_")) throw new IllegalStateException("Model names may not contain underscore");
+        ensureValidName(name,"model");
+    }
+
     private static void ensureValidName(String name, String thing) {
         //The three character minimum isn't actually enforced for fields
-        if(name.matches(".*(\\W|_).*") || name.length() > 25 || name.length() < 3) {
+        if(name.matches(".*(\\W).*") || name.length() > 25 || name.length() < 3) {
             throw new IllegalStateException(String.format("Invalid name for a %s: %s. Must be 3-25 alphanumeric characters", thing, name));
         }
     }
@@ -320,7 +332,7 @@ public abstract class StackMobModel {
         JsonObject json = gson.toJsonTree(this).getAsJsonObject();
         JsonObject outgoing = new JsonObject();
         for(String fieldName : getFieldNames(json)) {
-            ensureValidName(fieldName, "field");
+            ensureValidFieldName(fieldName);
             JsonElement value = json.get(fieldName);
             if(getMetadata(fieldName) == MODEL) {
                 json.remove(fieldName);
