@@ -222,7 +222,7 @@ public class StackMobTests extends StackMobTestCommon {
             @Override
             public void success(String responseBody) {
                 JsonElement elt = new JsonParser().parse(responseBody);
-                asserter.markTrue(elt.getAsJsonArray().get(0).getAsJsonObject().get("business").getAsJsonObject().get("name").equals("bar"));
+                asserter.markNotNull(elt.getAsJsonArray().get(1).getAsJsonObject().get("business").getAsJsonObject().get("business_id"));
                 asserter.markNotJsonError(responseBody);
                 latch.countDown();
             }
