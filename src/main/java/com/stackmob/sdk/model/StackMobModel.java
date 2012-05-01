@@ -433,7 +433,7 @@ public abstract class StackMobModel {
         RelationMapping mapping = new RelationMapping();
         String json = toJsonWithDepth(depth, mapping);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
-        if(!mapping.isEmpty()) headers.add(new Pair<String,String>("X-StackMob-Relations", mapping.toHeaderString()));
+        headers.add(new Pair<String,String>("X-StackMob-Relations", mapping.toHeaderString()));
         StackMob.getStackMob().post(getSchemaName(), json, headers, new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
