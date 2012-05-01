@@ -170,4 +170,42 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
 
     }
+
+    public static class Account extends StackMobModel {
+        public Account() {
+            super(Account.class);
+        }
+
+        public String name;
+
+        public Business business;
+    }
+
+    public static class Business extends StackMobModel {
+        public Business() {
+            super(Business.class);
+        }
+
+        public String name;
+
+    }
+
+    @Test public void testExpand() throws Exception {
+        new StackMobModelQuery<Account>(Account.class).expandDepthIs(1).send(new StackMobQueryCallback<Account>() {
+            @Override
+            public void success(List<Account> result) {
+                asserter.markTrue(result.get(1).name.equals("foo"));
+                asserter.markNotNull(result.get(1).business);
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+
+        asserter.assertLatchFinished(latch);
+
+    }
 }

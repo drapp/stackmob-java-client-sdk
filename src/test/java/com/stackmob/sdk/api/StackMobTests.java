@@ -211,6 +211,31 @@ public class StackMobTests extends StackMobTestCommon {
         objectOnServer.delete();
     }
 
+
+    @Test public void getWithExpand() throws Exception {
+
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+        StackMobQuery q = new StackMobQuery("account");
+        q.expandDepthIs(1);
+        stackmob.get(q, new StackMobCallback() {
+            @Override
+            public void success(String responseBody) {
+                JsonElement elt = new JsonParser().parse(responseBody);
+                asserter.markTrue(elt.getAsJsonArray().get(0).getAsJsonObject().get("business").getAsJsonObject().get("name").equals("bar"));
+                asserter.markNotJsonError(responseBody);
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+                latch.countDown();
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
     @Test public void getWithQuery() throws InterruptedException, StackMobException {
         final Game g = new Game(Arrays.asList("seven", "six"), "woot");
         final StackMobObjectOnServer<Game> objectOnServer = createOnServer(g, Game.class);
