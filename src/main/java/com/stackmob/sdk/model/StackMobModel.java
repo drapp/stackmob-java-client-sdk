@@ -419,12 +419,14 @@ public abstract class StackMobModel {
         StackMob.getStackMob().get(getSchemaName() + "/" + id, args, headers , new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
+                boolean fillSucceeded = false;
                 try {
                     StackMobModel.this.fillFromJson(new JsonParser().parse(responseBody));
+                    fillSucceeded = true;
                 } catch (StackMobException e) {
                     failure(e);
                 }
-                super.success(responseBody);
+                if(fillSucceeded) super.success(responseBody);
             }
         });
     }
@@ -449,12 +451,14 @@ public abstract class StackMobModel {
         StackMob.getStackMob().post(getSchemaName(), json, headers, new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
+                boolean fillSucceeded = false;
                 try {
                     fillFromJson(new JsonParser().parse(responseBody), Arrays.asList("lastmoddate", "createddate"));
+                    fillSucceeded = true;
                 } catch (StackMobException e) {
                     failure(e);
                 }
-                super.success(responseBody);
+                if(fillSucceeded) super.success(responseBody);
             }
         });
     }
