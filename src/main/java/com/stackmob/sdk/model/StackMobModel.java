@@ -82,7 +82,7 @@ public abstract class StackMobModel {
     }
 
     private void ensureValidFieldName(String name) {
-        if(name.equals(getIDFieldName())) {
+        if(name.equalsIgnoreCase(getIDFieldName())) {
             throw new IllegalStateException(String.format("Don't create a field called %s. It's your object's id and is treated specially. Use setID and getID instead.", getIDFieldName()));
         }
         ensureValidName(name, "field");
