@@ -1,5 +1,11 @@
 # Stackmob Java SDK (Release Notes)
 
+### 0.4.3 (05/02/2012)
+* Count methods
+* Null and Not Equal Queries
+* Logged in user checks
+* User Model
+
 ### 0.4.2 (04/02/2012)
 * Add optional logging
 
