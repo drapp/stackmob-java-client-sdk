@@ -146,7 +146,7 @@ public class StackMob {
     public StackMob(String apiKey, String apiSecret, String userObjectName, String appName, Integer apiVersionNumber) {
         this.session = new StackMobSession(apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
         this.executor = createNewExecutor();
-        if(StackMob.getStackMob() == null) StackMob.setStackMob(this);
+        if(stackmob == null) StackMob.setStackMob(this);
     }
 
     /**
