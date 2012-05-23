@@ -236,7 +236,7 @@ public abstract class StackMobRequest {
     }
 
     protected String getScheme() {
-        if (isSecure) {
+        if (isSecure && session.getEnableHTTPS()) {
             return SECURE_SCHEME;
         }
         else {

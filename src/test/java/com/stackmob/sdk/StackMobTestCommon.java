@@ -24,13 +24,12 @@ import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.testobjects.Error;
-import java.util.HashMap;
+
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.lang.reflect.Type;
 import java.util.concurrent.atomic.AtomicReference;
-import com.google.gson.reflect.TypeToken;
+
 import com.stackmob.sdk.testobjects.StackMobObject;
 import com.stackmob.sdk.testobjects.StackMobObjectOnServer;
 
@@ -40,6 +39,7 @@ public class StackMobTestCommon {
 
     private static final String ENVIRONMENT_KEY_KEY = "STACKMOB_KEY";
     private static final String ENVIRONMENT_SECRET_KEY = "STACKMOB_SECRET";
+    private static final String ENVIRONMENT_DISABLE_HTTPS_KEY = "STACKMOB_DISABLE_HTTPS";
 
     protected static final Gson gson = new Gson();
     protected final StackMob stackmob;
@@ -50,6 +50,7 @@ public class StackMobTestCommon {
 
         String envKey = System.getenv(ENVIRONMENT_KEY_KEY);
         String envSecret = System.getenv(ENVIRONMENT_SECRET_KEY);
+        String envHTTPS = System.getenv(ENVIRONMENT_DISABLE_HTTPS_KEY);
         if(envKey != null && envSecret != null) {
             System.out.println("found environment vars for key & secret. using these");
             apiKey = envKey;
@@ -68,6 +69,9 @@ public class StackMobTestCommon {
                 //do nothing
             }
         }));
+        if(envHTTPS != null) {
+            StackMob.getStackMob().getSession().setEnableHTTPS(false);
+        }
         StackMob.getLogger().setLogging(true);
         stackmob = StackMob.getStackMob();
     }

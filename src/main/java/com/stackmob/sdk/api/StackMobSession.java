@@ -28,6 +28,7 @@ public class StackMobSession {
     private String appName = null;
     private String lastUserLoginName;
     private long serverTimeDiff = 0;
+    private boolean enableHTTPS = true;
 
     public StackMobSession(String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
         this(key, secret, userObjectName, apiVersionNumber);
@@ -106,6 +107,14 @@ public class StackMobSession {
 
     protected String getLastUserLoginName() {
         return lastUserLoginName;
+    }
+
+    public void setEnableHTTPS(boolean enableHTTPS) {
+        this.enableHTTPS = enableHTTPS;
+    }
+
+    public boolean getEnableHTTPS() {
+        return enableHTTPS;
     }
 
 }
