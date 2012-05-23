@@ -332,9 +332,9 @@ public abstract class StackMobRequest {
             @Override
             public String call() throws Exception {
                 try {
-                    StackMob.getLogger().logInfo("Sending request %s", req.toString());
+                    StackMob.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
                     Response ret = req.send();
-                    StackMob.getLogger().logInfo("Received response %d", ret.getCode());
+                    StackMob.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + (ret.getBody().length() < 1000 ? ret.getBody() : (ret.getBody().subSequence(0, 1000) + " (truncated)")));
                     if(ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
                     if(HttpRedirectHelper.isRedirected(ret.getCode())) {
                         StackMob.getLogger().logInfo("Response was redirected");
