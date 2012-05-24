@@ -45,11 +45,16 @@ public class StackMob {
     protected static class RegistrationIDAndUser {
         public String userId;
         public Map<String, String> token = new HashMap<String, String>();
+        public Boolean overwrite = null;
 
         public RegistrationIDAndUser(String registrationID, String user) {
             userId = user;
             token.put("token", registrationID);
             token.put("type", "android");
+        }
+        public RegistrationIDAndUser(String registrationID, String user, boolean overwrite) {
+            this(registrationID, user);
+            this.overwrite = overwrite;
         }
     }
     
@@ -514,6 +519,23 @@ public class StackMob {
         RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username);
         return postPush("register_device_token_universal", tokenAndUser, callback);
     }
+
+    /**
+     * register a user for C2DM push notifications
+     * @param username the StackMob username to register
+     * @param registrationID the C2DM registration ID. see http://code.google.com/android/c2dm/#registering for detail on how to get this ID
+     * @param overwrite whether to overwrite existing entries
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
+     */
+    public StackMobRequestSendResult registerForPushWithUser(String username,
+                                                             String registrationID,
+                                                             boolean overwrite,
+                                                             StackMobRawCallback callback) {
+        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, overwrite);
+        return postPush("register_device_token_universal", tokenAndUser, callback);
+    }
+
 
     /**
      * get all the tokens for the each of the given users
