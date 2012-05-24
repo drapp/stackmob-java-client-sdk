@@ -16,9 +16,9 @@
 
 package com.stackmob.sdk.api;
 
+import com.google.gson.*;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
-import com.google.gson.JsonParser;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
