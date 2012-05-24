@@ -898,6 +898,47 @@ public class StackMob {
     }
 
     /**
+     * do a put request on the StackMob platform, treating some of the fields as counters to be incremented rather
+     * than as values to set
+     * @param path the path to put
+     * @param id the id of the object to put
+     * @param requestObject the object to serialize and send in the PUT body. this object will be serialized with Gson
+     * @param counterFields a list of the fields in the object to be treated as counters being incremented
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
+     */
+    public StackMobRequestSendResult putAndUpdateAtomicCounters(String path,
+                                                             String id,
+                                                             Object requestObject,
+                                                             List<String> counterFields,
+                                                             StackMobRawCallback callback) {
+        JsonObject obj = new Gson().toJsonTree(requestObject).getAsJsonObject();
+        for(Map.Entry<String, JsonElement> field : obj.entrySet()) {
+            if(counterFields.contains(field.getKey())) {
+                obj.remove(field.getKey());
+                obj.add(field.getKey() + "[inc]", field.getValue());
+            }
+        }
+        return put(path, id, obj.toString(), callback);
+    }
+
+    /**
+     * Do an atomic update on a an integer field in a particular object and schema
+     *
+     * @param path the path to put
+     * @param id the id of the object to put
+     * @param field the field to increment
+     * @param value the value to increment by
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
+     */
+    public StackMobRequestSendResult updateAtomicCounter(String path, String id, String field, int value, StackMobRawCallback callback) {
+        JsonObject body = new JsonObject();
+        body.add(field + "[inc]", new JsonPrimitive(value));
+        return put(path, id, body.toString(), callback);
+    }
+
+    /**
      * do a an atomic put request on the StackMob platform with the contents of the has-many relation
      * @param path the path to get
      * @param primaryId id of the object with the relation
