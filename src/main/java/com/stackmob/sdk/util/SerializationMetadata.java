@@ -17,6 +17,7 @@
 package com.stackmob.sdk.util;
 
 import com.stackmob.sdk.api.StackMob;
+import com.stackmob.sdk.model.StackMobCounter;
 import com.stackmob.sdk.model.StackMobModel;
 
 import java.lang.reflect.Field;
@@ -34,6 +35,7 @@ public enum SerializationMetadata {
     PRIMITIVE,
     OBJECT,
     MODEL,
+    COUNTER,
     PRIMITIVE_ARRAY,
     OBJECT_ARRAY,
     MODEL_ARRAY;
@@ -81,6 +83,8 @@ public enum SerializationMetadata {
             return PRIMITIVE;
         } else if(isModel(field.getType())) {
             return MODEL;
+        } else if(StackMobCounter.class.isAssignableFrom(field.getType())) {
+            return COUNTER;
         } else {
             return OBJECT;
         }

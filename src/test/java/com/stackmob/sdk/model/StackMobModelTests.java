@@ -634,4 +634,69 @@ public class StackMobModelTests extends StackMobTestCommon {
         });
         asserter.assertLatchFinished(latch);
     }
+
+    public static class CounterTest extends StackMobModel {
+        public CounterTest(){
+            super(CounterTest.class);
+        }
+        StackMobCounter counter = new StackMobCounter();
+    }
+
+    @Test public void testCounter() throws Exception {
+        final CounterTest counter = new CounterTest();
+        counter.save(new AssertErrorCallback() {
+            @Override
+            public void success(String responseBody) {
+                JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                asserter.markEquals(0, result.get("counter").getAsInt());
+                counter.counter.updateAtomicallyBy(5);
+                counter.save(new AssertErrorCallback() {
+                    @Override
+                    public void success(String responseBody) {
+                        JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                        asserter.markEquals(5, result.get("counter").getAsInt());
+                        counter.counter.forceTo(-1);
+                        counter.save(new AssertErrorCallback() {
+                            @Override
+                            public void success(String responseBody) {
+                                JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                                asserter.markEquals(-1, result.get("counter").getAsInt());
+                                counter.counter.updateAtomicallyBy(4);
+                                counter.save(new AssertErrorCallback() {
+                                    @Override
+                                    public void success(String responseBody) {
+                                        JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                                        asserter.markEquals(3, result.get("counter").getAsInt());
+                                        counter.counter = new StackMobCounter();
+                                        counter.counter.forceTo(5);
+                                        counter.counter.updateAtomicallyBy(1);
+                                        counter.fetch(new AssertErrorCallback() {
+                                            @Override
+                                            public void success(String responseBody) {
+                                                JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                                                asserter.markEquals(3, result.get("counter").getAsInt());
+                                                counter.counter.forceTo(5);
+                                                counter.counter.updateAtomicallyBy(1);
+                                                counter.save(new AssertErrorCallback() {
+                                                    @Override
+                                                    public void success(String responseBody) {
+                                                        JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                                                        asserter.markEquals(6, result.get("counter").getAsInt());
+
+                                                        latch.countDown();
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+        });
+        asserter.assertLatchFinished(latch);
+    }
 }

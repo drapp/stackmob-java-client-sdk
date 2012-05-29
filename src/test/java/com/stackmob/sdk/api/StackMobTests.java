@@ -24,10 +24,7 @@ import com.stackmob.sdk.callback.StackMobCountCallback;
 import com.stackmob.sdk.concurrencyutils.CountDownLatchUtils;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
-import com.stackmob.sdk.testobjects.Game;
-import com.stackmob.sdk.testobjects.S3Object;
-import com.stackmob.sdk.testobjects.StackMobObjectOnServer;
-import com.stackmob.sdk.testobjects.User;
+import com.stackmob.sdk.testobjects.*;
 import org.junit.Test;
 
 import java.util.*;
@@ -1025,5 +1022,69 @@ public class StackMobTests extends StackMobTestCommon {
     @Test
     public void countQuery() throws Exception {
         testCount(new StackMobQuery("justmany").fieldIsGreaterThan("foo", "foo"), 2);
+    }
+
+    static class CounterTest extends StackMobObject {
+        String countertest_id;
+
+        public CounterTest(String id, int i) {
+            countertest_id = id;
+            counter = i;
+        }
+        int counter;
+
+        @Override
+        public String getIdField() {
+            return countertest_id;
+        }
+
+        @Override
+        public String getIdFieldName() {
+            return "countertest_id";
+        }
+
+        @Override
+        public String getName() {
+            return "countertest";
+        }
+    }
+
+    @Test
+    public void testUpdateAtomicCounter() throws Exception {
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+        CounterTest test = new CounterTest("foo", 5);
+        StackMobObjectOnServer<CounterTest> obj = createOnServer(test, CounterTest.class);
+        StackMob.getStackMob().updateAtomicCounter("countertest", obj.getObject().getIdField(), "counter", -2, new StackMobCallback() {
+            @Override public void success(String result) {
+                asserter.markEquals(3, new JsonParser().parse(result).getAsJsonObject().get("counter").getAsJsonPrimitive().getAsInt());
+                latch.countDown();
+            }
+            @Override public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+        obj.delete();
+    }
+
+    @Test
+    public void testPutWithUpdateAtomicCounter() throws Exception {
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+        CounterTest test = new CounterTest("foo", 5);
+        StackMobObjectOnServer<CounterTest> obj = createOnServer(test, CounterTest.class);
+        test.counter = -2;
+        StackMob.getStackMob().putAndUpdateAtomicCounters("countertest", "foo", test, Arrays.asList("counter"), new StackMobCallback() {
+            @Override public void success(String result) {
+                asserter.markEquals(3, new JsonParser().parse(result).getAsJsonObject().get("counter").getAsJsonPrimitive().getAsInt());
+                latch.countDown();
+            }
+            @Override public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+        obj.delete();
     }
 }
