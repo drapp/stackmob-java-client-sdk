@@ -1,5 +1,10 @@
 # Stackmob Java SDK (Release Notes)
 
+### 0.4.4 (05/30/2012)
+* Atomic Increment
+* Overwrite flag for push
+* Bugfixes
+
 ### 0.4.3 (05/02/2012)
 * Count methods
 * Null and Not Equal Queries
