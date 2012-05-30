@@ -1,9 +1,12 @@
 # Stackmob Java SDK (Release Notes)
 
-### 0.4.4 (05/30/2012)
+### 0.4.5 (05/30/2012)
 * Atomic Increment
 * Overwrite flag for push
 * Bugfixes
+
+### 0.4.4 (05/04/2012)
+* Quick fix for shared StackMob instance problem
 
 ### 0.4.3 (05/02/2012)
 * Count methods
