@@ -38,7 +38,7 @@ import java.util.*;
 
 public abstract class StackMobModel {
 
-    public class DateAsNumberTypeAdapter extends TypeAdapter<Date> {
+    public static class DateAsNumberTypeAdapter extends TypeAdapter<Date> {
 
         @Override
         public void write(JsonWriter jsonWriter, Date date) throws IOException {
@@ -59,12 +59,18 @@ public abstract class StackMobModel {
         }
     }
 
+    static {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Date.class, new DateAsNumberTypeAdapter());
+        gson = gsonBuilder.create();
+    }
+
     
     private transient String id;
     private transient Class<? extends StackMobModel> actualClass;
     private transient String schemaName;
     private transient boolean hasData;
-    private transient Gson gson;
+    private static Gson gson;
 
     public StackMobModel(String id, Class<? extends StackMobModel> actualClass) {
         this(actualClass);
@@ -76,9 +82,6 @@ public abstract class StackMobModel {
         schemaName = actualClass.getSimpleName().toLowerCase();
         ensureValidModelName(schemaName);
         ensureMetadata(actualClass);
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Date.class, new DateAsNumberTypeAdapter());
-        gson = gsonBuilder.create();
     }
 
     private void ensureValidFieldName(String name) {
