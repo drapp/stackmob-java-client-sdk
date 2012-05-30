@@ -18,7 +18,6 @@ package com.stackmob.sdk.model;
 
 import com.google.gson.*;
 import com.stackmob.sdk.StackMobTestCommon;
-import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
@@ -32,7 +31,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static com.stackmob.sdk.concurrencyutils.CountDownLatchUtils.latch;
 import static com.stackmob.sdk.concurrencyutils.CountDownLatchUtils.latchOne;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -428,7 +426,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     String bookName2 = "yet another book!";
     String bookPublisher2 = "no one";
     final MultiThreadAsserter asserter = new MultiThreadAsserter();
-    final CountDownLatch latch = latchOne();
+    CountDownLatch latch = latchOne();
 
     private abstract class AssertErrorCallback extends StackMobCallback {
 
@@ -644,59 +642,82 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testCounter() throws Exception {
         final CounterTest counter = new CounterTest();
+
         counter.save(new AssertErrorCallback() {
             @Override
             public void success(String responseBody) {
                 JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
                 asserter.markEquals(0, result.get("counter").getAsInt());
-                counter.counter.updateAtomicallyBy(5);
-                counter.save(new AssertErrorCallback() {
-                    @Override
-                    public void success(String responseBody) {
-                        JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
-                        asserter.markEquals(5, result.get("counter").getAsInt());
-                        counter.counter.forceTo(-1);
-                        counter.save(new AssertErrorCallback() {
-                            @Override
-                            public void success(String responseBody) {
-                                JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
-                                asserter.markEquals(-1, result.get("counter").getAsInt());
-                                counter.counter.updateAtomicallyBy(4);
-                                counter.save(new AssertErrorCallback() {
-                                    @Override
-                                    public void success(String responseBody) {
-                                        JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
-                                        asserter.markEquals(3, result.get("counter").getAsInt());
-                                        counter.counter = new StackMobCounter();
-                                        counter.counter.forceTo(5);
-                                        counter.counter.updateAtomicallyBy(1);
-                                        counter.fetch(new AssertErrorCallback() {
-                                            @Override
-                                            public void success(String responseBody) {
-                                                JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
-                                                asserter.markEquals(3, result.get("counter").getAsInt());
-                                                counter.counter.forceTo(5);
-                                                counter.counter.updateAtomicallyBy(1);
-                                                counter.save(new AssertErrorCallback() {
-                                                    @Override
-                                                    public void success(String responseBody) {
-                                                        JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
-                                                        asserter.markEquals(6, result.get("counter").getAsInt());
-
-                                                        latch.countDown();
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+                incrementCounter(counter);
             }
-
         });
         asserter.assertLatchFinished(latch);
     }
+
+    private void incrementCounter(final CounterTest counter) {
+        counter.counter.updateAtomicallyBy(5);
+        counter.save(new AssertErrorCallback() {
+            @Override
+            public void success(String responseBody) {
+                JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                asserter.markEquals(5, result.get("counter").getAsInt());
+                forceCounter(counter);
+            }
+        });
+    }
+
+    private void forceCounter(final CounterTest counter) {
+        counter.counter.forceTo(-1);
+        counter.save(new AssertErrorCallback() {
+            @Override
+            public void success(String responseBody) {
+                JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                asserter.markEquals(-1, result.get("counter").getAsInt());
+                incrementAgain(counter);
+            }
+        });
+    }
+
+
+    private void incrementAgain(final CounterTest counter) {
+        counter.counter.updateAtomicallyBy(4);
+        counter.save(new AssertErrorCallback() {
+            @Override
+            public void success(String responseBody) {
+                JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                asserter.markEquals(3, result.get("counter").getAsInt());
+                overwriteCounter(counter);
+            }
+        });
+    }
+
+    private void overwriteCounter(final CounterTest counter) {
+        counter.counter = new StackMobCounter();
+        counter.counter.forceTo(5);
+        counter.counter.updateAtomicallyBy(1);
+        counter.fetch(new AssertErrorCallback() {
+            @Override
+            public void success(String responseBody) {
+                asserter.markEquals(3, counter.counter.get());
+                forceAndIncrement(counter);
+            }
+        });
+    }
+
+    private void forceAndIncrement(final CounterTest counter) {
+        counter.counter.forceTo(5);
+        counter.counter.updateAtomicallyBy(1);
+        counter.save(new AssertErrorCallback() {
+            @Override
+            public void success(String responseBody) {
+                JsonObject result = new JsonParser().parse(responseBody).getAsJsonObject();
+                asserter.markEquals(6, result.get("counter").getAsInt());
+                latch.countDown();
+            }
+        });
+    }
+
+
+
+
 }
