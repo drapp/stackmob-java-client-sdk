@@ -1032,6 +1032,7 @@ public class StackMobTests extends StackMobTestCommon {
             counter = i;
         }
         int counter;
+        int counter2;
 
         @Override
         public String getIdField() {

@@ -935,7 +935,7 @@ public class StackMob {
                                                              List<String> counterFields,
                                                              StackMobRawCallback callback) {
         JsonObject obj = new Gson().toJsonTree(requestObject).getAsJsonObject();
-        for(Map.Entry<String, JsonElement> field : obj.entrySet()) {
+        for(Map.Entry<String, JsonElement> field : new HashSet<Map.Entry<String, JsonElement>>(obj.entrySet())) {
             if(counterFields.contains(field.getKey())) {
                 obj.remove(field.getKey());
                 obj.add(field.getKey() + "[inc]", field.getValue());
