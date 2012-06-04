@@ -59,10 +59,10 @@ public abstract class StackMobModel {
         }
     }
 
-    static {
+    private static Gson getGson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Date.class, new DateAsNumberTypeAdapter());
-        gson = gsonBuilder.create();
+        return gsonBuilder.create();
     }
 
     
@@ -70,7 +70,7 @@ public abstract class StackMobModel {
     private transient Class<? extends StackMobModel> actualClass;
     private transient String schemaName;
     private transient boolean hasData;
-    private static Gson gson;
+    private static final Gson gson = getGson();
 
     public StackMobModel(String id, Class<? extends StackMobModel> actualClass) {
         this(actualClass);
