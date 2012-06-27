@@ -42,19 +42,27 @@ public class StackMob {
 
     private final Object urlFormatLock = new Object();
 
-    protected static class RegistrationIDAndUser {
+    public static class RegistrationIDAndUser {
         public String userId;
         public Map<String, String> token = new HashMap<String, String>();
         public Boolean overwrite = null;
 
         public RegistrationIDAndUser(String registrationID, String user) {
+          this(registrationID, user, "android");
+        }
+
+        public RegistrationIDAndUser(String registrationID, String user, String platform) {
             userId = user;
             token.put("token", registrationID);
-            token.put("type", "android");
+            token.put("type", platform);
         }
-        public RegistrationIDAndUser(String registrationID, String user, boolean overwrite) {
-            this(registrationID, user);
+        public RegistrationIDAndUser(String registrationID, String user, String platform, boolean overwrite) {
+            this(registrationID, user, platform);
             this.overwrite = overwrite;
+        }
+
+        public RegistrationIDAndUser(String registrationID, String user, boolean overwrite) {
+            this(registrationID, user, "android", overwrite);
         }
     }
     
@@ -560,6 +568,28 @@ public class StackMob {
     }
 
     /**
+     * get the user for the each of the given tokens
+     * @param tokens the tokens whose users to get
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
+     */
+    public StackMobRequestSendResult getUsersForTokens(List<String> tokens,
+                                                       StackMobRawCallback callback) {
+        final StringBuilder tokenString = new StringBuilder();
+        boolean first = true;
+        for(String token : tokens) {
+            if(!first) {
+                tokenString.append(",");
+            }
+            first = false;
+            tokenString.append(token);
+        }
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("tokens", tokenString.toString());
+        return getPush("get_users_for_tokens_universal", params, callback);
+    }
+
+    /**
      * broadcast a push notification to all users of this app. use this method sparingly, especially if you have a large app
      * @param payload the payload to broadcast
      * @param callback callback to be called when the server returns. may execute in a separate thread
@@ -718,7 +748,7 @@ public class StackMob {
         return this.get(query.getQuery(), callback);
     }
 
-    private StackMobRequestSendResult getPush(String path,
+    public StackMobRequestSendResult getPush(String path,
                          Map<String, String> arguments,
                          StackMobRawCallback callback) {
         return new StackMobRequestWithoutPayload(this.executor,
@@ -859,7 +889,7 @@ public class StackMob {
         return postRelated(path, primaryId, relatedField, relatedObjects, callback);
     }
 
-    private StackMobRequestSendResult postPush(String path,
+    public StackMobRequestSendResult postPush(String path,
                           Object requestObject,
                           StackMobRawCallback callback) {
         return new StackMobRequestWithPayload(this.executor,
