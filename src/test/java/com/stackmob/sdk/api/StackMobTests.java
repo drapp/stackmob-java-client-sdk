@@ -25,6 +25,7 @@ import com.stackmob.sdk.concurrencyutils.CountDownLatchUtils;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.testobjects.*;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -125,7 +126,7 @@ public class StackMobTests extends StackMobTestCommon {
         objectOnServer.delete();
     }
 
-    @Test public void testTimeSync() throws Exception {
+    @Ignore @Test public void testTimeSync() throws Exception {
         //Hack a bad local time into the session
         StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
             @Override
