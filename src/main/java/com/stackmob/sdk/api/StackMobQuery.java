@@ -93,12 +93,18 @@ public class StackMobQuery {
         }
     }
 
+    public StackMobQuery() {}
+
     public StackMobQuery(String objectName) {
         this.objectName = objectName;
     }
 
     public static StackMobQuery objects(String objectName) {
         return new StackMobQuery(objectName);
+    }
+
+    public void setObjectName(String objectName) {
+        this.objectName = objectName;
     }
 
     public String getObjectName() {

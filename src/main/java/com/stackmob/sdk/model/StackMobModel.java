@@ -21,9 +21,11 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.stackmob.sdk.api.StackMob;
+import com.stackmob.sdk.api.StackMobQuery;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobIntermediaryCallback;
 import com.stackmob.sdk.callback.StackMobNoopCallback;
+import com.stackmob.sdk.callback.StackMobQueryCallback;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.util.Pair;
 import com.stackmob.sdk.util.RelationMapping;
@@ -37,6 +39,15 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public abstract class StackMobModel {
+
+
+    public static <T extends StackMobModel> void query(Class<T> theClass, StackMobQuery q, StackMobQueryCallback<T> callback) {
+        StackMobModelQuery<T> query = new StackMobModelQuery<T>(theClass);
+        q.setObjectName(theClass.getSimpleName().toLowerCase());
+        query.query = q;
+        query.send(callback);
+    }
+
 
     public static class DateAsNumberTypeAdapter extends TypeAdapter<Date> {
 

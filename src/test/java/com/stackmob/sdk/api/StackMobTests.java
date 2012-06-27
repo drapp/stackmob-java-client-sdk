@@ -142,6 +142,7 @@ public class StackMobTests extends StackMobTestCommon {
             @Override
             public void success(String responseBody) {
                 asserter.markException(new Exception("request with bad time succeeded"));
+                latch.countDown();
             }
 
             @Override
