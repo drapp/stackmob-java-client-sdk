@@ -18,19 +18,19 @@ Hopefully you can see the pattern here. With this library, you can connect almos
 <dependency>
     <groupId>com.stackmob</groupId>
     <artifactId>stackmob-java-client-sdk</artifactId>
-    <version>0.4.6</version>
+    <version>0.4.7</version>
 </dependency>
 ```
 
 ## With SBT
 
 ```scala
-libraryDependencies += "com.stackmob" % "stackmob-java-client-sdk" % "0.4.6"
+libraryDependencies += "com.stackmob" % "stackmob-java-client-sdk" % "0.4.7"
 ```
 
 ## Commandline (or Ant)
 
-Download the [StackMob Java SDK](http://search.maven.org/remotecontent?filepath=com/stackmob/stackmob-java-client-sdk/0.4.6/stackmob-java-client-sdk-0.4.6.jar) and the dependencies listed below and place them on your CLASSPATH:
+Download the [StackMob Java SDK](http://search.maven.org/remotecontent?filepath=com/stackmob/stackmob-java-client-sdk/0.4.7/stackmob-java-client-sdk-0.4.7.jar) and the dependencies listed below and place them on your CLASSPATH:
 
 * [Gson](http://search.maven.org/remotecontent?filepath=com/google/code/gson/gson/2.1/gson-2.1.jar)
 * [Scribe](http://search.maven.org/remotecontent?filepath=org/scribe/scribe/1.2.3/scribe-1.2.3.jar)
@@ -38,7 +38,7 @@ Download the [StackMob Java SDK](http://search.maven.org/remotecontent?filepath=
 
 # Making REST API Calls
 
-The main interface to your app on StackMob's servers is through the ``` com.stackmob.sdk.api.StackMob ``` object. Check out the [javadoc](http://stackmob.github.com/stackmob-java-client-sdk/javadoc/0.4.6/apidocs/) for details.
+The main interface to your app on StackMob's servers is through the ``` com.stackmob.sdk.api.StackMob ``` object. Check out the [javadoc](http://stackmob.github.com/stackmob-java-client-sdk/javadoc/0.4.7/apidocs/) for details.
 The following code shows basic use of the StackMob object.
 
 ```java

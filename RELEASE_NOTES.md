@@ -1,5 +1,8 @@
 # Stackmob Java SDK (Release Notes)
 
+### 0.4.7 (06/27/2012)
+* New push functions
+
 ### 0.4.6 (05/31/2012)
 * Bug fix for atomic increment
 
