@@ -18,6 +18,7 @@ package com.stackmob.sdk.api;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import com.stackmob.sdk.api.StackMob.OAuthVersion;
 
 public class StackMobSession {
 
@@ -28,21 +29,32 @@ public class StackMobSession {
     private String appName = null;
     private String lastUserLoginName;
     private long serverTimeDiff = 0;
+    private OAuthVersion oauthVersion;
+    private String oauth2Token;
     private boolean enableHTTPS = true;
 
-    public StackMobSession(String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
-        this(key, secret, userObjectName, apiVersionNumber);
-        this.appName = appName;
+    public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
+        this(oauthVersion, key, secret, userObjectName, apiVersionNumber, null);
     }
 
-    public StackMobSession(String key, String secret, String userObjectName, int apiVersionNumber) {
+    public StackMobSession(String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
+        this(key, secret, userObjectName, apiVersionNumber, null);
+    }
+
+    public StackMobSession(String key, String secret, String userObjectName, int apiVersionNumber, String appName) {
+        this(OAuthVersion.One, key, secret, userObjectName, apiVersionNumber, appName);
+    }
+
+    public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, int apiVersionNumber, String appName) {
         if(key.equals(StackMobConfiguration.DEFAULT_API_KEY) || secret.equals(StackMobConfiguration.DEFAULT_API_SECRET)) {
             throw new RuntimeException("You forgot to set your api key and secret");
         }
+        this.oauthVersion = oauthVersion;
         this.key = key;
         this.secret = secret;
         this.userObjectName = userObjectName;
         this.apiVersionNumber = apiVersionNumber;
+        this.appName = appName;
     }
 
     public StackMobSession(StackMobSession that) {
@@ -115,6 +127,18 @@ public class StackMobSession {
 
     public boolean getEnableHTTPS() {
         return enableHTTPS;
+    }
+
+    public OAuthVersion getOAuthVersion() {
+        return oauthVersion;
+    }
+
+    public String getOAuth2Token() {
+        return oauth2Token;
+    }
+
+    public void setOAuth2Token(String oauth2Token) {
+        this.oauth2Token = oauth2Token;
     }
 
 }

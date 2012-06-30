@@ -15,11 +15,15 @@
  */
 package com.stackmob.sdk.api;
 
+import com.stackmob.sdk.api.StackMob.OAuthVersion;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 
 import java.util.Map;
 
 public class StackMobConfiguration {
+
+    public static final OAuthVersion OAUTH_VERSION = OAuthVersion.Two;
+
     public static final String DEFAULT_API_KEY = "DEFAULT_API_KEY";//do not change this
     public static final String DEFAULT_API_SECRET = "DEFAULT_API_SECRET";//do not change this
 
@@ -40,13 +44,17 @@ public class StackMobConfiguration {
     };
     
     public static StackMob newStackMob() {
-        StackMob stackmob = new StackMob(API_KEY,
+        StackMob stackmob = new StackMob(OAUTH_VERSION,
+                                         API_KEY,
                                          API_SECRET,
                                          USER_OBJECT_NAME,
                                          API_VERSION,
                                          API_URL_FORMAT,
                                          PUSH_API_URL_FORMAT,
                                          redirectedCallback);
+        if(OAUTH_VERSION == OAuthVersion.Two && !DEFAULT_API_SECRET.equals(API_SECRET)) {
+            throw new IllegalStateException("The private key isn't necessary for oauth2. Embedding it is a security risk");
+        }
         StackMob.getLogger().setLogging(ENABLE_LOGGING);
         StackMob.getLogger().logDebug("Starting java sdk version %s running on %s", StackMob.getVersion(), System.getProperty("os.name"));
         return stackmob;

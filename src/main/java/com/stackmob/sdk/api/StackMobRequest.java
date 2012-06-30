@@ -18,6 +18,7 @@ package com.stackmob.sdk.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.stackmob.sdk.api.StackMob.OAuthVersion;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.exception.StackMobException;
@@ -54,6 +55,8 @@ public abstract class StackMobRequest {
     public static final String DEFAULT_PUSH_URL_FORMAT = "push." + DEFAULT_URL_FORMAT;
     protected static final String SECURE_SCHEME = "https";
     protected static final String REGULAR_SCHEME = "http";
+    protected static final String API_KEY_HEADER = "X-StackMob-API-Key";
+    protected static final String AUTHORIZATION_HEADER = "Authorization";
     private static StackMobCookieStore cookieStore = new StackMobCookieStore();
 
     public static void setCookieStore(StackMobCookieStore store) {
@@ -298,7 +301,17 @@ public abstract class StackMobRequest {
             oReq.addHeader(header.getKey(), header.getValue());
         }
 
-        oAuthService.signRequest(new Token("", ""), oReq);
+        switch(session.getOAuthVersion()) {
+            case One: oAuthService.signRequest(new Token("", ""), oReq); break;
+            case Two: {
+                oReq.addHeader(API_KEY_HEADER, session.getKey());
+                if(session.getOAuth2Token() != null) {
+                    oReq.addHeader(AUTHORIZATION_HEADER, "BASIC " + session.getOAuth2Token());
+                }
+                break;
+            }
+        }
+
         return oReq;
     }
 
