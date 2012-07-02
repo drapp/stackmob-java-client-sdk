@@ -134,6 +134,10 @@ public class StackMobSession {
         return oauthVersion;
     }
 
+    public void setOAuthVersion(OAuthVersion oauthVersion) {
+        this.oauthVersion = oauthVersion;
+    }
+
     public boolean isOAuth2() {
         return oauthVersion == StackMob.OAuthVersion.Two;
     }

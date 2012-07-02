@@ -40,7 +40,6 @@ public class StackMob {
         Two
     }
 
-    private OAuthVersion oauthVersion;
     private StackMobSession session;
     private String apiUrlFormat = StackMobRequest.DEFAULT_API_URL_FORMAT;
     private String pushUrlFormat = StackMobRequest.DEFAULT_PUSH_URL_FORMAT;
@@ -288,11 +287,8 @@ public class StackMob {
         if(getSession().getOAuthVersion() == OAuthVersion.One) {
             req = new StackMobUserBasedRequest(this.executor,
                                                this.session,
-                                               HttpVerbWithPayload.POST,
-                                               StackMobRequest.EmptyHeaders,
-                                               StackMobRequest.EmptyParams,
-                                               params,
                                                "login",
+                                               params,
                                                callback,
                                                this.redirectedCallback);
         } else {
@@ -1295,6 +1291,6 @@ public class StackMob {
 
 
     public OAuthVersion getOAuthVersion() {
-        return oauthVersion;
+        return session.getOAuthVersion();
     }
 }

@@ -53,7 +53,7 @@ public class StackMobTests extends StackMobTestCommon {
             }
 
             @Override public void failure(StackMobException e) {
-                asserter.markTrue(e.getMessage().contains("nvalid"));
+                asserter.markTrue(e.getMessage().contains("Invalid"));
                 latch.countDown();
             }
         });
@@ -61,6 +61,99 @@ public class StackMobTests extends StackMobTestCommon {
     }
 
     @Test public void loginLogout() throws Exception {
+        final String username = getRandomString();
+        final String password = getRandomString();
+
+        final User user = new User(username, password);
+        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("username", user.username);
+        params.put("password", user.password);
+
+        final CountDownLatch loginLatch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+        asserter.markTrue(!stackmob.isLoggedIn());
+        asserter.markTrue(!stackmob.isLoggedOut());
+        asserter.markTrue(stackmob.getLoggedInUser() == null);
+        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
+
+        stackmob.login(params, new StackMobCallback() {
+            @Override public void success(String responseBody) {
+                asserter.markNotJsonError(responseBody);
+                final CountDownLatch logoutLatch = latchOne();
+
+                asserter.markTrue(stackmob.isLoggedIn());
+                asserter.markTrue(!stackmob.isLoggedOut());
+                asserter.markTrue(stackmob.getLoggedInUser().equals(user.username));
+                asserter.markTrue(stackmob.isUserLoggedIn(user.username));
+
+                stackmob.logout(new StackMobCallback() {
+                    @Override public void success(String responseBody2) {
+                        asserter.markNotNull(responseBody2);
+                        asserter.markTrue(!stackmob.isLoggedIn());
+                        asserter.markTrue(stackmob.isLoggedOut());
+                        asserter.markTrue(stackmob.getLoggedInUser() == null);
+                        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
+                        asserter.markNotJsonError(responseBody2);
+                        logoutLatch.countDown();
+                    }
+                    @Override public void failure(StackMobException e) {
+                        asserter.markException(e);
+                    }
+                });
+
+                try {
+                    asserter.markLatchFinished(logoutLatch);
+                    loginLatch.countDown();
+                }
+                catch(InterruptedException e) {
+                    asserter.markFailure("logout did not complete");
+                }
+            }
+            @Override public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+
+        // We aren't actually logged in yet here
+        asserter.markTrue(!stackmob.isLoggedIn());
+        asserter.markTrue(!stackmob.isLoggedOut());
+        asserter.markTrue(stackmob.getLoggedInUser() == null);
+        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
+
+        asserter.assertLatchFinished(loginLatch, CountDownLatchUtils.MAX_LATCH_WAIT_TIME);
+        objectOnServer.delete();
+    }
+
+    @Test public void oauth2LoginShouldFail() throws Exception {
+        StackMob.getStackMob().getSession().setOAuthVersion(StackMob.OAuthVersion.Two);
+        final String username = getRandomString();
+        final String password = getRandomString();
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("username", username);
+        params.put("password", password);
+
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+
+        stackmob.login(params, new StackMobCallback() {
+            @Override public void success(String responseBody) {
+                asserter.markJsonError(responseBody);
+                latch.countDown();
+            }
+
+            @Override public void failure(StackMobException e) {
+                asserter.markTrue(e.getMessage().contains("invalid"));
+                latch.countDown();
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
+    @Test public void oauth2LoginLogout() throws Exception {
+        StackMob.getStackMob().getSession().setOAuthVersion(StackMob.OAuthVersion.Two);
         final String username = getRandomString();
         final String password = getRandomString();
 
