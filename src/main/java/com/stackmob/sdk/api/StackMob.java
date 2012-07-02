@@ -284,20 +284,20 @@ public class StackMob {
                       final StackMobRawCallback callback) {
         session.setLastUserLoginName(params.get("username"));
         StackMobRequest req;
-        if(getSession().getOAuthVersion() == OAuthVersion.One) {
-            req = new StackMobUserBasedRequest(this.executor,
-                                               this.session,
-                                               "login",
-                                               params,
-                                               callback,
-                                               this.redirectedCallback);
-        } else {
+        if(getSession().isOAuth2()) {
             req = new StackMobAccessTokenRequest(this.executor,
                                                  this.session,
                                                  "accessToken",
                                                  params,
                                                  callback,
                                                  this.redirectedCallback);
+        } else {
+            req = new StackMobUserBasedRequest(this.executor,
+                                               this.session,
+                                               "login",
+                                               params,
+                                               callback,
+                                               this.redirectedCallback);
         }
         return req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
@@ -350,12 +350,25 @@ public class StackMob {
         Map<String, String> params = new HashMap<String, String>();
         params.put("tw_tk", token);
         params.put("tw_ts", secret);
-        return new StackMobUserBasedRequest(this.executor,
-                                            this.session,
-                                            "twitterlogin",
-                                            params,
-                                            callback,
-                                            this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+
+        StackMobRequest req;
+        if(getSession().isOAuth2()) {
+            req = new StackMobAccessTokenRequest(this.executor,
+                    this.session,
+                    "twitterAccessToken",
+                    params,
+                    callback,
+                    this.redirectedCallback);
+        } else {
+            req = new StackMobUserBasedRequest(this.executor,
+                    this.session,
+                    "twitterlogin",
+                    params,
+                    callback,
+                    this.redirectedCallback);
+        }
+        return req.setUrlFormat(this.apiUrlFormat).sendRequest();
+
     }
 
     /**
@@ -433,12 +446,24 @@ public class StackMob {
         Map<String, String> params = new HashMap<String, String>();
         params.put("fb_at", token);
 
-        return new StackMobUserBasedRequest(this.executor,
-                                            this.session,
-                                            "facebookLogin",
-                                            params,
-                                            callback,
-                                            this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+
+        StackMobRequest req;
+        if(getSession().isOAuth2()) {
+            req = new StackMobAccessTokenRequest(this.executor,
+                                                 this.session,
+                                                 "facebookAccessToken",
+                                                 params,
+                                                 callback,
+                                                 this.redirectedCallback);
+        } else {
+            req = new StackMobUserBasedRequest(this.executor,
+                                               this.session,
+                                               "facebookLogin",
+                                               params,
+                                               callback,
+                                                this.redirectedCallback);
+        }
+        return req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
