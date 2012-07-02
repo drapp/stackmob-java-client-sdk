@@ -31,6 +31,7 @@ public class StackMobSession {
     private long serverTimeDiff = 0;
     private OAuthVersion oauthVersion;
     private String oauth2Token;
+    private Date oauth2TokenExpiration;
     private boolean enableHTTPS = true;
 
     public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
@@ -133,12 +134,24 @@ public class StackMobSession {
         return oauthVersion;
     }
 
+    public boolean isOAuth2() {
+        return oauthVersion == StackMob.OAuthVersion.Two;
+    }
+
     public String getOAuth2Token() {
         return oauth2Token;
     }
 
     public void setOAuth2Token(String oauth2Token) {
         this.oauth2Token = oauth2Token;
+    }
+
+    public void setOAuth2TokenExpiration(int seconds) {
+        oauth2TokenExpiration = new Date(new Date().getTime() + seconds * 1000);
+    }
+
+    public Date getOAuth2TokenExpiration() {
+        return oauth2TokenExpiration;
     }
 
 }

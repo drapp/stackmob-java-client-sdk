@@ -53,7 +53,7 @@ public class StackMobTests extends StackMobTestCommon {
             }
 
             @Override public void failure(StackMobException e) {
-                asserter.markTrue(e.getMessage().contains("Invalid"));
+                asserter.markTrue(e.getMessage().contains("nvalid"));
                 latch.countDown();
             }
         });

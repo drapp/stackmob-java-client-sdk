@@ -293,7 +293,6 @@ public class StackMob {
                                                StackMobRequest.EmptyParams,
                                                params,
                                                "login",
-                                               session.getOAuthVersion() == OAuthVersion.Two,
                                                callback,
                                                this.redirectedCallback);
         } else {
@@ -313,6 +312,7 @@ public class StackMob {
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
     public StackMobRequestSendResult logout(StackMobRawCallback callback) {
+        session.setOAuth2TokenExpiration(0);
         return new StackMobUserBasedRequest(this.executor,
                                      this.session,
                                      "logout",
@@ -1251,10 +1251,15 @@ public class StackMob {
     }
 
     public boolean isLoggedIn() {
-        Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
-        if(sessionCookie != null) {
-            boolean cookieIsStillValid = sessionCookie.getValue() == null || sessionCookie.getValue().before(new Date());
-            return cookieIsStillValid && !this.isLoggedOut();
+        if(getSession().isOAuth2()) {
+            Date sessionValidity = getSession().getOAuth2TokenExpiration();
+            return sessionValidity != null && sessionValidity.after(new Date());
+        } else {
+            Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
+            if(sessionCookie != null) {
+                boolean cookieIsStillValid = sessionCookie.getValue() == null || sessionCookie.getValue().before(new Date());
+                return cookieIsStillValid && !this.isLoggedOut();
+            }
         }
         return false;
     }
@@ -1264,9 +1269,14 @@ public class StackMob {
     }
 
     public boolean isLoggedOut() {
-        Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
-        //The logged out cookie is a json string.
-        return sessionCookie != null && sessionCookie.getKey().contains(":");
+        if(getSession().isOAuth2()) {
+            Date sessionValidity = getSession().getOAuth2TokenExpiration();
+            return sessionValidity != null && sessionValidity.before(new Date());
+        } else {
+            Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
+            //The logged out cookie is a json string.
+            return sessionCookie != null && sessionCookie.getKey().contains(":");
+        }
     }
 
 

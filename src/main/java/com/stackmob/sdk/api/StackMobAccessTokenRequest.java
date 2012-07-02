@@ -47,13 +47,23 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
             @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
                 JsonElement responseElt = new JsonParser().parse(new String(responseBody));
+                byte[] finalResponseBody = responseBody;
                 if(responseElt.isJsonObject()) {
                     JsonElement tokenElt = responseElt.getAsJsonObject().get("access_token");
                     if(tokenElt != null && tokenElt.isJsonPrimitive() && tokenElt.getAsJsonPrimitive().isString()) {
                         session.setOAuth2Token(tokenElt.getAsString());
                     }
+                    JsonElement expirationElt = responseElt.getAsJsonObject().get("expires_in");
+                    if(expirationElt != null && expirationElt.isJsonPrimitive() && expirationElt.getAsJsonPrimitive().isNumber()) {
+                        session.setOAuth2TokenExpiration(expirationElt.getAsInt());
+                    }
+                    JsonElement stackmobElt = responseElt.getAsJsonObject().get("stackmob");
+                    if(stackmobElt != null && stackmobElt.isJsonObject()) {
+                        JsonElement userElt = stackmobElt.getAsJsonObject().get("user");
+                        finalResponseBody = userElt.toString().getBytes();
+                    }
                 }
-                callback.setDone(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, responseBody);
+                callback.setDone(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, finalResponseBody);
             }
         };
     }
