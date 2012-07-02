@@ -284,34 +284,27 @@ public class StackMob {
     public StackMobRequestSendResult login(Map<String, String> params,
                       final StackMobRawCallback callback) {
         session.setLastUserLoginName(params.get("username"));
-        StackMobRawCallback intermediate = new StackMobRawCallback() {
-            @Override
-            public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
-                if(getSession().getOAuthVersion() == OAuthVersion.Two) {
-                    JsonElement responseElt = new JsonParser().parse(new String(responseBody));
-                    if(responseElt.isJsonObject()) {
-                        JsonElement tokenElt = responseElt.getAsJsonObject().get("access_token");
-                        if(tokenElt.isJsonPrimitive() && tokenElt.getAsJsonPrimitive().isString()) {
-                            getSession().setOAuth2Token(tokenElt.getAsString());
-                        }
-                    }
-                }
-                callback.setDone(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, responseBody);
-            }
-        };
-        return new StackMobUserBasedRequest(this.executor,
-                                            this.session,
-                                            getLoginName(),
-                                            params,
-                                            intermediate,
-                                            this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
-    }
-
-    public String getLoginName() {
-        switch(session.getOAuthVersion()) {
-            case One: return "login";
-            case Two: return "accessToken";
+        StackMobRequest req;
+        if(getSession().getOAuthVersion() == OAuthVersion.One) {
+            req = new StackMobUserBasedRequest(this.executor,
+                                               this.session,
+                                               HttpVerbWithPayload.POST,
+                                               StackMobRequest.EmptyHeaders,
+                                               StackMobRequest.EmptyParams,
+                                               params,
+                                               "login",
+                                               session.getOAuthVersion() == OAuthVersion.Two,
+                                               callback,
+                                               this.redirectedCallback);
+        } else {
+            req = new StackMobAccessTokenRequest(this.executor,
+                                                 this.session,
+                                                 "accessToken",
+                                                 params,
+                                                 callback,
+                                                 this.redirectedCallback);
         }
+        return req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**

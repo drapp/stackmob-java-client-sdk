@@ -271,6 +271,10 @@ public abstract class StackMobRequest {
     }
 
 
+    protected String getContentType() {
+        return "application/json";
+    }
+
 
     protected OAuthRequest getOAuthRequest(HttpVerb method, String url) {
         Verb verb = Verb.valueOf(method.toString());
@@ -282,7 +286,7 @@ public abstract class StackMobRequest {
 
         //build basic headers
         if(!verb.equals(Verb.GET) && !verb.equals(Verb.DELETE)) {
-            headerList.add(new Pair<String, String>("Content-Type", "application/json"));
+            headerList.add(new Pair<String, String>("Content-Type", getContentType()));
         }
         headerList.add(new Pair<String, String>("Accept", accept));
         headerList.add(new Pair<String, String>("User-Agent", StackMob.getUserAgent(session.getAppName())));
