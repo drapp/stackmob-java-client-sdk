@@ -28,7 +28,7 @@ public class StackMobConfiguration {
     public static final String DEFAULT_API_SECRET = "DEFAULT_API_SECRET";//do not change this
 
     public static final String API_KEY = DEFAULT_API_KEY;
-    public static final String API_SECRET = DEFAULT_API_SECRET;
+    public static final String API_SECRET = DEFAULT_API_SECRET; // Only change this for OAuth1
     public static String USER_OBJECT_NAME = "user";
     public static Integer API_VERSION = 0;
 

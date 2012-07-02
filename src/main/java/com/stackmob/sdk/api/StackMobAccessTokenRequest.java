@@ -49,6 +49,7 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                 JsonElement responseElt = new JsonParser().parse(new String(responseBody));
                 byte[] finalResponseBody = responseBody;
                 if(responseElt.isJsonObject()) {
+                    // Parse out the token and expiration
                     JsonElement tokenElt = responseElt.getAsJsonObject().get("access_token");
                     if(tokenElt != null && tokenElt.isJsonPrimitive() && tokenElt.getAsJsonPrimitive().isString()) {
                         session.setOAuth2Token(tokenElt.getAsString());
@@ -59,6 +60,7 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                     }
                     JsonElement stackmobElt = responseElt.getAsJsonObject().get("stackmob");
                     if(stackmobElt != null && stackmobElt.isJsonObject()) {
+                        // Return only the user to be compatible with the old login
                         JsonElement userElt = stackmobElt.getAsJsonObject().get("user");
                         finalResponseBody = userElt.toString().getBytes();
                     }

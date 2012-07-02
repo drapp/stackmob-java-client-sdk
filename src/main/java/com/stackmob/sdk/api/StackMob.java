@@ -280,8 +280,7 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult login(Map<String, String> params,
-                      final StackMobRawCallback callback) {
+    public StackMobRequestSendResult login(Map<String, String> params, StackMobRawCallback callback) {
         session.setLastUserLoginName(params.get("username"));
         StackMobRequest req;
         if(getSession().isOAuth2()) {
@@ -461,7 +460,7 @@ public class StackMob {
                                                "facebookLogin",
                                                params,
                                                callback,
-                                                this.redirectedCallback);
+                                               this.redirectedCallback);
         }
         return req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
