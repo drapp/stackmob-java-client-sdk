@@ -53,7 +53,7 @@ public class StackMobConfiguration {
                                          PUSH_API_URL_FORMAT,
                                          redirectedCallback);
         if(OAUTH_VERSION == OAuthVersion.Two && !DEFAULT_API_SECRET.equals(API_SECRET)) {
-            throw new IllegalStateException("The private key isn't necessary for oauth2. Embedding it is a security risk");
+            throw new IllegalStateException("The private key isn't necessary for oauth2. Leave it as " + DEFAULT_API_SECRET);
         }
         StackMob.getLogger().setLogging(ENABLE_LOGGING);
         StackMob.getLogger().logDebug("Starting java sdk version %s running on %s", StackMob.getVersion(), System.getProperty("os.name"));

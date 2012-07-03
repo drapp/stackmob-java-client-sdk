@@ -47,7 +47,7 @@ public class StackMobSession {
     }
 
     public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, int apiVersionNumber, String appName) {
-        if(key.equals(StackMobConfiguration.DEFAULT_API_KEY) || secret.equals(StackMobConfiguration.DEFAULT_API_SECRET)) {
+        if(key.equals(StackMobConfiguration.DEFAULT_API_KEY) || (oauthVersion != OAuthVersion.Two && secret.equals(StackMobConfiguration.DEFAULT_API_SECRET))) {
             throw new RuntimeException("You forgot to set your api key and secret");
         }
         this.oauthVersion = oauthVersion;
