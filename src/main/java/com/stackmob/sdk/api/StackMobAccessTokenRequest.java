@@ -52,11 +52,13 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                     // Parse out the token and expiration
                     JsonElement tokenElt = responseElt.getAsJsonObject().get("access_token");
                     if(tokenElt != null && tokenElt.isJsonPrimitive() && tokenElt.getAsJsonPrimitive().isString()) {
-                        session.setOAuth2Token(tokenElt.getAsString());
-                    }
-                    JsonElement expirationElt = responseElt.getAsJsonObject().get("expires_in");
-                    if(expirationElt != null && expirationElt.isJsonPrimitive() && expirationElt.getAsJsonPrimitive().isNumber()) {
-                        session.setOAuth2TokenExpiration(expirationElt.getAsInt());
+                        JsonElement macKeyElt = responseElt.getAsJsonObject().get("mac_key");
+                        if(macKeyElt != null && macKeyElt.isJsonPrimitive() && macKeyElt.getAsJsonPrimitive().isString()) {
+                            JsonElement expirationElt = responseElt.getAsJsonObject().get("expires_in");
+                            if(expirationElt != null && expirationElt.isJsonPrimitive() && expirationElt.getAsJsonPrimitive().isNumber()) {
+                                session.setOAuth2TokenAndExpiration(tokenElt.getAsString(), macKeyElt.getAsString(), expirationElt.getAsInt());
+                            }
+                        }
                     }
                     JsonElement stackmobElt = responseElt.getAsJsonObject().get("stackmob");
                     if(stackmobElt != null && stackmobElt.isJsonObject()) {

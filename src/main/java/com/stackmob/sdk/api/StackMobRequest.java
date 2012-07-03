@@ -310,7 +310,13 @@ public abstract class StackMobRequest {
             case Two: {
                 oReq.addHeader(API_KEY_HEADER, session.getKey());
                 if(session.oauth2TokenValid()) {
-                    oReq.addHeader(AUTHORIZATION_HEADER, "BASIC " + session.getOAuth2Token());
+                    int firstSlash = url.indexOf("/");
+                    String[] hostAndPort = url.substring(0, firstSlash).split(":");
+                    String host = hostAndPort[0];
+                    String port = hostAndPort.length > 1 ? hostAndPort[1] : "80";
+                    String uri = url.substring(firstSlash);
+
+                    oReq.addHeader(AUTHORIZATION_HEADER, session.generateMacToken(method.toString(), uri, host, port));
                 }
                 break;
             }
