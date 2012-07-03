@@ -158,4 +158,8 @@ public class StackMobSession {
         return oauth2TokenExpiration;
     }
 
+    public boolean oauth2TokenValid() {
+        return oauth2TokenExpiration != null && oauth2TokenExpiration.after(new Date());
+    }
+
 }

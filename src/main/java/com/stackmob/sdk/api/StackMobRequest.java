@@ -309,7 +309,7 @@ public abstract class StackMobRequest {
             case One: oAuthService.signRequest(new Token("", ""), oReq); break;
             case Two: {
                 oReq.addHeader(API_KEY_HEADER, session.getKey());
-                if(session.getOAuth2Token() != null) {
+                if(session.oauth2TokenValid()) {
                     oReq.addHeader(AUTHORIZATION_HEADER, "BASIC " + session.getOAuth2Token());
                 }
                 break;

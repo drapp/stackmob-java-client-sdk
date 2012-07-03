@@ -1272,8 +1272,7 @@ public class StackMob {
 
     public boolean isLoggedIn() {
         if(getSession().isOAuth2()) {
-            Date sessionValidity = getSession().getOAuth2TokenExpiration();
-            return sessionValidity != null && sessionValidity.after(new Date());
+            return getSession().oauth2TokenValid();
         } else {
             Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
             if(sessionCookie != null) {
@@ -1290,8 +1289,7 @@ public class StackMob {
 
     public boolean isLoggedOut() {
         if(getSession().isOAuth2()) {
-            Date sessionValidity = getSession().getOAuth2TokenExpiration();
-            return sessionValidity != null && sessionValidity.before(new Date());
+            return getSession().getOAuth2TokenExpiration() != null && !getSession().oauth2TokenValid();
         } else {
             Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
             //The logged out cookie is a json string.
