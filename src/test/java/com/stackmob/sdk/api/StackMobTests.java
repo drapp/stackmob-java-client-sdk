@@ -60,7 +60,8 @@ public class StackMobTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
     }
 
-    @Test public void loginLogout() throws Exception {
+    public void doLoginLogout(StackMob.OAuthVersion version, final boolean logout) throws Exception {
+        StackMob.getStackMob().getSession().setOAuthVersion(version);
         final String username = getRandomString();
         final String password = getRandomString();
 
@@ -88,23 +89,25 @@ public class StackMobTests extends StackMobTestCommon {
                 asserter.markTrue(stackmob.getLoggedInUser().equals(user.username));
                 asserter.markTrue(stackmob.isUserLoggedIn(user.username));
 
-                stackmob.logout(new StackMobCallback() {
-                    @Override public void success(String responseBody2) {
-                        asserter.markNotNull(responseBody2);
-                        asserter.markTrue(!stackmob.isLoggedIn());
-                        asserter.markTrue(stackmob.isLoggedOut());
-                        asserter.markTrue(stackmob.getLoggedInUser() == null);
-                        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
-                        asserter.markNotJsonError(responseBody2);
-                        logoutLatch.countDown();
-                    }
-                    @Override public void failure(StackMobException e) {
-                        asserter.markException(e);
-                    }
-                });
+                if(logout) {
+                    stackmob.logout(new StackMobCallback() {
+                        @Override public void success(String responseBody2) {
+                            asserter.markNotNull(responseBody2);
+                            asserter.markTrue(!stackmob.isLoggedIn());
+                            asserter.markTrue(stackmob.isLoggedOut());
+                            asserter.markTrue(stackmob.getLoggedInUser() == null);
+                            asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
+                            asserter.markNotJsonError(responseBody2);
+                            logoutLatch.countDown();
+                        }
+                        @Override public void failure(StackMobException e) {
+                            asserter.markException(e);
+                        }
+                    });
+                }
 
                 try {
-                    asserter.markLatchFinished(logoutLatch);
+                    if(logout) asserter.markLatchFinished(logoutLatch);
                     loginLatch.countDown();
                 }
                 catch(InterruptedException e) {
@@ -124,6 +127,11 @@ public class StackMobTests extends StackMobTestCommon {
 
         asserter.assertLatchFinished(loginLatch, CountDownLatchUtils.MAX_LATCH_WAIT_TIME);
         objectOnServer.delete();
+    }
+
+    @Test public void loginLogout() throws Exception {
+        doLoginLogout(StackMob.OAuthVersion.One, true);
+
     }
 
     @Test public void oauth2LoginShouldFail() throws Exception {
@@ -153,70 +161,19 @@ public class StackMobTests extends StackMobTestCommon {
     }
 
     @Test public void oauth2LoginLogout() throws Exception {
-        StackMob.getStackMob().getSession().setOAuthVersion(StackMob.OAuthVersion.Two);
-        final String username = getRandomString();
-        final String password = getRandomString();
-
-        final User user = new User(username, password);
-        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
-
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("username", user.username);
-        params.put("password", user.password);
-
-        final CountDownLatch loginLatch = latchOne();
-        final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        asserter.markTrue(!stackmob.isLoggedIn());
-        asserter.markTrue(!stackmob.isLoggedOut());
-        asserter.markTrue(stackmob.getLoggedInUser() == null);
-        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
-
-        stackmob.login(params, new StackMobCallback() {
+        doLoginLogout(StackMob.OAuthVersion.Two, false);
+        final CountDownLatch localLatch = latchOne();
+        final MultiThreadAsserter localAsserter = new MultiThreadAsserter();
+        StackMob.getStackMob().get("restricted", new StackMobCallback() {
             @Override public void success(String responseBody) {
-                asserter.markNotJsonError(responseBody);
-                final CountDownLatch logoutLatch = latchOne();
-
-                asserter.markTrue(stackmob.isLoggedIn());
-                asserter.markTrue(!stackmob.isLoggedOut());
-                asserter.markTrue(stackmob.getLoggedInUser().equals(user.username));
-                asserter.markTrue(stackmob.isUserLoggedIn(user.username));
-
-                stackmob.logout(new StackMobCallback() {
-                    @Override public void success(String responseBody2) {
-                        asserter.markNotNull(responseBody2);
-                        asserter.markTrue(!stackmob.isLoggedIn());
-                        asserter.markTrue(stackmob.isLoggedOut());
-                        asserter.markTrue(stackmob.getLoggedInUser() == null);
-                        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
-                        asserter.markNotJsonError(responseBody2);
-                        logoutLatch.countDown();
-                    }
-                    @Override public void failure(StackMobException e) {
-                        asserter.markException(e);
-                    }
-                });
-
-                try {
-                    asserter.markLatchFinished(logoutLatch);
-                    loginLatch.countDown();
-                }
-                catch(InterruptedException e) {
-                    asserter.markFailure("logout did not complete");
-                }
+                localLatch.countDown();
             }
+
             @Override public void failure(StackMobException e) {
-                asserter.markException(e);
+                localAsserter.markException(e);
             }
         });
-
-        // We aren't actually logged in yet here
-        asserter.markTrue(!stackmob.isLoggedIn());
-        asserter.markTrue(!stackmob.isLoggedOut());
-        asserter.markTrue(stackmob.getLoggedInUser() == null);
-        asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
-
-        asserter.assertLatchFinished(loginLatch, CountDownLatchUtils.MAX_LATCH_WAIT_TIME);
-        objectOnServer.delete();
+        localAsserter.assertLatchFinished(localLatch);
     }
 
     @Ignore @Test public void testTimeSync() throws Exception {

@@ -284,10 +284,13 @@ public class StackMob {
         session.setLastUserLoginName(params.get("username"));
         StackMobRequest req;
         if(getSession().isOAuth2()) {
+            Map<String, String> newParams = new HashMap<String, String>(params);
+            newParams.put("token_type", "mac");
+            newParams.put("mac_algorithm", "hmac-sha-1");
             req = new StackMobAccessTokenRequest(this.executor,
                                                  this.session,
                                                  "accessToken",
-                                                 params,
+                                                 newParams,
                                                  callback,
                                                  this.redirectedCallback);
         } else {
@@ -307,7 +310,7 @@ public class StackMob {
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
     public StackMobRequestSendResult logout(StackMobRawCallback callback) {
-        session.setOAuth2TokenExpiration(0);
+        session.setOAuth2TokenAndExpiration("", "", 0);
         return new StackMobUserBasedRequest(this.executor,
                                      this.session,
                                      "logout",
