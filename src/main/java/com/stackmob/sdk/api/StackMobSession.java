@@ -167,7 +167,7 @@ public class StackMobSession {
 
     public String generateMacToken(String method, String uri, String host, String port) {
 
-        String ts = String.valueOf(getServerTime());
+        String ts = String.valueOf(new Date().getTime()/1000);
         String nonce = String.format("n%d", Math.round(Math.random() * 10000));
         try {
             String baseString = getNormalizedRequestString(ts, nonce, method, uri, host, port);
