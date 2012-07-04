@@ -184,7 +184,7 @@ public class StackMobSession {
             return String.format("MAC id=\"%s\",ts=\"%s\",nonce=\"%s\",mac=\"%s\"", oauth2Token, ts, nonce, calculatedMac);
 
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalStateException("This device don't have SHA1");
+            throw new IllegalStateException("This device doesn't have SHA1");
         }
     }
 
