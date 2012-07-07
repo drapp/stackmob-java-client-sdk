@@ -16,10 +16,19 @@
 
 package com.stackmob.sdk.api;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import com.stackmob.sdk.api.StackMob.OAuthVersion;
+import org.apache.commons.codec.binary.Base64;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 public class StackMobSession {
+
+    private static String SIGNATURE_ALGORITHM = "HmacSHA1";
 
     private String key;
     private String secret;
@@ -28,21 +37,34 @@ public class StackMobSession {
     private String appName = null;
     private String lastUserLoginName;
     private long serverTimeDiff = 0;
+    private OAuthVersion oauthVersion;
+    private String oauth2Token;
+    private String oauth2MacKey;
+    private Date oauth2TokenExpiration;
     private boolean enableHTTPS = true;
 
-    public StackMobSession(String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
-        this(key, secret, userObjectName, apiVersionNumber);
-        this.appName = appName;
+    public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
+        this(oauthVersion, key, secret, userObjectName, apiVersionNumber, null);
     }
 
-    public StackMobSession(String key, String secret, String userObjectName, int apiVersionNumber) {
-        if(key.equals(StackMobConfiguration.DEFAULT_API_KEY) || secret.equals(StackMobConfiguration.DEFAULT_API_SECRET)) {
+    public StackMobSession(String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
+        this(key, secret, userObjectName, apiVersionNumber, null);
+    }
+
+    public StackMobSession(String key, String secret, String userObjectName, int apiVersionNumber, String appName) {
+        this(OAuthVersion.One, key, secret, userObjectName, apiVersionNumber, appName);
+    }
+
+    public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, int apiVersionNumber, String appName) {
+        if(key.equals(StackMobConfiguration.DEFAULT_API_KEY) || (oauthVersion != OAuthVersion.Two && secret.equals(StackMobConfiguration.DEFAULT_API_SECRET))) {
             throw new RuntimeException("You forgot to set your api key and secret");
         }
+        this.oauthVersion = oauthVersion;
         this.key = key;
         this.secret = secret;
         this.userObjectName = userObjectName;
         this.apiVersionNumber = apiVersionNumber;
+        this.appName = appName;
     }
 
     public StackMobSession(StackMobSession that) {
@@ -115,6 +137,61 @@ public class StackMobSession {
 
     public boolean getEnableHTTPS() {
         return enableHTTPS;
+    }
+
+    public OAuthVersion getOAuthVersion() {
+        return oauthVersion;
+    }
+
+    public void setOAuthVersion(OAuthVersion oauthVersion) {
+        this.oauthVersion = oauthVersion;
+    }
+
+    public boolean isOAuth2() {
+        return oauthVersion == StackMob.OAuthVersion.Two;
+    }
+
+    public void setOAuth2TokenAndExpiration(String accessToken, String macKey, int seconds) {
+        oauth2Token = accessToken;
+        oauth2MacKey = macKey;
+        oauth2TokenExpiration = new Date(new Date().getTime() + seconds * 1000);
+    }
+
+    public Date getOAuth2TokenExpiration() {
+        return oauth2TokenExpiration;
+    }
+
+    public boolean oauth2TokenValid() {
+        return oauth2TokenExpiration != null && oauth2TokenExpiration.after(new Date());
+    }
+
+    public String generateMacToken(String method, String uri, String host, String port) {
+
+        String ts = String.valueOf(new Date().getTime()/1000);
+        String nonce = String.format("n%d", Math.round(Math.random() * 10000));
+        try {
+            String baseString = getNormalizedRequestString(ts, nonce, method, uri, host, port);
+            Mac mac = Mac.getInstance(SIGNATURE_ALGORITHM);
+            SecretKeySpec spec = new SecretKeySpec(oauth2MacKey.getBytes(), SIGNATURE_ALGORITHM);
+            try {
+                mac.init(spec);
+            } catch(InvalidKeyException ike) {
+                throw new IllegalStateException(ike);
+            }
+            byte[] rawMacBytes = mac.doFinal(baseString.getBytes());
+            byte[] b64Bytes = Base64.encodeBase64(rawMacBytes);
+            String calculatedMac = new String(b64Bytes);
+            return String.format("MAC id=\"%s\",ts=\"%s\",nonce=\"%s\",mac=\"%s\"", oauth2Token, ts, nonce, calculatedMac);
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("This device doesn't have SHA1");
+        }
+    }
+
+    private String getNormalizedRequestString(String timestamp, String nonce, String method,
+                                              String uri, String host, String port) {
+        return new StringBuilder(timestamp).append("\n").append(nonce).append("\n").append(method).append("\n")
+                .append(uri).append("\n").append(host).append("\n").append(port).append("\n\n").toString();
     }
 
 }

@@ -18,6 +18,7 @@ package com.stackmob.sdk.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.stackmob.sdk.api.StackMob.OAuthVersion;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.exception.StackMobException;
@@ -54,6 +55,8 @@ public abstract class StackMobRequest {
     public static final String DEFAULT_PUSH_URL_FORMAT = "push." + DEFAULT_URL_FORMAT;
     protected static final String SECURE_SCHEME = "https";
     protected static final String REGULAR_SCHEME = "http";
+    protected static final String API_KEY_HEADER = "X-StackMob-API-Key";
+    protected static final String AUTHORIZATION_HEADER = "Authorization";
     private static StackMobCookieStore cookieStore = new StackMobCookieStore();
 
     public static void setCookieStore(StackMobCookieStore store) {
@@ -268,6 +271,10 @@ public abstract class StackMobRequest {
     }
 
 
+    protected String getContentType() {
+        return "application/json";
+    }
+
 
     protected OAuthRequest getOAuthRequest(HttpVerb method, String url) {
         Verb verb = Verb.valueOf(method.toString());
@@ -279,7 +286,7 @@ public abstract class StackMobRequest {
 
         //build basic headers
         if(!verb.equals(Verb.GET) && !verb.equals(Verb.DELETE)) {
-            headerList.add(new Pair<String, String>("Content-Type", "application/json"));
+            headerList.add(new Pair<String, String>("Content-Type", getContentType()));
         }
         headerList.add(new Pair<String, String>("Accept", accept));
         headerList.add(new Pair<String, String>("User-Agent", StackMob.getUserAgent(session.getAppName())));
@@ -298,7 +305,24 @@ public abstract class StackMobRequest {
             oReq.addHeader(header.getKey(), header.getValue());
         }
 
-        oAuthService.signRequest(new Token("", ""), oReq);
+        switch(session.getOAuthVersion()) {
+            case One: oAuthService.signRequest(new Token("", ""), oReq); break;
+            case Two: {
+                oReq.addHeader(API_KEY_HEADER, session.getKey());
+                if(session.oauth2TokenValid()) {
+                    String urlNoScheme = url.substring(getScheme().length() + 3);
+                    int firstSlash = urlNoScheme.indexOf("/");
+                    String[] hostAndPort = urlNoScheme.substring(0, firstSlash).split(":");
+                    String host = hostAndPort[0];
+                    String port = hostAndPort.length > 1 ? hostAndPort[1] : "80";
+                    String uri = urlNoScheme.substring(firstSlash);
+
+                    oReq.addHeader(AUTHORIZATION_HEADER, session.generateMacToken(method.toString(), uri, host, port));
+                }
+                break;
+            }
+        }
+
         return oReq;
     }
 
@@ -335,7 +359,7 @@ public abstract class StackMobRequest {
                     StackMob.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
                     Response ret = req.send();
                     StackMob.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + (ret.getBody().length() < 1000 ? ret.getBody() : (ret.getBody().subSequence(0, 1000) + " (truncated)")));
-                    if(ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
+                    if(!session.isOAuth2() && ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
                     if(HttpRedirectHelper.isRedirected(ret.getCode())) {
                         StackMob.getLogger().logInfo("Response was redirected");
                         String newLocation = HttpRedirectHelper.getNewLocation(ret.getHeaders());

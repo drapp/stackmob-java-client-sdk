@@ -35,6 +35,11 @@ import java.util.concurrent.Executors;
 
 public class StackMob {
 
+    public static enum OAuthVersion {
+        One,
+        Two
+    }
+
     private StackMobSession session;
     private String apiUrlFormat = StackMobRequest.DEFAULT_API_URL_FORMAT;
     private String pushUrlFormat = StackMobRequest.DEFAULT_PUSH_URL_FORMAT;
@@ -157,7 +162,20 @@ public class StackMob {
      * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
      */
     public StackMob(String apiKey, String apiSecret, String userObjectName, String appName, Integer apiVersionNumber) {
-        this.session = new StackMobSession(apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
+        this(OAuthVersion.One, apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
+    }
+
+    /**
+     * create a new StackMob object. this is the preferred constructor
+     * @param oauthVersion whether to use oauth1 or oauth2
+     * @param apiKey the api key for your app
+     * @param apiSecret the api secret for your app
+     * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
+     * @param appName the name of your application
+     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
+     */
+    public StackMob(OAuthVersion oauthVersion, String apiKey, String apiSecret, String userObjectName, String appName, Integer apiVersionNumber) {
+        this.session = new StackMobSession(oauthVersion, apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
         this.executor = createNewExecutor();
         if(stackmob == null) StackMob.setStackMob(this);
     }
@@ -197,23 +215,25 @@ public class StackMob {
      * </code>
      * note that this callback may be called in a background thread
      */
-    public StackMob(String apiKey,
+    public StackMob(OAuthVersion oauthVersion,
+                    String apiKey,
                     String apiSecret,
                     String userObjectName,
                     Integer apiVersionNumber,
                     String urlFormat,
                     StackMobRedirectedCallback redirectedCallback) {
-        this(apiKey, apiSecret, userObjectName, null, apiVersionNumber, urlFormat, StackMobRequest.DEFAULT_PUSH_URL_FORMAT, redirectedCallback);
+        this(oauthVersion, apiKey, apiSecret, userObjectName, null, apiVersionNumber, urlFormat, StackMobRequest.DEFAULT_PUSH_URL_FORMAT, redirectedCallback);
     }
 
-    public StackMob(String apiKey,
+    public StackMob(OAuthVersion oauthVersion,
+                    String apiKey,
                     String apiSecret,
                     String userObjectName,
                     Integer apiVersionNumber,
                     String apiUrlFormat,
                     String pushUrlFormat,
                     StackMobRedirectedCallback redirectedCallback) {
-        this(apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
+        this(oauthVersion, apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
     }
 
     public StackMob(String apiKey,
@@ -224,7 +244,19 @@ public class StackMob {
                     String apiUrlFormat,
                     String pushUrlFormat,
                     StackMobRedirectedCallback redirectedCallback) {
-        this(apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
+        this(OAuthVersion.One, apiKey,apiSecret, userObjectName, appName, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
+    }
+
+    public StackMob(OAuthVersion oauthVersion,
+                    String apiKey,
+                    String apiSecret,
+                    String userObjectName,
+                    String appName,
+                    Integer apiVersionNumber,
+                    String apiUrlFormat,
+                    String pushUrlFormat,
+                    StackMobRedirectedCallback redirectedCallback) {
+        this(oauthVersion, apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
         this.userRedirectedCallback = redirectedCallback;
         this.apiUrlFormat = apiUrlFormat;
         this.pushUrlFormat = pushUrlFormat;
@@ -248,15 +280,28 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult login(Map<String, String> params,
-                      StackMobRawCallback callback) {
+    public StackMobRequestSendResult login(Map<String, String> params, StackMobRawCallback callback) {
         session.setLastUserLoginName(params.get("username"));
-        return new StackMobUserBasedRequest(this.executor,
-                                            this.session,
-                                            "login",
-                                            params,
-                                            callback,
-                                            this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+        StackMobRequest req;
+        if(getSession().isOAuth2()) {
+            Map<String, String> newParams = new HashMap<String, String>(params);
+            newParams.put("token_type", "mac");
+            newParams.put("mac_algorithm", "hmac-sha-1");
+            req = new StackMobAccessTokenRequest(this.executor,
+                                                 this.session,
+                                                 "accessToken",
+                                                 newParams,
+                                                 callback,
+                                                 this.redirectedCallback);
+        } else {
+            req = new StackMobUserBasedRequest(this.executor,
+                                               this.session,
+                                               "login",
+                                               params,
+                                               callback,
+                                               this.redirectedCallback);
+        }
+        return req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -265,6 +310,7 @@ public class StackMob {
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
     public StackMobRequestSendResult logout(StackMobRawCallback callback) {
+        session.setOAuth2TokenAndExpiration("", "", 0);
         return new StackMobUserBasedRequest(this.executor,
                                      this.session,
                                      "logout",
@@ -306,12 +352,25 @@ public class StackMob {
         Map<String, String> params = new HashMap<String, String>();
         params.put("tw_tk", token);
         params.put("tw_ts", secret);
-        return new StackMobUserBasedRequest(this.executor,
-                                            this.session,
-                                            "twitterlogin",
-                                            params,
-                                            callback,
-                                            this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+
+        StackMobRequest req;
+        if(getSession().isOAuth2()) {
+            req = new StackMobAccessTokenRequest(this.executor,
+                    this.session,
+                    "twitterAccessToken",
+                    params,
+                    callback,
+                    this.redirectedCallback);
+        } else {
+            req = new StackMobUserBasedRequest(this.executor,
+                    this.session,
+                    "twitterlogin",
+                    params,
+                    callback,
+                    this.redirectedCallback);
+        }
+        return req.setUrlFormat(this.apiUrlFormat).sendRequest();
+
     }
 
     /**
@@ -389,12 +448,24 @@ public class StackMob {
         Map<String, String> params = new HashMap<String, String>();
         params.put("fb_at", token);
 
-        return new StackMobUserBasedRequest(this.executor,
-                                            this.session,
-                                            "facebookLogin",
-                                            params,
-                                            callback,
-                                            this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+
+        StackMobRequest req;
+        if(getSession().isOAuth2()) {
+            req = new StackMobAccessTokenRequest(this.executor,
+                                                 this.session,
+                                                 "facebookAccessToken",
+                                                 params,
+                                                 callback,
+                                                 this.redirectedCallback);
+        } else {
+            req = new StackMobUserBasedRequest(this.executor,
+                                               this.session,
+                                               "facebookLogin",
+                                               params,
+                                               callback,
+                                               this.redirectedCallback);
+        }
+        return req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -1203,10 +1274,14 @@ public class StackMob {
     }
 
     public boolean isLoggedIn() {
-        Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
-        if(sessionCookie != null) {
-            boolean cookieIsStillValid = sessionCookie.getValue() == null || sessionCookie.getValue().before(new Date());
-            return cookieIsStillValid && !this.isLoggedOut();
+        if(getSession().isOAuth2()) {
+            return getSession().oauth2TokenValid();
+        } else {
+            Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
+            if(sessionCookie != null) {
+                boolean cookieIsStillValid = sessionCookie.getValue() == null || sessionCookie.getValue().before(new Date());
+                return cookieIsStillValid && !this.isLoggedOut();
+            }
         }
         return false;
     }
@@ -1216,9 +1291,13 @@ public class StackMob {
     }
 
     public boolean isLoggedOut() {
-        Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
-        //The logged out cookie is a json string.
-        return sessionCookie != null && sessionCookie.getKey().contains(":");
+        if(getSession().isOAuth2()) {
+            return getSession().getOAuth2TokenExpiration() != null && !getSession().oauth2TokenValid();
+        } else {
+            Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
+            //The logged out cookie is a json string.
+            return sessionCookie != null && sessionCookie.getKey().contains(":");
+        }
     }
 
 
@@ -1233,5 +1312,10 @@ public class StackMob {
 
     public void setSession(StackMobSession session) {
         this.session = session;
+    }
+
+
+    public OAuthVersion getOAuthVersion() {
+        return session.getOAuthVersion();
     }
 }
