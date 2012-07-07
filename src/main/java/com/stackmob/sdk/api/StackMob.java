@@ -239,6 +239,16 @@ public class StackMob {
     public StackMob(String apiKey,
                     String apiSecret,
                     String userObjectName,
+                    Integer apiVersionNumber,
+                    String apiUrlFormat,
+                    String pushUrlFormat,
+                    StackMobRedirectedCallback redirectedCallback) {
+        this(OAuthVersion.One, apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
+    }
+
+    public StackMob(String apiKey,
+                    String apiSecret,
+                    String userObjectName,
                     String appName,
                     Integer apiVersionNumber,
                     String apiUrlFormat,
