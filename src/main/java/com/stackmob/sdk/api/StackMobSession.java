@@ -40,6 +40,7 @@ public class StackMobSession {
     private OAuthVersion oauthVersion;
     private String oauth2Token;
     private String oauth2MacKey;
+    private String oauth2RefreshToken;
     private Date oauth2TokenExpiration;
     private boolean enableHTTPS = true;
 
@@ -151,9 +152,10 @@ public class StackMobSession {
         return oauthVersion == StackMob.OAuthVersion.Two;
     }
 
-    public void setOAuth2TokenAndExpiration(String accessToken, String macKey, int seconds) {
+    public void setOAuth2TokensAndExpiration(String accessToken, String macKey, String refreshToken, int seconds) {
         oauth2Token = accessToken;
         oauth2MacKey = macKey;
+        oauth2RefreshToken = refreshToken;
         oauth2TokenExpiration = new Date(new Date().getTime() + seconds * 1000);
     }
 
@@ -163,6 +165,14 @@ public class StackMobSession {
 
     public boolean oauth2TokenValid() {
         return oauth2TokenExpiration != null && oauth2TokenExpiration.after(new Date());
+    }
+
+    public boolean oauth2RefreshTokenValid() {
+        return oauth2RefreshToken != null;
+    }
+
+    public String getOAuth2RefreshToken() {
+        return oauth2RefreshToken;
     }
 
     public String generateMacToken(String method, String uri, String host, String port) {

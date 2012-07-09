@@ -314,13 +314,34 @@ public class StackMob {
         return req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
+    public StackMobRequestSendResult refreshToken(StackMobRawCallback callback) {
+        if(!getSession().isOAuth2()) {
+            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("Refresh token invalid"));
+        }
+
+        if(!getSession().oauth2RefreshTokenValid()) {
+            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("Refresh token invalid"));
+        }
+        Map<String, String> newParams = new HashMap<String, String>();
+        newParams.put("grant_type", "refresh_token");
+        newParams.put("refresh_token", getSession().getOAuth2RefreshToken());
+        newParams.put("token_type", "mac");
+        newParams.put("mac_algorithm", "hmac-sha-1");
+        return new StackMobAccessTokenRequest(this.executor,
+                this.session,
+                "refreshToken",
+                newParams,
+                callback,
+                this.redirectedCallback).sendRequest();
+    }
+
     /**
      * call the logout method on StackMob
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
     public StackMobRequestSendResult logout(StackMobRawCallback callback) {
-        session.setOAuth2TokenAndExpiration("", "", 0);
+        session.setOAuth2TokensAndExpiration(null, null, null, 0);
         return new StackMobUserBasedRequest(this.executor,
                                      this.session,
                                      "logout",
