@@ -216,13 +216,23 @@ public class StackMob {
      * note that this callback may be called in a background thread
      */
     public StackMob(OAuthVersion oauthVersion,
-                    String apiKey,
+                         String apiKey,
+                         String apiSecret,
+                         String userObjectName,
+                         Integer apiVersionNumber,
+                         String urlFormat,
+                         StackMobRedirectedCallback redirectedCallback) {
+        this(oauthVersion, apiKey, apiSecret, userObjectName, null, apiVersionNumber, urlFormat, StackMobRequest.DEFAULT_PUSH_URL_FORMAT, redirectedCallback);
+    }
+
+    public StackMob(String apiKey,
                     String apiSecret,
                     String userObjectName,
                     Integer apiVersionNumber,
-                    String urlFormat,
+                    String apiUrlFormat,
+                    String pushUrlFormat,
                     StackMobRedirectedCallback redirectedCallback) {
-        this(oauthVersion, apiKey, apiSecret, userObjectName, null, apiVersionNumber, urlFormat, StackMobRequest.DEFAULT_PUSH_URL_FORMAT, redirectedCallback);
+        this(OAuthVersion.One, apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
     }
 
     public StackMob(OAuthVersion oauthVersion,
