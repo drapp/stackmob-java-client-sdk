@@ -68,11 +68,16 @@ public class StackMobSession {
     }
 
     public StackMobSession(StackMobSession that) {
+        this.oauthVersion = that.oauthVersion;
         this.key = that.key;
         this.secret = that.secret;
         this.appName = that.appName;
         this.userObjectName = that.userObjectName;
         this.apiVersionNumber = that.apiVersionNumber;
+        this.serverTimeDiff = that.serverTimeDiff;
+        this.oauth2Token = that.oauth2Token;
+        this.oauth2MacKey = that.oauth2MacKey;
+        this.oauth2TokenExpiration = that.oauth2TokenExpiration;
     }
 
     public String getKey() {
