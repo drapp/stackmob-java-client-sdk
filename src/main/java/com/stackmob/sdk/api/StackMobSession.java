@@ -69,11 +69,16 @@ public class StackMobSession {
     }
 
     public StackMobSession(StackMobSession that) {
+        this.oauthVersion = that.oauthVersion;
         this.key = that.key;
         this.secret = that.secret;
         this.appName = that.appName;
         this.userObjectName = that.userObjectName;
         this.apiVersionNumber = that.apiVersionNumber;
+        this.serverTimeDiff = that.serverTimeDiff;
+        this.oauth2Token = that.oauth2Token;
+        this.oauth2MacKey = that.oauth2MacKey;
+        this.oauth2TokenExpiration = that.oauth2TokenExpiration;
     }
 
     public String getKey() {
@@ -153,10 +158,14 @@ public class StackMobSession {
     }
 
     public void setOAuth2TokensAndExpiration(String accessToken, String macKey, String refreshToken, int seconds) {
+        setOAuth2TokensAndExpiration(accessToken, macKey, refreshToken, new Date(new Date().getTime() + seconds * 1000));
+    }
+
+    protected void setOAuth2TokensAndExpiration(String accessToken, String macKey, String refreshToken, Date expiration) {
         oauth2Token = accessToken;
         oauth2MacKey = macKey;
         oauth2RefreshToken = refreshToken;
-        oauth2TokenExpiration = new Date(new Date().getTime() + seconds * 1000);
+        oauth2TokenExpiration = expiration;
     }
 
     public Date getOAuth2TokenExpiration() {
