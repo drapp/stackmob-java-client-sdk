@@ -152,9 +152,13 @@ public class StackMobSession {
     }
 
     public void setOAuth2TokenAndExpiration(String accessToken, String macKey, int seconds) {
+        setOAuth2TokenAndExpiration(accessToken, macKey, new Date(new Date().getTime() + seconds * 1000));
+    }
+
+    protected void setOAuth2TokenAndExpiration(String accessToken, String macKey, Date expiration) {
         oauth2Token = accessToken;
         oauth2MacKey = macKey;
-        oauth2TokenExpiration = new Date(new Date().getTime() + seconds * 1000);
+        oauth2TokenExpiration = expiration;
     }
 
     public Date getOAuth2TokenExpiration() {
