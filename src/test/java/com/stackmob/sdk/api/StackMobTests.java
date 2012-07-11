@@ -176,6 +176,22 @@ public class StackMobTests extends StackMobTestCommon {
         localAsserter.assertLatchFinished(localLatch);
     }
 
+    @Test public void oauth2RefreshToken() throws Exception {
+        doLoginLogout(StackMob.OAuthVersion.Two, false);
+        final CountDownLatch localLatch = latchOne();
+        final MultiThreadAsserter localAsserter = new MultiThreadAsserter();
+        StackMob.getStackMob().refreshToken(new StackMobCallback() {
+            @Override public void success(String responseBody) {
+                localLatch.countDown();
+            }
+
+            @Override public void failure(StackMobException e) {
+                localAsserter.markException(e);
+            }
+        });
+        localAsserter.assertLatchFinished(localLatch);
+    }
+
     @Ignore @Test public void testTimeSync() throws Exception {
         //Hack a bad local time into the session
         StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
