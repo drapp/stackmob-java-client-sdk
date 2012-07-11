@@ -22,11 +22,27 @@ import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class StackMobAccessTokenRequest extends StackMobRequest {
+
+    public static StackMobAccessTokenRequest newRefreshTokenRequest(ExecutorService executor, StackMobSession session, StackMobRedirectedCallback redirectedCallback, StackMobRawCallback callback) {
+
+        Map<String, String> newParams = new HashMap<String, String>();
+        newParams.put("grant_type", "refresh_token");
+        newParams.put("refresh_token", session.getOAuth2RefreshToken());
+        newParams.put("token_type", "mac");
+        newParams.put("mac_algorithm", "hmac-sha-1");
+        return new StackMobAccessTokenRequest(executor,
+                session,
+                "refreshToken",
+                newParams,
+                callback,
+                redirectedCallback);
+    }
 
     Map<String, String> bodyParams;
 
@@ -85,5 +101,10 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
     @Override
     protected String getRequestBody() {
         return formatQueryString(bodyParams);
+    }
+
+    @Override
+    protected boolean tryRefreshToken() {
+        return false;
     }
 }

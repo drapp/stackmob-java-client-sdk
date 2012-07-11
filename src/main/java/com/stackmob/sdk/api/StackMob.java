@@ -225,16 +225,6 @@ public class StackMob {
         this(oauthVersion, apiKey, apiSecret, userObjectName, null, apiVersionNumber, urlFormat, StackMobRequest.DEFAULT_PUSH_URL_FORMAT, redirectedCallback);
     }
 
-    public StackMob(String apiKey,
-                    String apiSecret,
-                    String userObjectName,
-                    Integer apiVersionNumber,
-                    String apiUrlFormat,
-                    String pushUrlFormat,
-                    StackMobRedirectedCallback redirectedCallback) {
-        this(OAuthVersion.One, apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
-    }
-
     public StackMob(OAuthVersion oauthVersion,
                     String apiKey,
                     String apiSecret,
@@ -326,23 +316,13 @@ public class StackMob {
 
     public StackMobRequestSendResult refreshToken(StackMobRawCallback callback) {
         if(!getSession().isOAuth2()) {
-            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("Refresh token invalid"));
+            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("This method is only available with oauth2"));
         }
 
         if(!getSession().oauth2RefreshTokenValid()) {
             return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("Refresh token invalid"));
         }
-        Map<String, String> newParams = new HashMap<String, String>();
-        newParams.put("grant_type", "refresh_token");
-        newParams.put("refresh_token", getSession().getOAuth2RefreshToken());
-        newParams.put("token_type", "mac");
-        newParams.put("mac_algorithm", "hmac-sha-1");
-        return new StackMobAccessTokenRequest(this.executor,
-                this.session,
-                "refreshToken",
-                newParams,
-                callback,
-                this.redirectedCallback).sendRequest();
+        return StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, this.redirectedCallback, callback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
