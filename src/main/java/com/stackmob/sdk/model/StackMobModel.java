@@ -48,6 +48,13 @@ public abstract class StackMobModel {
         query.send(callback);
     }
 
+    public static <T extends StackMobModel> T newFromJson(Class<T> classOfT, String json) throws StackMobException {
+        T newObject = new Gson().fromJson("{}", classOfT);
+        newObject.setActualClass(classOfT);
+        newObject.fillFromJson(json);
+        return newObject;
+    }
+
 
     public static class DateAsNumberTypeAdapter extends TypeAdapter<Date> {
 
