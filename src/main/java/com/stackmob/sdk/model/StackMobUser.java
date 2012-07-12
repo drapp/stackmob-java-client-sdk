@@ -20,16 +20,34 @@ import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobRequestWithPayload;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobIntermediaryCallback;
+import com.stackmob.sdk.callback.StackMobQueryCallback;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.push.StackMobPushToken;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StackMobUser extends StackMobModel {
+
+    public static <T extends StackMobUser> void getLoggedInUser(final Class<T> classOfT, final StackMobQueryCallback<T> callback) {
+        StackMob.getStackMob().getLoggedInUser(new StackMobCallback(){
+            @Override
+            public void success(String responseBody) {
+                List<T> list = new ArrayList<T>();
+                try {
+                    list.add(StackMobModel.newFromJson(classOfT, responseBody));
+                    callback.success(list);
+                } catch(Exception e) {
+                    callback.failure(new StackMobException(e.getMessage()));
+                }
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                callback.failure(e);
+            }
+        });
+    }
     
     String password;
 
