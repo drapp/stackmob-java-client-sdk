@@ -1290,6 +1290,12 @@ public class StackMob {
                                             this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
+    /**
+     * Gets the user object for the currently logged in oauth2 user. Invokes the failure callback if there
+     * is no logged in user
+     * @param callback
+     * @return
+     */
     public StackMobRequestSendResult getLoggedInUser(StackMobCallback callback) {
         return get("user/loggedInUser", callback);
     }

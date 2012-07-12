@@ -29,6 +29,12 @@ import java.util.*;
 
 public class StackMobUser extends StackMobModel {
 
+    /**
+     * Get the currently logged in user
+     * @param classOfT The class of the user model
+     * @param callback The callback to invoke with the user model
+     */
+
     public static <T extends StackMobUser> void getLoggedInUser(final Class<T> classOfT, final StackMobQueryCallback<T> callback) {
         StackMob.getStackMob().getLoggedInUser(new StackMobCallback(){
             @Override

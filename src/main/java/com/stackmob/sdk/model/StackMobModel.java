@@ -41,6 +41,12 @@ import java.util.*;
 public abstract class StackMobModel {
 
 
+    /**
+     * Run a query on the server to get all the instances of your model within certain constraints
+     * @param theClass The class of your model
+     * @param q The query to run
+     * @param callback The callback to be invoked upon returning
+     */
     public static <T extends StackMobModel> void query(Class<T> theClass, StackMobQuery q, StackMobQueryCallback<T> callback) {
         StackMobModelQuery<T> query = new StackMobModelQuery<T>(theClass);
         q.setObjectName(theClass.getSimpleName().toLowerCase());
@@ -48,6 +54,14 @@ public abstract class StackMobModel {
         query.send(callback);
     }
 
+    /**
+     * Create a new instance of the specified model class from a json string. Useful if you've serialized a model class for some
+     * reason and now want to deserialize it.
+     * @param classOfT The class to instantiate
+     * @param json The string to deserialize
+     * @return A new instance of the class based on the json
+     * @throws StackMobException
+     */
     public static <T extends StackMobModel> T newFromJson(Class<T> classOfT, String json) throws StackMobException {
         T newObject = new Gson().fromJson("{}", classOfT);
         newObject.setActualClass(classOfT);
