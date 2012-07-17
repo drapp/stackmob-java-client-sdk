@@ -17,6 +17,7 @@
 package com.stackmob.sdk.api;
 
 import com.google.gson.*;
+import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.net.HttpVerb;
@@ -225,16 +226,6 @@ public class StackMob {
         this(oauthVersion, apiKey, apiSecret, userObjectName, null, apiVersionNumber, urlFormat, StackMobRequest.DEFAULT_PUSH_URL_FORMAT, redirectedCallback);
     }
 
-    public StackMob(String apiKey,
-                    String apiSecret,
-                    String userObjectName,
-                    Integer apiVersionNumber,
-                    String apiUrlFormat,
-                    String pushUrlFormat,
-                    StackMobRedirectedCallback redirectedCallback) {
-        this(OAuthVersion.One, apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
-    }
-
     public StackMob(OAuthVersion oauthVersion,
                     String apiKey,
                     String apiSecret,
@@ -244,6 +235,16 @@ public class StackMob {
                     String pushUrlFormat,
                     StackMobRedirectedCallback redirectedCallback) {
         this(oauthVersion, apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
+    }
+
+    public StackMob(String apiKey,
+                    String apiSecret,
+                    String userObjectName,
+                    Integer apiVersionNumber,
+                    String apiUrlFormat,
+                    String pushUrlFormat,
+                    StackMobRedirectedCallback redirectedCallback) {
+        this(OAuthVersion.One, apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
     }
 
     public StackMob(String apiKey,
@@ -314,13 +315,24 @@ public class StackMob {
         return req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
+    public StackMobRequestSendResult refreshToken(StackMobRawCallback callback) {
+        if(!getSession().isOAuth2()) {
+            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("This method is only available with oauth2"));
+        }
+
+        if(!getSession().oauth2RefreshTokenValid()) {
+            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("Refresh token invalid"));
+        }
+        return StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, this.redirectedCallback, callback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
     /**
      * call the logout method on StackMob
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
     public StackMobRequestSendResult logout(StackMobRawCallback callback) {
-        session.setOAuth2TokenAndExpiration("", "", 0);
+        session.setOAuth2TokensAndExpiration(null, null, null, 0);
         return new StackMobUserBasedRequest(this.executor,
                                      this.session,
                                      "logout",
@@ -1276,6 +1288,16 @@ public class StackMob {
                                             "resetPassword",
                                             callback,
                                             this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
+    /**
+     * Gets the user object for the currently logged in oauth2 user. Invokes the failure callback if there
+     * is no logged in user
+     * @param callback
+     * @return
+     */
+    public StackMobRequestSendResult getLoggedInUser(StackMobCallback callback) {
+        return get("user/loggedInUser", callback);
     }
 
     // Logged in user checking
