@@ -64,7 +64,7 @@ public class StackMobTestCommon {
             apiSecret = vmSecret;
         }
 
-        StackMob.setStackMob(new StackMob(apiKey, apiSecret, StackMobConfiguration.USER_OBJECT_NAME, StackMobConfiguration.API_VERSION, StackMobConfiguration.API_URL_FORMAT, StackMobConfiguration.PUSH_API_URL_FORMAT, new StackMobRedirectedCallback() {
+        StackMob.setStackMob(new StackMob(StackMob.OAuthVersion.One,  apiKey, apiSecret, StackMobConfiguration.USER_OBJECT_NAME, StackMobConfiguration.API_VERSION, StackMobConfiguration.API_URL_FORMAT, StackMobConfiguration.PUSH_API_URL_FORMAT, new StackMobRedirectedCallback() {
             @Override public void redirected(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
                 //do nothing
             }

@@ -21,13 +21,28 @@ import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
-import com.stackmob.sdk.net.HttpVerbWithoutPayload;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public class StackMobAccessTokenRequest extends StackMobRequest {
+
+    public static StackMobAccessTokenRequest newRefreshTokenRequest(ExecutorService executor, StackMobSession session, StackMobRedirectedCallback redirectedCallback, StackMobRawCallback callback) {
+
+        Map<String, String> newParams = new HashMap<String, String>();
+        newParams.put("grant_type", "refresh_token");
+        newParams.put("refresh_token", session.getOAuth2RefreshToken());
+        newParams.put("token_type", "mac");
+        newParams.put("mac_algorithm", "hmac-sha-1");
+        return new StackMobAccessTokenRequest(executor,
+                session,
+                "refreshToken",
+                newParams,
+                callback,
+                redirectedCallback);
+    }
 
     Map<String, String> bodyParams;
 
@@ -51,14 +66,15 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                 if(responseElt.isJsonObject()) {
                     // Parse out the token and expiration
                     JsonElement tokenElt = responseElt.getAsJsonObject().get("access_token");
-                    if(tokenElt != null && tokenElt.isJsonPrimitive() && tokenElt.getAsJsonPrimitive().isString()) {
-                        JsonElement macKeyElt = responseElt.getAsJsonObject().get("mac_key");
-                        if(macKeyElt != null && macKeyElt.isJsonPrimitive() && macKeyElt.getAsJsonPrimitive().isString()) {
-                            JsonElement expirationElt = responseElt.getAsJsonObject().get("expires_in");
-                            if(expirationElt != null && expirationElt.isJsonPrimitive() && expirationElt.getAsJsonPrimitive().isNumber()) {
-                                session.setOAuth2TokenAndExpiration(tokenElt.getAsString(), macKeyElt.getAsString(), expirationElt.getAsInt());
-                            }
-                        }
+                    JsonElement macKeyElt = responseElt.getAsJsonObject().get("mac_key");
+                    JsonElement expirationElt = responseElt.getAsJsonObject().get("expires_in");
+                    JsonElement refreshTokenElt = responseElt.getAsJsonObject().get("refresh_token");
+                    if(tokenElt != null && tokenElt.isJsonPrimitive() && tokenElt.getAsJsonPrimitive().isString()
+                       && macKeyElt != null && macKeyElt.isJsonPrimitive() && macKeyElt.getAsJsonPrimitive().isString()
+                       && expirationElt != null && expirationElt.isJsonPrimitive() && expirationElt.getAsJsonPrimitive().isNumber()
+                       && refreshTokenElt != null && refreshTokenElt.isJsonPrimitive() && refreshTokenElt.getAsJsonPrimitive().isString()) {
+                        session.setOAuth2TokensAndExpiration(tokenElt.getAsString(), macKeyElt.getAsString(), refreshTokenElt.getAsString(), expirationElt.getAsInt());
+
                     }
                     JsonElement stackmobElt = responseElt.getAsJsonObject().get("stackmob");
                     if(stackmobElt != null && stackmobElt.isJsonObject()) {
@@ -85,5 +101,10 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
     @Override
     protected String getRequestBody() {
         return formatQueryString(bodyParams);
+    }
+
+    @Override
+    protected boolean tryRefreshToken() {
+        return false;
     }
 }

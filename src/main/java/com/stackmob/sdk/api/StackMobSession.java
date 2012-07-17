@@ -40,8 +40,9 @@ public class StackMobSession {
     private OAuthVersion oauthVersion;
     private String oauth2Token;
     private String oauth2MacKey;
+    private String oauth2RefreshToken;
     private Date oauth2TokenExpiration;
-    private boolean enableHTTPS = true;
+    private Boolean httpsOverride = null;
 
     public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
         this(oauthVersion, key, secret, userObjectName, apiVersionNumber, null);
@@ -137,11 +138,15 @@ public class StackMobSession {
     }
 
     public void setEnableHTTPS(boolean enableHTTPS) {
-        this.enableHTTPS = enableHTTPS;
+        this.httpsOverride = enableHTTPS;
     }
 
-    public boolean getEnableHTTPS() {
-        return enableHTTPS;
+    public void setHTTPSOverride(Boolean enableHTTPS) {
+        this.httpsOverride = enableHTTPS;
+    }
+
+    public Boolean getHTTPSOverride() {
+        return httpsOverride;
     }
 
     public OAuthVersion getOAuthVersion() {
@@ -156,13 +161,14 @@ public class StackMobSession {
         return oauthVersion == StackMob.OAuthVersion.Two;
     }
 
-    public void setOAuth2TokenAndExpiration(String accessToken, String macKey, int seconds) {
-        setOAuth2TokenAndExpiration(accessToken, macKey, new Date(new Date().getTime() + seconds * 1000));
+    public void setOAuth2TokensAndExpiration(String accessToken, String macKey, String refreshToken, int seconds) {
+        setOAuth2TokensAndExpiration(accessToken, macKey, refreshToken, new Date(new Date().getTime() + seconds * 1000));
     }
 
-    protected void setOAuth2TokenAndExpiration(String accessToken, String macKey, Date expiration) {
+    protected void setOAuth2TokensAndExpiration(String accessToken, String macKey, String refreshToken, Date expiration) {
         oauth2Token = accessToken;
         oauth2MacKey = macKey;
+        oauth2RefreshToken = refreshToken;
         oauth2TokenExpiration = expiration;
     }
 
@@ -172,6 +178,14 @@ public class StackMobSession {
 
     public boolean oauth2TokenValid() {
         return oauth2TokenExpiration != null && oauth2TokenExpiration.after(new Date());
+    }
+
+    public boolean oauth2RefreshTokenValid() {
+        return oauth2RefreshToken != null;
+    }
+
+    public String getOAuth2RefreshToken() {
+        return oauth2RefreshToken;
     }
 
     public String generateMacToken(String method, String uri, String host, String port) {

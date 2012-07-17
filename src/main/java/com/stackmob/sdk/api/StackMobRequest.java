@@ -37,6 +37,7 @@ import org.scribe.oauth.OAuthService;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Modifier;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
@@ -79,6 +80,7 @@ public abstract class StackMobRequest {
     protected Boolean isSecure = false;
     protected Map<String, String> params = new HashMap<String, String>();
     protected List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
+    private boolean triedRefreshToken = false;
 
     protected Gson gson;
 
@@ -239,7 +241,7 @@ public abstract class StackMobRequest {
     }
 
     protected String getScheme() {
-        if (isSecure && session.getEnableHTTPS()) {
+        if (isSecure && (session.getHTTPSOverride() == null || session.getHTTPSOverride() )) {
             return SECURE_SCHEME;
         }
         else {
@@ -347,68 +349,92 @@ public abstract class StackMobRequest {
         }
         return requestHeaders;
     }
+
+    protected boolean tryRefreshToken() {
+        return true;
+    }
+
+    private boolean canDoRefreshToken() {
+        return session.isOAuth2() && session.oauth2RefreshTokenValid() && tryRefreshToken() && !triedRefreshToken;
+    }
+
+    protected void refreshTokenAndResend() {
+        StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, redirectedCallback, new StackMobRawCallback() {
+            @Override
+            public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
+                sendRequest();
+            }
+        }).setUrlFormat(urlFormat).sendRequest();
+    }
     
     protected void sendRequest(final OAuthRequest req) throws InterruptedException, ExecutionException {
         final StackMobRawCallback cb = this.callback;
 
-
-        executor.submit(new Callable<Object>() {
-            @Override
-            public String call() throws Exception {
-                try {
-                    StackMob.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
-                    Response ret = req.send();
-                    StackMob.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + (ret.getBody().length() < 1000 ? ret.getBody() : (ret.getBody().subSequence(0, 1000) + " (truncated)")));
-                    if(!session.isOAuth2() && ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
-                    if(HttpRedirectHelper.isRedirected(ret.getCode())) {
-                        StackMob.getLogger().logInfo("Response was redirected");
-                        String newLocation = HttpRedirectHelper.getNewLocation(ret.getHeaders());
-                        HttpVerb verb = HttpVerbHelper.valueOf(req.getVerb().toString());
-                        OAuthRequest newReq = getOAuthRequest(verb, newLocation);
-                        if(req.getBodyContents() != null && req.getBodyContents().length() > 0) {
-                            newReq = getOAuthRequest(verb, newLocation, req.getBodyContents());
+        if(session.isOAuth2() && !session.oauth2TokenValid() && canDoRefreshToken()) {
+            refreshTokenAndResend();
+        } else {
+            executor.submit(new Callable<Object>() {
+                @Override
+                public String call() throws Exception {
+                    try {
+                        StackMob.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
+                        Response ret = req.send();
+                        StackMob.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + (ret.getBody().length() < 1000 ? ret.getBody() : (ret.getBody().subSequence(0, 1000) + " (truncated)")));
+                        if(!session.isOAuth2() && ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
+                        if(HttpRedirectHelper.isRedirected(ret.getCode())) {
+                            StackMob.getLogger().logInfo("Response was redirected");
+                            String newLocation = HttpRedirectHelper.getNewLocation(ret.getHeaders());
+                            HttpVerb verb = HttpVerbHelper.valueOf(req.getVerb().toString());
+                            OAuthRequest newReq = getOAuthRequest(verb, newLocation);
+                            if(req.getBodyContents() != null && req.getBodyContents().length() > 0) {
+                                newReq = getOAuthRequest(verb, newLocation, req.getBodyContents());
+                            }
+                            //does NOT protect against circular redirects
+                            redirectedCallback.redirected(req.getUrl(), ret.getHeaders(), ret.getBody(), newReq.getUrl());
+                            sendRequest(newReq);
                         }
-                        //does NOT protect against circular redirects
-                        redirectedCallback.redirected(req.getUrl(), ret.getHeaders(), ret.getBody(), newReq.getUrl());
-                        sendRequest(newReq);
-                    }
-                    else {
-                        List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
-                        if(ret.getHeaders() != null) {
-                            for(Map.Entry<String, String> header : ret.getHeaders().entrySet()) {
-                                headers.add(header);
+                        else {
+                            List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
+                            if(ret.getHeaders() != null) {
+                                for(Map.Entry<String, String> header : ret.getHeaders().entrySet()) {
+                                    headers.add(header);
+                                }
+                            }
+                            if(Http.isSuccess(ret.getCode())) {
+                                cookieStore.storeCookies(ret);
+                            }
+                            if(ret.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED && canDoRefreshToken()) {
+                                refreshTokenAndResend();
+                            } else {
+                                try {
+                                    cb.setDone(getRequestVerb(req),
+                                            req.getUrl(),
+                                            getRequestHeaders(req),
+                                            req.getBodyContents(),
+                                            ret.getCode(),
+                                            headers,
+                                            ret.getBody().getBytes());
+                                }
+                                catch(Throwable t) {
+                                    StackMob.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
+                                }
                             }
                         }
-                        if(Http.isSuccess(ret.getCode())) {
-                            cookieStore.storeCookies(ret);
-                        }
-                        try {
-                            cb.setDone(getRequestVerb(req),
-                                    req.getUrl(),
-                                    getRequestHeaders(req),
-                                    req.getBodyContents(),
-                                    ret.getCode(),
-                                    headers,
-                                    ret.getBody().getBytes());
-                        }
-                        catch(Throwable t) {
-                            StackMob.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
-                        }
                     }
+                    catch(Throwable t) {
+                        StackMob.getLogger().logWarning("Invoking callback after unexpected exception %s", StackMobLogger.getStackTrace(t));
+                        cb.setDone(getRequestVerb(req),
+                                req.getUrl(),
+                                getRequestHeaders(req),
+                                req.getBodyContents(),
+                                -1,
+                                EmptyHeaders,
+                                t.getMessage().getBytes());
+                    }
+                    return null;
                 }
-                catch(Throwable t) {
-                    StackMob.getLogger().logWarning("Invoking callback after unexpected exception %s", StackMobLogger.getStackTrace(t));
-                    cb.setDone(getRequestVerb(req),
-                               req.getUrl(),
-                               getRequestHeaders(req),
-                               req.getBodyContents(),
-                               -1,
-                               EmptyHeaders,
-                               t.getMessage().getBytes());
-                }
-                return null;
-            }
-        });
+            });
+        }
     }
 
 }
