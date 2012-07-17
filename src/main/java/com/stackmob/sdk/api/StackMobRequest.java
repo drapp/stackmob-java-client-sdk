@@ -239,7 +239,7 @@ public abstract class StackMobRequest {
     }
 
     protected String getScheme() {
-        if (isSecure && (session.getHTTPSOverride() != null || session.getHTTPSOverride() )) {
+        if (isSecure && (session.getHTTPSOverride() == null || session.getHTTPSOverride() )) {
             return SECURE_SCHEME;
         }
         else {
