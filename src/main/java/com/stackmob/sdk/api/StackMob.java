@@ -744,8 +744,12 @@ public class StackMob {
                                 StackMobPushToken.TokenType tokenType,
                                 StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
+        String type = StackMobPushToken.TokenType.iOS.toString();
+        if(tokenType == StackMobPushToken.TokenType.Android) {
+            type = defaultPushType.toString();
+        }
         finalPayload.put("token", tokenString);
-        finalPayload.put("type", tokenType.toString());
+        finalPayload.put("type", type);
         return postPush("remove_token_universal", finalPayload, callback);
     }
 
