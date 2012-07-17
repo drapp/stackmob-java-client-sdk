@@ -40,14 +40,24 @@ public class StackMob {
         Two
     }
 
+    public static enum PushType {
+        C2DM,
+        GCM
+    }
+
     private StackMobSession session;
     private String apiUrlFormat = StackMobRequest.DEFAULT_API_URL_FORMAT;
     private String pushUrlFormat = StackMobRequest.DEFAULT_PUSH_URL_FORMAT;
     private ExecutorService executor;
+    private PushType defaultPushType = PushType.GCM;
 
     private final Object urlFormatLock = new Object();
 
     public static class RegistrationIDAndUser {
+        public static String PLATFORM_IOS = "ios";
+        public static String PLATFORM_ANDROID_C2DM = "android";
+        public static String PLATFORM_ANDROID_GCM = "androidGCM";
+
         public String userId;
         public Map<String, String> token = new HashMap<String, String>();
         public Boolean overwrite = null;
@@ -63,6 +73,11 @@ public class StackMob {
         }
         public RegistrationIDAndUser(String registrationID, String user, String platform, boolean overwrite) {
             this(registrationID, user, platform);
+            this.overwrite = overwrite;
+        }
+
+        public RegistrationIDAndUser(String registrationID, String user, PushType type, boolean overwrite) {
+            this(registrationID, user, type == PushType.C2DM ? PLATFORM_ANDROID_C2DM : PLATFORM_ANDROID_GCM);
             this.overwrite = overwrite;
         }
 
@@ -278,6 +293,10 @@ public class StackMob {
         this.apiUrlFormat = other.apiUrlFormat;
         this.pushUrlFormat = other.pushUrlFormat;
         this.executor = other.executor;
+    }
+
+    public void setPushType(PushType type) {
+        this.defaultPushType = type;
     }
 
     ////////////////////
@@ -605,7 +624,7 @@ public class StackMob {
     public StackMobRequestSendResult registerForPushWithUser(String username,
                                         String registrationID,
                                         StackMobRawCallback callback) {
-        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username);
+        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, defaultPushType, false);
         return postPush("register_device_token_universal", tokenAndUser, callback);
     }
 
@@ -621,7 +640,7 @@ public class StackMob {
                                                              String registrationID,
                                                              boolean overwrite,
                                                              StackMobRawCallback callback) {
-        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, overwrite);
+        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, defaultPushType, overwrite);
         return postPush("register_device_token_universal", tokenAndUser, callback);
     }
 
