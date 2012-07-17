@@ -41,7 +41,7 @@ public class StackMobSession {
     private String oauth2Token;
     private String oauth2MacKey;
     private Date oauth2TokenExpiration;
-    private boolean enableHTTPS = true;
+    private Boolean httpsOverride = null;
 
     public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
         this(oauthVersion, key, secret, userObjectName, apiVersionNumber, null);
@@ -137,11 +137,15 @@ public class StackMobSession {
     }
 
     public void setEnableHTTPS(boolean enableHTTPS) {
-        this.enableHTTPS = enableHTTPS;
+        this.httpsOverride = enableHTTPS;
     }
 
-    public boolean getEnableHTTPS() {
-        return enableHTTPS;
+    public void setHTTPSOverride(Boolean enableHTTPS) {
+        this.httpsOverride = enableHTTPS;
+    }
+
+    public Boolean getHTTPSOverride() {
+        return httpsOverride;
     }
 
     public OAuthVersion getOAuthVersion() {
