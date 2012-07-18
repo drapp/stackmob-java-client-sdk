@@ -20,6 +20,7 @@ import com.google.gson.*;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
+import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
@@ -336,11 +337,11 @@ public class StackMob {
 
     public StackMobRequestSendResult refreshToken(StackMobRawCallback callback) {
         if(!getSession().isOAuth2()) {
-            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("This method is only available with oauth2"));
+            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new StackMobException("This method is only available with oauth2"));
         }
 
         if(!getSession().oauth2RefreshTokenValid()) {
-            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("Refresh token invalid"));
+            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new StackMobException("Refresh token invalid"));
         }
         return StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, this.redirectedCallback, callback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
