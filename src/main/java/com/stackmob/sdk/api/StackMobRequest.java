@@ -241,11 +241,10 @@ public abstract class StackMobRequest {
     }
 
     protected String getScheme() {
-        if (isSecure && (session.getHTTPSOverride() == null || session.getHTTPSOverride() )) {
-            return SECURE_SCHEME;
-        }
-        else {
-            return REGULAR_SCHEME;
+        if(session.getHTTPSOverride() == null) {
+            return isSecure ? SECURE_SCHEME : REGULAR_SCHEME;
+        } else {
+            return session.getHTTPSOverride() ? SECURE_SCHEME : REGULAR_SCHEME;
         }
     }
 
