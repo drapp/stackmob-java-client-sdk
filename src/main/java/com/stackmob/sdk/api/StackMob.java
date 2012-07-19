@@ -985,15 +985,12 @@ public class StackMob {
     public StackMobRequestSendResult postPush(String path,
                           Object requestObject,
                           StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
-                                              this.session,
-                                              HttpVerbWithPayload.POST,
-                                              StackMobRequest.EmptyHeaders,
-                                              StackMobRequest.EmptyParams,
-                                              requestObject,
-                                              path,
-                                              callback,
-                                              this.redirectedCallback).setUrlFormat(this.pushUrlFormat).sendRequest();
+        return new StackMobPushRequest(this.executor,
+                                       this.session,
+                                       requestObject,
+                                       path,
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.pushUrlFormat).sendRequest();
     }
 
     /**

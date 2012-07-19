@@ -276,6 +276,10 @@ public abstract class StackMobRequest {
         return "application/json";
     }
 
+    protected OAuthVersion getOAuthVersion() {
+        return session.getOAuthVersion();
+    }
+
 
     protected OAuthRequest getOAuthRequest(HttpVerb method, String url) {
         Verb verb = Verb.valueOf(method.toString());
@@ -306,7 +310,7 @@ public abstract class StackMobRequest {
             oReq.addHeader(header.getKey(), header.getValue());
         }
 
-        switch(session.getOAuthVersion()) {
+        switch(getOAuthVersion()) {
             case One: oAuthService.signRequest(new Token("", ""), oReq); break;
             case Two: {
                 oReq.addHeader(API_KEY_HEADER, session.getKey());
