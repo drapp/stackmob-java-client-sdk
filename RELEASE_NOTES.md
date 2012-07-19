@@ -1,5 +1,11 @@
 # Stackmob Java SDK (Release Notes)
 
+### 0.5.1 (07/19/2012)
+* GCM Push Support
+* Refresh Tokens
+* Fix oauth2 push bug
+* Https override switch
+
 ### 0.5.0 (07/10/2012)
 * OAuth2 Support
 
