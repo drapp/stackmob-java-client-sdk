@@ -1,5 +1,8 @@
 # Stackmob Java SDK (Release Notes)
 
+### 0.5.2 (07/23/2012)
+* Bugfixes
+
 ### 0.5.1 (07/19/2012)
 * GCM Push Support
 * Refresh Tokens
