@@ -20,6 +20,7 @@ import com.google.gson.*;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
+import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
@@ -41,14 +42,24 @@ public class StackMob {
         Two
     }
 
+    public static enum PushType {
+        C2DM,
+        GCM
+    }
+
     private StackMobSession session;
     private String apiUrlFormat = StackMobRequest.DEFAULT_API_URL_FORMAT;
     private String pushUrlFormat = StackMobRequest.DEFAULT_PUSH_URL_FORMAT;
     private ExecutorService executor;
+    private PushType defaultPushType = PushType.GCM;
 
     private final Object urlFormatLock = new Object();
 
     public static class RegistrationIDAndUser {
+        public static String PLATFORM_IOS = "ios";
+        public static String PLATFORM_ANDROID_C2DM = "android";
+        public static String PLATFORM_ANDROID_GCM = "androidGCM";
+
         public String userId;
         public Map<String, String> token = new HashMap<String, String>();
         public Boolean overwrite = null;
@@ -64,6 +75,11 @@ public class StackMob {
         }
         public RegistrationIDAndUser(String registrationID, String user, String platform, boolean overwrite) {
             this(registrationID, user, platform);
+            this.overwrite = overwrite;
+        }
+
+        public RegistrationIDAndUser(String registrationID, String user, PushType type, boolean overwrite) {
+            this(registrationID, user, type == PushType.C2DM ? PLATFORM_ANDROID_C2DM : PLATFORM_ANDROID_GCM);
             this.overwrite = overwrite;
         }
 
@@ -281,6 +297,10 @@ public class StackMob {
         this.executor = other.executor;
     }
 
+    public void setPushType(PushType type) {
+        this.defaultPushType = type;
+    }
+
     ////////////////////
     //session & login/logout
     ////////////////////
@@ -317,11 +337,11 @@ public class StackMob {
 
     public StackMobRequestSendResult refreshToken(StackMobRawCallback callback) {
         if(!getSession().isOAuth2()) {
-            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("This method is only available with oauth2"));
+            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new StackMobException("This method is only available with oauth2"));
         }
 
         if(!getSession().oauth2RefreshTokenValid()) {
-            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new Throwable("Refresh token invalid"));
+            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new StackMobException("Refresh token invalid"));
         }
         return StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, this.redirectedCallback, callback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
@@ -617,7 +637,7 @@ public class StackMob {
     public StackMobRequestSendResult registerForPushWithUser(String username,
                                         String registrationID,
                                         StackMobRawCallback callback) {
-        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username);
+        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, defaultPushType, false);
         return postPush("register_device_token_universal", tokenAndUser, callback);
     }
 
@@ -633,7 +653,7 @@ public class StackMob {
                                                              String registrationID,
                                                              boolean overwrite,
                                                              StackMobRawCallback callback) {
-        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, overwrite);
+        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, defaultPushType, overwrite);
         return postPush("register_device_token_universal", tokenAndUser, callback);
     }
 
@@ -737,8 +757,12 @@ public class StackMob {
                                 StackMobPushToken.TokenType tokenType,
                                 StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
+        String type = StackMobPushToken.TokenType.iOS.toString();
+        if(tokenType == StackMobPushToken.TokenType.Android) {
+            type = defaultPushType.toString();
+        }
         finalPayload.put("token", tokenString);
-        finalPayload.put("type", tokenType.toString());
+        finalPayload.put("type", type);
         return postPush("remove_token_universal", finalPayload, callback);
     }
 
