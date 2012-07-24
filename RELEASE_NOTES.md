@@ -1,5 +1,8 @@
 # Stackmob Java SDK (Release Notes)
 
+### 0.5.3 (07/24/2012)
+* Bugfixes
+
 ### 0.5.2 (07/23/2012)
 * Bugfixes
 
