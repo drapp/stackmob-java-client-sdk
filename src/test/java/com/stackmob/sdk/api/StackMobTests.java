@@ -24,6 +24,7 @@ import com.stackmob.sdk.callback.StackMobCountCallback;
 import com.stackmob.sdk.concurrencyutils.CountDownLatchUtils;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
+import com.stackmob.sdk.push.StackMobPushToken;
 import com.stackmob.sdk.testobjects.*;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -922,7 +923,7 @@ public class StackMobTests extends StackMobTestCommon {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
-                latch.countDown();
+                pushToToken(token, latch, asserter);
             }
 
             @Override
@@ -932,6 +933,24 @@ public class StackMobTests extends StackMobTestCommon {
         });
         asserter.assertLatchFinished(latch);
         objectOnServer.delete();
+    }
+
+    public void pushToToken(String token, final CountDownLatch latch, final MultiThreadAsserter asserter) {
+        StackMobPushToken t = new StackMobPushToken(token, StackMobPushToken.TokenType.Android);
+        Map<String, String> payload = new HashMap<String, String>();
+        payload.put("foo", "bar");
+        stackmob.pushToTokens(payload, Arrays.asList(t), new StackMobCallback() {
+            @Override
+            public void success(String responseBody) {
+                asserter.markNotJsonError(responseBody);
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
     }
 
     @Test public void getTokensForUsers() throws Exception {
@@ -1017,7 +1036,7 @@ public class StackMobTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
     }
 
-    @Test public void resetPassword() throws Exception {
+    public void doResetPassword() throws Exception {
         final String username = getRandomString();
         final String password = getRandomString();
         final String email = getRandomString();
@@ -1054,6 +1073,15 @@ public class StackMobTests extends StackMobTestCommon {
             }
         });
         asserter.assertLatchFinished(latch);
+    }
+
+    @Test public void resetPassword() throws Exception {
+        doResetPassword();
+    }
+
+    @Test public void resetPasswordOAuth2() throws Exception {
+        doLoginLogout(StackMob.OAuthVersion.Two, false);
+        doResetPassword();
     }
     
     private void testCount(StackMobQuery query, final int expectedCount) throws Exception {
