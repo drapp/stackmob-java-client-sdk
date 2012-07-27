@@ -1,5 +1,9 @@
 # Stackmob Java SDK (Release Notes)
 
+### 0.5.4 (07/27/2012)
+* Fix OAuth2 over ssl
+* Fix pushToTokens for GCM
+
 ### 0.5.3 (07/24/2012)
 * Bugfixes
 
