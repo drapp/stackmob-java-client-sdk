@@ -20,7 +20,8 @@ public class StackMobPushToken {
 
     public static enum TokenType {
         iOS("ios"),
-        Android("android");
+        Android("androidGCM"),
+        AndroidC2DM("android");
 
         private String type;
         TokenType(String type) {
@@ -53,6 +54,10 @@ public class StackMobPushToken {
 
     public TokenType getTokenType() {
         return type;
+    }
+
+    public void setTokenType(TokenType type) {
+        this.type = type;
     }
 
     public Long getRegisteredMilliseconds() {

@@ -604,6 +604,13 @@ public class StackMob {
                              StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
         Map<String, Object> payloadMap = new HashMap<String, Object>();
+
+        for(StackMobPushToken token : tokens) {
+            //Android means GCM in the new sdk for simplicity. Since it meant C2DM in the old sdk we convert tokens back
+            if(token.getTokenType() == StackMobPushToken.TokenType.Android && defaultPushType == PushType.C2DM) {
+                token.setTokenType(StackMobPushToken.TokenType.AndroidC2DM);
+            }
+        }
         payloadMap.put("kvPairs", payload);
         finalPayload.put("payload", payloadMap);
         finalPayload.put("tokens", tokens);
