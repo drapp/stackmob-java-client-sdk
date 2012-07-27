@@ -1078,11 +1078,6 @@ public class StackMobTests extends StackMobTestCommon {
     @Test public void resetPassword() throws Exception {
         doResetPassword();
     }
-
-    @Test public void resetPasswordOAuth2() throws Exception {
-        doLoginLogout(StackMob.OAuthVersion.Two, false);
-        doResetPassword();
-    }
     
     private void testCount(StackMobQuery query, final int expectedCount) throws Exception {
         final CountDownLatch latch = latchOne();
