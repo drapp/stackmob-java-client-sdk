@@ -319,7 +319,7 @@ public abstract class StackMobRequest {
                     int firstSlash = urlNoScheme.indexOf("/");
                     String[] hostAndPort = urlNoScheme.substring(0, firstSlash).split(":");
                     String host = hostAndPort[0];
-                    String port = hostAndPort.length > 1 ? hostAndPort[1] : "80";
+                    String port = getPort(hostAndPort);
                     String uri = urlNoScheme.substring(firstSlash);
 
                     oReq.addHeader(AUTHORIZATION_HEADER, session.generateMacToken(method.toString(), uri, host, port));
@@ -329,6 +329,14 @@ public abstract class StackMobRequest {
         }
 
         return oReq;
+    }
+
+    private String getPort(String[] hostAndPort) {
+        if(hostAndPort.length > 1) {
+            return hostAndPort[1];
+        } else {
+            return getScheme().equals(SECURE_SCHEME) ? "443" : "80";
+        }
     }
 
     protected OAuthRequest getOAuthRequest(HttpVerb method, String url, String payload) {
