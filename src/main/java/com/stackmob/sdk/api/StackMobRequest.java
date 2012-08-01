@@ -367,7 +367,7 @@ public abstract class StackMobRequest {
     }
 
     private boolean canDoRefreshToken() {
-        return session.isOAuth2() && session.oauth2RefreshTokenValid() && tryRefreshToken() && !triedRefreshToken;
+        return session.isOAuth2() && session.oauth2RefreshTokenValid() && tryRefreshToken() && !triedRefreshToken.get();
     }
 
     protected void refreshTokenAndResend() {
