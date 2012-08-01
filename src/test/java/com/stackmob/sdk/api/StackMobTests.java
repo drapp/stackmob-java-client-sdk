@@ -128,6 +128,7 @@ public class StackMobTests extends StackMobTestCommon {
 
         asserter.assertLatchFinished(loginLatch, CountDownLatchUtils.MAX_LATCH_WAIT_TIME);
         if(logout) objectOnServer.delete();
+        return objectOnServer;
     }
 
     @Test public void loginLogout() throws Exception {
