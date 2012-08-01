@@ -155,7 +155,7 @@ public class StackMobTests extends StackMobTestCommon {
             }
 
             @Override public void failure(StackMobException e) {
-                asserter.markTrue(e.getMessage().contains("invalid"));
+                asserter.markTrue(e.getMessage().contains("access_denied"));
                 latch.countDown();
             }
         });
