@@ -61,7 +61,7 @@ public class StackMobTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
     }
 
-    public void doLoginLogout(StackMob.OAuthVersion version, final boolean logout) throws Exception {
+    public StackMobObjectOnServer<User> doLoginLogout(StackMob.OAuthVersion version, final boolean logout) throws Exception {
         StackMob.getStackMob().getSession().setOAuthVersion(version);
         final String username = getRandomString();
         final String password = getRandomString();
@@ -127,7 +127,7 @@ public class StackMobTests extends StackMobTestCommon {
         asserter.markTrue(!stackmob.isUserLoggedIn(user.username));
 
         asserter.assertLatchFinished(loginLatch, CountDownLatchUtils.MAX_LATCH_WAIT_TIME);
-        objectOnServer.delete();
+        if(logout) objectOnServer.delete();
     }
 
     @Test public void loginLogout() throws Exception {
@@ -162,7 +162,7 @@ public class StackMobTests extends StackMobTestCommon {
     }
 
     @Test public void oauth2LoginLogout() throws Exception {
-        doLoginLogout(StackMob.OAuthVersion.Two, false);
+        StackMobObjectOnServer<User> user = doLoginLogout(StackMob.OAuthVersion.Two, false);
         final CountDownLatch localLatch = latchOne();
         final MultiThreadAsserter localAsserter = new MultiThreadAsserter();
         StackMob.getStackMob().get("restricted", new StackMobCallback() {
@@ -175,10 +175,11 @@ public class StackMobTests extends StackMobTestCommon {
             }
         });
         localAsserter.assertLatchFinished(localLatch);
+        user.delete();
     }
 
     @Test public void oauth2RefreshToken() throws Exception {
-        doLoginLogout(StackMob.OAuthVersion.Two, false);
+        StackMobObjectOnServer<User> user = doLoginLogout(StackMob.OAuthVersion.Two, false);
         final CountDownLatch localLatch = latchOne();
         final MultiThreadAsserter localAsserter = new MultiThreadAsserter();
         StackMob.getStackMob().refreshToken(new StackMobCallback() {
@@ -191,6 +192,7 @@ public class StackMobTests extends StackMobTestCommon {
             }
         });
         localAsserter.assertLatchFinished(localLatch);
+        user.delete();
     }
 
     @Ignore @Test public void testTimeSync() throws Exception {
