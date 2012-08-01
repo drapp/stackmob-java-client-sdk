@@ -45,6 +45,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class StackMobRequest {
     
@@ -80,7 +81,7 @@ public abstract class StackMobRequest {
     protected Boolean isSecure = false;
     protected Map<String, String> params = new HashMap<String, String>();
     protected List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
-    private boolean triedRefreshToken = false;
+    private AtomicBoolean triedRefreshToken = new AtomicBoolean(false);
 
     protected Gson gson;
 
@@ -370,7 +371,7 @@ public abstract class StackMobRequest {
     }
 
     protected void refreshTokenAndResend() {
-        triedRefreshToken = true;
+        triedRefreshToken.set(true);
         StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, redirectedCallback, new StackMobRawCallback() {
             @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
