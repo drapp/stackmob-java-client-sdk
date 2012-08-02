@@ -938,6 +938,35 @@ public class StackMobTests extends StackMobTestCommon {
         objectOnServer.delete();
     }
 
+    @Test public void registeriOSToken() throws Exception {
+        final String username = getRandomString();
+        final String password = getRandomString();
+        final String token = getRandomString();
+
+        User user = new User(username, password);
+        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
+        final String objectId = objectOnServer.getObjectId();
+
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+
+        StackMob.RegistrationIDAndUser tokenAndUser = new StackMob.RegistrationIDAndUser("0000000000000000000000000000000000000000000000000000000000000000", "bodie", StackMob.RegistrationIDAndUser.PLATFORM_IOS, true);
+        stackmob.postPush("register_device_token_universal", tokenAndUser, new StackMobCallback() {
+            @Override
+            public void success(String responseBody) {
+                asserter.markNotJsonError(responseBody);
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+        objectOnServer.delete();
+    }
+
     public void pushToToken(String token, final CountDownLatch latch, final MultiThreadAsserter asserter) {
         StackMobPushToken t = new StackMobPushToken(token, StackMobPushToken.TokenType.Android);
         Map<String, String> payload = new HashMap<String, String>();
