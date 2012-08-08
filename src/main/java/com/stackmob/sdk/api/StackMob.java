@@ -766,7 +766,7 @@ public class StackMob {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
         String type = StackMobPushToken.TokenType.iOS.toString();
         if(tokenType == StackMobPushToken.TokenType.Android) {
-            type = defaultPushType.toString();
+            type = (defaultPushType == PushType.C2DM) ? StackMobPushToken.TokenType.AndroidC2DM.toString() : StackMobPushToken.TokenType.Android.toString();
         }
         finalPayload.put("token", tokenString);
         finalPayload.put("type", type);

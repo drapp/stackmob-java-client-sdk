@@ -48,12 +48,14 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
         stackmob.login(params, new StackMobCallback() {
-            @Override public void success(String responseBody) {
+            @Override
+            public void success(String responseBody) {
                 asserter.markJsonError(responseBody);
                 latch.countDown();
             }
 
-            @Override public void failure(StackMobException e) {
+            @Override
+            public void failure(StackMobException e) {
                 asserter.markTrue(e.getMessage().contains("Invalid"));
                 latch.countDown();
             }
@@ -950,12 +952,24 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        StackMob.RegistrationIDAndUser tokenAndUser = new StackMob.RegistrationIDAndUser("0000000000000000000000000000000000000000000000000000000000000000", "bodie", StackMob.RegistrationIDAndUser.PLATFORM_IOS, true);
+        final StackMob.RegistrationIDAndUser tokenAndUser = new StackMob.RegistrationIDAndUser("0000000000000000000000000000000000000000000000000000000000000000", "bodie", StackMob.RegistrationIDAndUser.PLATFORM_IOS, true);
         stackmob.postPush("register_device_token_universal", tokenAndUser, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
-                latch.countDown();
+
+                stackmob.removePushToken(tokenAndUser.token.get("token"), StackMobPushToken.TokenType.Android, new StackMobCallback() {
+                    @Override
+                    public void success(String responseBody) {
+                        asserter.markNotJsonError(responseBody);
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void failure(StackMobException e) {
+                        asserter.markException(e);
+                    }
+                });
             }
 
             @Override
