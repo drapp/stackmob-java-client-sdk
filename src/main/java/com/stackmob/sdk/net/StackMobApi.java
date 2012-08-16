@@ -22,15 +22,23 @@ import org.scribe.model.Token;
 import org.scribe.services.TimestampService;
 import org.scribe.services.TimestampServiceImpl;
 
+import java.util.Random;
+import java.util.UUID;
+
 public class StackMobApi extends DefaultApi10a {
 
     public static class StackMobTimeService extends TimestampServiceImpl {
-        
         @Override
         public String getTimestampInSeconds() {
             //Ensure the timestamp we sends matches up with the server time
             return String.valueOf(StackMob.getStackMob().getSession().getServerTime());
         }
+
+        @Override
+        public String getNonce() {
+            return UUID.randomUUID().toString();
+        }
+
     }
 
     @Override
