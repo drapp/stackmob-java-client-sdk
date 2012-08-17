@@ -25,13 +25,14 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class StackMobCallback extends StackMobRawCallback {
-    @Override public void done(HttpVerb requestVerb,
-                               String requestURL,
-                               List<Map.Entry<String, String>> requestHeaders,
-                               String requestBody,
-                               Integer responseStatusCode,
-                               List<Map.Entry<String, String>> responseHeaders,
-                               byte[] responseBody) {
+    @Override
+    public void done(HttpVerb requestVerb,
+                     String requestURL,
+                     List<Map.Entry<String, String>> requestHeaders,
+                     String requestBody,
+                     Integer responseStatusCode,
+                     List<Map.Entry<String, String>> responseHeaders,
+                     byte[] responseBody) {
         if(Http.isSuccess(responseStatusCode)) {
             success(new String(responseBody));
         }

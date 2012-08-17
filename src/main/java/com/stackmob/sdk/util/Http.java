@@ -21,6 +21,10 @@ public class Http {
     public static final Integer SuccessResponseLowerLimit = 100;
     //the highest HTTP error code (non inclusive) that represents a success
     public static final Integer SuccessResponseUpperLimit = 400;
+    //the HTTP error code that represents unavailable
+    public static final Integer UnavailableResponseCode = 503;
+    //the lowercase version of the "Retry-After" header
+    public static final String RetryAfterLowercase = "retry-after";
 
     /**
      * determine whether a given status code represents a success
@@ -29,5 +33,13 @@ public class Http {
      */
     public static boolean isSuccess(Integer statusCode) {
         return (statusCode < SuccessResponseUpperLimit) && (statusCode >= SuccessResponseLowerLimit);
+    }
+
+    public static boolean isUnavailable(Integer statusCode) {
+        return statusCode != null && statusCode.equals(UnavailableResponseCode);
+    }
+
+    public static boolean isRetryAfterHeader(String headerName) {
+        return headerName != null && headerName.toLowerCase().equals(RetryAfterLowercase);
     }
 }

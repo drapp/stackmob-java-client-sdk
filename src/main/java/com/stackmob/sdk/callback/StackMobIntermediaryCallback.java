@@ -18,9 +18,13 @@ package com.stackmob.sdk.callback;
 import com.stackmob.sdk.exception.StackMobException;
 
 public class StackMobIntermediaryCallback extends StackMobCallback {
-    StackMobCallback furtherCallback;
+    private StackMobCallback furtherCallback;
     public StackMobIntermediaryCallback(StackMobCallback furtherCallback) {
         this.furtherCallback = furtherCallback;
+    }
+
+    public StackMobCallback getFurtherCallback() {
+        return this.furtherCallback;
     }
 
     @Override
