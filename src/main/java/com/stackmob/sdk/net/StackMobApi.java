@@ -22,7 +22,6 @@ import org.scribe.model.Token;
 import org.scribe.services.TimestampService;
 import org.scribe.services.TimestampServiceImpl;
 
-import java.util.Random;
 import java.util.UUID;
 
 public class StackMobApi extends DefaultApi10a {
