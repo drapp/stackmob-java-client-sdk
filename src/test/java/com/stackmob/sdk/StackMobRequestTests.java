@@ -27,6 +27,7 @@ import static com.stackmob.sdk.concurrencyutils.CountDownLatchUtils.latchOne;
 import static org.junit.Assert.*;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.exception.StackMobException;
+
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -188,5 +189,27 @@ public class StackMobRequestTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
         assertEquals(sendResult.getStatus(), StackMobRequestSendResult.RequestSendStatus.SENT);
         assertNull(sendResult.getFailureReason());
+    }
+
+    @Test
+    public void testSpecialCharactersInRequest() throws InterruptedException, StackMobException {
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+
+        stackmob.get("foobar/baz!@#$", new StackMobCallback() {
+            @Override
+            public void success(String responseBody) {
+                System.out.println("responseBody = " + responseBody);
+                assertNotNull(responseBody);
+                latch.countDown();
+            }
+            @Override
+            public void failure(StackMobException e) {
+                fail(e.getMessage());
+            }
+        });
+
+        asserter.assertLatchFinished(latch);
+
     }
 }
