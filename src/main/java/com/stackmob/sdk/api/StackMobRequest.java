@@ -35,7 +35,6 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
-import java.awt.datatransfer.StringSelection;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
