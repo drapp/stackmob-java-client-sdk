@@ -199,8 +199,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
         stackmob.get("foobar/baz!@#$", new StackMobCallback() {
             @Override
             public void success(String responseBody) {
-                System.out.println("responseBody = " + responseBody);
-                assertNotNull(responseBody);
+                assertTrue(responseBody.startsWith("{\"createddate\":1345250420156,\"foobar_id\":\"baz!@#$\""));
                 latch.countDown();
             }
             @Override
