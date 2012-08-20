@@ -239,7 +239,11 @@ public abstract class StackMobRequest {
 
         for(int i = 0; i < parts.length; i++) {
             try {
-                sb.append(URLEncoder.encode(parts[i], "utf-8"));
+                if(i == parts.length-1) {
+                    sb.append(URLEncoder.encode(parts[i], "utf-8"));
+                } else {
+                    sb.append(parts[i]);
+                }
             } catch(UnsupportedEncodingException e) {
                 throw new URISyntaxException(parts[i], "could not be URL-encoded as UTF-8");
             }
