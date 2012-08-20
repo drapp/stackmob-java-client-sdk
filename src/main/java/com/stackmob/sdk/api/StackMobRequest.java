@@ -223,13 +223,37 @@ public abstract class StackMobRequest {
         if(!path.startsWith("/")) {
             uriBuilder.append("/");
         }
-        uriBuilder.append(path);
+        uriBuilder.append(escapePath(path));
 
         if(query != null && query.length() > 0) {
             uriBuilder.append("?").append(query);
         }
 
         return new URI(uriBuilder.toString());
+    }
+
+    private String escapePath(String path) throws URISyntaxException {
+        String[] parts = path.split("/");
+
+        StringBuilder sb = new StringBuilder();
+
+        for(int i = 0; i < parts.length; i++) {
+            try {
+                if(i == parts.length-1) {
+                    sb.append(URLEncoder.encode(parts[i], "utf-8"));
+                } else {
+                    sb.append(parts[i]);
+                }
+            } catch(UnsupportedEncodingException e) {
+                throw new URISyntaxException(parts[i], "could not be URL-encoded as UTF-8");
+            }
+
+            if(i != parts.length-1) {
+                sb.append("/");
+            }
+        }
+
+        return sb.toString();
     }
 
     protected String getPath() {
