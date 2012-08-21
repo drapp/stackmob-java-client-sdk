@@ -22,12 +22,14 @@ import com.stackmob.sdk.api.StackMob.OAuthVersion;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.exception.StackMobException;
+import com.stackmob.sdk.model.StackMobModel;
 import com.stackmob.sdk.net.*;
 import com.stackmob.sdk.push.StackMobPushToken;
 import com.stackmob.sdk.push.StackMobPushTokenDeserializer;
 import com.stackmob.sdk.push.StackMobPushTokenSerializer;
 import com.stackmob.sdk.util.Http;
 import com.stackmob.sdk.util.Pair;
+import com.stackmob.sdk.util.StackMobNull;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
@@ -107,6 +109,8 @@ public abstract class StackMobRequest {
         GsonBuilder gsonBuilder = new GsonBuilder()
                                   .registerTypeAdapter(StackMobPushToken.class, new StackMobPushTokenDeserializer())
                                   .registerTypeAdapter(StackMobPushToken.class, new StackMobPushTokenSerializer())
+                                  .registerTypeAdapter(StackMobModel.class, new StackMobModel.Adapter())
+                                  .registerTypeAdapter(StackMobNull.class, new StackMobNull.Adapter())
                                   .excludeFieldsWithModifiers(Modifier.PRIVATE, Modifier.PROTECTED, Modifier.TRANSIENT, Modifier.STATIC);
         gson = gsonBuilder.create();
 
