@@ -31,6 +31,7 @@ public abstract class StackMobRawCallback {
     protected Integer responseStatusCode;
     protected List<Map.Entry<String, String>> responseHeaders;
     protected byte[] responseBody;
+    protected int retriesRemaining = 3;
 
 
     /**
@@ -77,6 +78,37 @@ public abstract class StackMobRawCallback {
                               Integer responseStatusCode,
                               List<Map.Entry<String, String>> responseHeaders,
                               byte[] responseBody);
+
+    /**
+     * The method that will be called when a retry is possible. This is triggered when there is a distinct
+     * and short term reason your request failed, and it should be successful on retry after the specified
+     * interval. By default at most three attempts are made before failing. Override to implement your own
+     * logic on retry, and return false to stop the request from being automatically retried.
+     * @param afterMilliseconds the number of milliseconds to wait until retrying the request.
+     * @return whether or not to automatically retry
+     */
+    public boolean retry(int afterMilliseconds) {
+        try {
+            Thread.currentThread().wait(afterMilliseconds);
+        } catch (InterruptedException ignore) { }
+        return true;
+    }
+
+    /**
+     *
+     * @return The number of times the request will be automatically retried if necessary
+     */
+    public int getRetriesRemaining() {
+        return retriesRemaining;
+    }
+
+    /**
+     *
+     * @param remaining the number of times the request should be retried
+     */
+    public void setRetriesRemaining(int remaining) {
+        retriesRemaining = remaining;
+    }
 
     /**
      * get the total number of items from the Content-Range header

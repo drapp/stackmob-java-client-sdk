@@ -871,52 +871,6 @@ public class StackMob {
     }
 
     /**
-     * do a GET request to StackMob custom code
-     * @param methodName the name of the custom code method to execute
-     * @param arguments the arguments to pass to the custom code method, in the query string
-     * @param callback the custom code callback to execute when the request returns
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
-     */
-    public StackMobRequestSendResult getCustomCode(String methodName,
-                                                   Map<String, String> arguments,
-                                                   StackMobCustomCodeCallback callback) {
-        return get(methodName, arguments, callback);
-    }
-
-    /**
-     * do a GET request to StackMob custom code
-     * @param methodName the name of the custom code method to execute
-     * @param arguments the arguments to pass to the custom code method, in the query string
-     * @param headers the headers to pass in the request
-     * @param callback the custom code callback to execute when the request returns
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
-     */
-    public StackMobRequestSendResult getCustomCode(String methodName,
-                                                   Map<String, String> arguments,
-                                                   List<Map.Entry<String, String>> headers,
-                                                   StackMobCustomCodeCallback callback) {
-        return get(methodName, arguments, headers, callback);
-    }
-
-    /**
-     * do a GET request to StackMob custom code
-     * @param methodName the name of teh custom code method to execute
-     * @param arguments the arguments to pass to the custom code method, in the query string
-     * @param headerMap the headers to pass in the request
-     * @param callback the custom code callback to execute when the request returns
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
-     */
-    public StackMobRequestSendResult getCustomCode(String methodName,
-                                                   Map<String, String> arguments,
-                                                   Map<String, String> headerMap,
-                                                   StackMobCustomCodeCallback callback) {
-        return this.get(methodName, arguments, headerMap, callback);
-    }
-
-    /**
      * do a GET request to the stackmob push service
      * @param path the path of the push request
      * @param arguments the arguments to pass to the push service, in the query string
@@ -1002,51 +956,6 @@ public class StackMob {
                 callback,
                 this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
-
-    /**
-     * do a POST request to custom code
-     * @param methodName the method name of the custom code to call
-     * @param requestObject an Object representing the body of the POST request
-     * @param callback the custom code callback to execute when the request returns
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
-     */
-    public StackMobRequestSendResult postCustomCode(String methodName,
-                                                    Object requestObject,
-                                                    StackMobCustomCodeCallback callback) {
-        return post(methodName, requestObject, callback);
-    }
-
-    /**
-     * do a POST request to custom code
-     * @param methodName the method name of the custom code to call
-     * @param body the body of the POST request
-     * @param callback the custom code callback to execute when the request returns
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
-     */
-    public StackMobRequestSendResult postCustomCode(String methodName,
-                                                    String body,
-                                                    StackMobCustomCodeCallback callback) {
-        return post(methodName, body, callback);
-    }
-
-    /**
-     * do a POST request to custom code
-     * @param methodName the method name of the custom code to call
-     * @param body the body of the POST request
-     * @param headers the headers to send in the request
-     * @param callback the custom code callback to execute when the request returns
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
-     */
-    public StackMobRequestSendResult postCustomCode(String methodName,
-                                                    String body,
-                                                    List<Map.Entry<String, String>> headers,
-                                                    StackMobCustomCodeCallback callback) {
-        return this.post(methodName, body, headers, callback);
-    }
-
 
     /**
      * do a post request on the StackMob platform with a list of objects
@@ -1170,38 +1079,6 @@ public class StackMob {
     }
 
     /**
-     * do a PUT request on the StackMob platform
-     * @param methodName the name of the custom code method to call
-     * @param id the ID to PUT. will be appended as the last element of the path
-     * @param requestObject an object representing the JSON body to send to the server
-     * @param callback the custom code callback to execute when the request returns
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
-     */
-    public StackMobRequestSendResult putCustomCode(String methodName,
-                                                   String id,
-                                                   Object requestObject,
-                                                   StackMobCustomCodeCallback callback) {
-        return this.put(methodName, id, requestObject, callback);
-    }
-
-    /**
-     * do a PUT request on the StackMob platform
-     * @param methodName the name of teh custom code method to call to PUT
-     * @param id the ID to PUT. will be appended as the last element of the path
-     * @param body the body of the request to send
-     * @param callback the custom code callback to execute when the request returns
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
-     */
-    public StackMobRequestSendResult putCustomCode(String methodName,
-                                                   String id,
-                                                   String body,
-                                                   StackMobCustomCodeCallback callback) {
-        return this.put(methodName, id, body, callback);
-    }
-
-    /**
      * do a PUT request on the StackMob platform, treating some of the fields as counters to be incremented rather
      * than as values to set
      * @param path the path to put
@@ -1295,31 +1172,16 @@ public class StackMob {
     }
 
     /**
-     * do a DELETE request to the StackMob platform
-     * @param methodName the name of the custom code method to call
-     * @param id the ID to pass in the URL. will be appended as the last element of the path
+     * atomically remove elements from an array or has many relationship
+     * @param path the path to get
+     * @param primaryId id of the object with the relation
+     * @param field name of the relation or array field to delete from
+     * @param idsToDelete list of ids to atomically remove from field.
+     *                    ids should be same type as the primary id of the related type (most likely String or Integer)
+     * @param cascadeDeletes true if related objects specified in idsToDelete should also be deleted
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult deleteCustomCode(String methodName,
-                                                      String id,
-                                                      StackMobCustomCodeCallback callback) {
-        return this.delete(methodName, id, callback);
-    }
-
-
-        /**
-        * atomically remove elements from an array or has many relationship
-        * @param path the path to get
-        * @param primaryId id of the object with the relation
-        * @param field name of the relation or array field to delete from
-        * @param idsToDelete list of ids to atomically remove from field.
-        *                    ids should be same type as the primary id of the related type (most likely String or Integer)
-        * @param cascadeDeletes true if related objects specified in idsToDelete should also be deleted
-        * @param callback callback to be called when the server returns. may execute in a separate thread
-        * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
-        */
     public <T> StackMobRequestSendResult deleteIdsFrom(String path,
                                   String primaryId,
                                   String field,
