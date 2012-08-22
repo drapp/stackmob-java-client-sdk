@@ -50,8 +50,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class StackMobRequest {
-
-    public static final int defaultRetryAfterMilliseconds = 30000;
+    
     public static final List<Map.Entry<String, String>> EmptyHeaders = new ArrayList<Map.Entry<String, String>>();
     public static final Map<String, String> EmptyParams = new HashMap<String, String>();
 
@@ -110,7 +109,6 @@ public abstract class StackMobRequest {
         GsonBuilder gsonBuilder = new GsonBuilder()
                                   .registerTypeAdapter(StackMobPushToken.class, new StackMobPushTokenDeserializer())
                                   .registerTypeAdapter(StackMobPushToken.class, new StackMobPushTokenSerializer())
-                                  .registerTypeAdapter(StackMobModel.class, new StackMobModel.Adapter())
                                   .registerTypeAdapter(StackMobNull.class, new StackMobNull.Adapter())
                                   .excludeFieldsWithModifiers(Modifier.PRIVATE, Modifier.PROTECTED, Modifier.TRANSIENT, Modifier.STATIC);
         gson = gsonBuilder.create();
@@ -445,41 +443,20 @@ public abstract class StackMobRequest {
                             if(Http.isSuccess(ret.getCode())) {
                                 cookieStore.storeCookies(ret);
                             }
-                            boolean retried = false;
-                            if(Http.isUnavailable(ret.getCode())) {
-                                int afterMilliseconds = defaultRetryAfterMilliseconds;
-                                for(Map.Entry<String, String> headerPair : headers) {
-                                    if(Http.isRetryAfterHeader(headerPair.getKey())) {
-                                        try {
-                                            int candidateMilliseconds = Integer.parseInt(headerPair.getValue());
-                                            if(candidateMilliseconds > 0) {
-                                                afterMilliseconds = candidateMilliseconds;
-                                            }
-                                        } catch(Throwable ignore) { }
-                                    }
+                            if(ret.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED && canDoRefreshToken()) {
+                                refreshTokenAndResend();
+                            } else {
+                                try {
+                                    cb.setDone(getRequestVerb(req),
+                                            req.getUrl(),
+                                            getRequestHeaders(req),
+                                            req.getBodyContents(),
+                                            ret.getCode(),
+                                            headers,
+                                            ret.getBody().getBytes());
                                 }
-                                if(cb.getRetriesRemaining() > 0 && cb.retry(afterMilliseconds)) {
-                                    cb.setRetriesRemaining(cb.getRetriesRemaining() - 1);
-                                    sendRequest();
-                                    retried = true;
-                                }
-                            }
-                            if(!retried) {
-                                if(ret.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED && canDoRefreshToken()) {
-                                    refreshTokenAndResend();
-                                } else {
-                                    try {
-                                        cb.setDone(getRequestVerb(req),
-                                                req.getUrl(),
-                                                getRequestHeaders(req),
-                                                req.getBodyContents(),
-                                                ret.getCode(),
-                                                headers,
-                                                ret.getBody().getBytes());
-                                    }
-                                    catch(Throwable t) {
-                                        StackMob.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
-                                    }
+                                catch(Throwable t) {
+                                    StackMob.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
                                 }
                             }
                         }

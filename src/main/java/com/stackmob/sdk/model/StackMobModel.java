@@ -40,19 +40,6 @@ import java.util.*;
 
 public abstract class StackMobModel {
 
-    public static class Adapter extends TypeAdapter<StackMobModel> {
-
-        @Override
-        public void write(JsonWriter jsonWriter, StackMobModel model) throws IOException {
-            getGson().toJson(model.toJsonElement(0, new RelationMapping()), jsonWriter);
-        }
-
-        @Override
-        public StackMobModel read(JsonReader jsonReader) throws IOException {
-            throw new UnsupportedOperationException("Cannot read a raw StackMobModel from json");
-        }
-    }
-
     /**
      * Run a query on the server to get all the instances of your model within certain constraints
      * @param theClass The class of your model
