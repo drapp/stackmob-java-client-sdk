@@ -23,7 +23,7 @@ import com.stackmob.sdk.util.Http;
 import java.util.List;
 import java.util.Map;
 
-public abstract class StackMobCountCallback extends StackMobCallback{
+public abstract class StackMobCountCallback extends StackMobCallback {
     @Override
     public void done(HttpVerb requestVerb,
                                String requestURL,
