@@ -1,6 +1,6 @@
 # Stackmob Java SDK (Release Notes)
 
-### 0.5.5 (08/22/2012)
+### 0.5.6 (08/22/2012)
 * Retry callback for 503 errors
 * Bugfixes
 
