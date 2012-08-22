@@ -54,6 +54,7 @@ public abstract class StackMobRequest {
     public static final List<Map.Entry<String, String>> EmptyHeaders = new ArrayList<Map.Entry<String, String>>();
     public static final Map<String, String> EmptyParams = new HashMap<String, String>();
 
+    public static final int DEFAULT_RETRY_AFTER_MILLIS = 30000;
     public static final String DEFAULT_URL_FORMAT = "mob1.stackmob.com";
     public static final String DEFAULT_API_URL_FORMAT = "api." + DEFAULT_URL_FORMAT;
     public static final String DEFAULT_PUSH_URL_FORMAT = "push." + DEFAULT_URL_FORMAT;
@@ -443,20 +444,41 @@ public abstract class StackMobRequest {
                             if(Http.isSuccess(ret.getCode())) {
                                 cookieStore.storeCookies(ret);
                             }
-                            if(ret.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED && canDoRefreshToken()) {
-                                refreshTokenAndResend();
-                            } else {
-                                try {
-                                    cb.setDone(getRequestVerb(req),
-                                            req.getUrl(),
-                                            getRequestHeaders(req),
-                                            req.getBodyContents(),
-                                            ret.getCode(),
-                                            headers,
-                                            ret.getBody().getBytes());
+                            boolean retried = false;
+                            if(Http.isUnavailable(ret.getCode())) {
+                                int afterMilliseconds = DEFAULT_RETRY_AFTER_MILLIS;
+                                for(Map.Entry<String, String> headerPair : headers) {
+                                    if(Http.isRetryAfterHeader(headerPair.getKey())) {
+                                        try {
+                                            int candidateMilliseconds = Integer.parseInt(headerPair.getValue());
+                                            if(candidateMilliseconds > 0) {
+                                                afterMilliseconds = candidateMilliseconds;
+                                            }
+                                        } catch(Throwable ignore) { }
+                                    }
                                 }
-                                catch(Throwable t) {
-                                    StackMob.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
+                                if(cb.getRetriesRemaining() > 0 && cb.retry(afterMilliseconds)) {
+                                    cb.setRetriesRemaining(cb.getRetriesRemaining() - 1);
+                                    sendRequest();
+                                    retried = true;
+                                }
+                            }
+                            if(!retried) {
+                                if(ret.getCode() == HttpURLConnection.HTTP_UNAUTHORIZED && canDoRefreshToken()) {
+                                    refreshTokenAndResend();
+                                } else {
+                                    try {
+                                        cb.setDone(getRequestVerb(req),
+                                                req.getUrl(),
+                                                getRequestHeaders(req),
+                                                req.getBodyContents(),
+                                                ret.getCode(),
+                                                headers,
+                                                ret.getBody().getBytes());
+                                    }
+                                    catch(Throwable t) {
+                                        StackMob.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
+                                    }
                                 }
                             }
                         }
