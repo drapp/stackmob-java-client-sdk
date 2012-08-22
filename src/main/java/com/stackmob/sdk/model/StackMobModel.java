@@ -62,9 +62,14 @@ public abstract class StackMobModel {
      * @throws StackMobException
      */
     public static <T extends StackMobModel> T newFromJson(Class<T> classOfT, String json) throws StackMobException {
-        T newObject = new Gson().fromJson("{}", classOfT);
-        newObject.setActualClass(classOfT);
+        T newObject = newInstance(classOfT);
         newObject.fillFromJson(json);
+        return newObject;
+    }
+
+    private static <T extends StackMobModel> T newInstance(Class<T> classOfT) {
+        T newObject = new Gson().fromJson("{}", classOfT);
+        newObject.init(classOfT);
         return newObject;
     }
 
@@ -109,6 +114,10 @@ public abstract class StackMobModel {
     }
 
     public StackMobModel(Class<? extends StackMobModel> actualClass) {
+        init(actualClass);
+    }
+
+    private void init(Class<? extends StackMobModel> actualClass) {
         this.actualClass = actualClass;
         schemaName = actualClass.getSimpleName().toLowerCase();
         ensureValidModelName(schemaName);
@@ -188,7 +197,7 @@ public abstract class StackMobModel {
                         StackMobModel relatedModel = (StackMobModel) field.get(this);
                         // If there's a model with the same id, keep it. Otherwise create a new one
                         if(relatedModel == null || !relatedModel.hasSameID(json)) {
-                            relatedModel = (StackMobModel) field.getType().newInstance();
+                            relatedModel = newInstance((Class<? extends StackMobModel>) field.getType());
                         }
                         relatedModel.fillFromJson(json);
                         field.set(this, relatedModel);
@@ -278,7 +287,7 @@ public abstract class StackMobModel {
         List<StackMobModel> result = new ArrayList<StackMobModel>();
         for(JsonElement json : array) {
             StackMobModel model = getExistingModel(existingModels, json);
-            if(model == null) model = modelClass.newInstance();
+            if(model == null) model = newInstance(modelClass);
             model.fillFromJson(json);
             result.add(model);
         }

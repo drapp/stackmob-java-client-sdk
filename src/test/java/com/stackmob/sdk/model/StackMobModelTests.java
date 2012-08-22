@@ -40,15 +40,12 @@ public class StackMobModelTests extends StackMobTestCommon {
     /* Offline */
 
     private static class Simple extends StackMobModel {
-        public Simple() {
-            super(Simple.class);
-        }
         public Simple(Class<? extends StackMobModel> actualClass) {
             super(actualClass);
         }
         
         public Simple(String id) {
-            this();
+            super(Simple.class);
             setID(id);
         }
         public Simple(String id, String foo, int bar) {
@@ -61,7 +58,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     }
     
     @Test public void testBasicBehavior() throws Exception {
-        Simple simple = new Simple();
+        Simple simple = new Simple("foo");
         assertEquals("simple", simple.getSchemaName());
         assertEquals("simple_id", simple.getIDFieldName());
         RelationMapping mapping = new RelationMapping();
@@ -293,7 +290,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     }
 
     @Test public void testHasSameID() {
-        Simple simple = new Simple();
+        Simple simple = new Simple("bar");
         assertFalse(simple.hasSameID(new JsonPrimitive("foo")));
         simple.setID("foo");
         assertTrue(simple.hasSameID(new JsonPrimitive("foo")));
@@ -345,7 +342,6 @@ public class StackMobModelTests extends StackMobTestCommon {
         assertEquals("blah",((Simple)insertUpdated.get(0)).getID());
         assertEquals("blah",((Simple)insertUpdated.get(0)).foo);
         assertEquals("arg",((Simple)insertUpdated.get(1)).getID());
-        assertEquals("test", ((Simple) insertUpdated.get(1)).foo);
         assertEquals("foo", ((Simple) insertUpdated.get(2)).getID());
         assertEquals("foo",((Simple)insertUpdated.get(2)).foo);
         assertEquals("baz",((Simple)insertUpdated.get(3)).getID());
@@ -505,7 +501,7 @@ public class StackMobModelTests extends StackMobTestCommon {
 
 
     @Test public void testFullSequence() throws Exception {
-        final Author author = new Author();
+        final Author author = new Author("bob");
         author.setName("Larry Wall");
         author.save(new AssertErrorCallback() {
             @Override
