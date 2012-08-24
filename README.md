@@ -38,7 +38,7 @@ Download the [StackMob Java SDK](http://search.maven.org/remotecontent?filepath=
 
 # Making REST API Calls
 
-The main interface to your app on StackMob's servers is through the ``` com.stackmob.sdk.api.StackMob ``` object. Check out the [javadoc](http://stackmob.github.com/stackmob-java-client-sdk/javadoc/0./apidocs/) for details.
+The main interface to your app on StackMob's servers is through the ``` com.stackmob.sdk.api.StackMob ``` object. Check out the [javadoc](http://stackmob.github.com/stackmob-java-client-sdk/javadoc/0.5.6/apidocs/) for details.
 The following code shows basic use of the StackMob object.
 
 ```java
