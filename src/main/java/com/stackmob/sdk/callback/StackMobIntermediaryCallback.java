@@ -17,8 +17,17 @@ package com.stackmob.sdk.callback;
 
 import com.stackmob.sdk.exception.StackMobException;
 
+/**
+ * A callback that allows you to inject some logic before the actual callback is called. This is useful when you want to reuse some standard
+ * callbacks but inject some custom logic in various places. This is a specialized class and most apps will never need it.
+ */
 public class StackMobIntermediaryCallback extends StackMobCallback {
     private StackMobCallback furtherCallback;
+
+    /**
+     * Create a callback that by default just passes through to the given callback
+     * @param furtherCallback the callback that should receive messages in the end
+     */
     public StackMobIntermediaryCallback(StackMobCallback furtherCallback) {
         this.furtherCallback = furtherCallback;
     }
@@ -27,11 +36,19 @@ public class StackMobIntermediaryCallback extends StackMobCallback {
         return this.furtherCallback;
     }
 
+    /**
+     * override and call super to inject custom logic before success
+     * @param responseBody the response string received from StackMob
+     */
     @Override
     public void success(String responseBody) {
         furtherCallback.success(responseBody);
     }
 
+    /**
+     * override and call super to inject custom logic before failure
+     * @param e a representation of the error that occurred
+     */
     @Override
     public void failure(StackMobException e) {
         furtherCallback.failure(e);

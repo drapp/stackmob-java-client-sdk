@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-public class StackMobRequestWithPayload extends StackMobRequest {
+class StackMobRequestWithPayload extends StackMobRequest {
     private String body;
     private Object requestObject;
 

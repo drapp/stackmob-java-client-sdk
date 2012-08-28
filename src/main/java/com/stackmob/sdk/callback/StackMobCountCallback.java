@@ -23,6 +23,11 @@ import com.stackmob.sdk.util.Http;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * A callback function meant specifically for {@link com.stackmob.sdk.api.StackMob#count(String, StackMobRawCallback)}.
+ * It functions like a regular {@link StackMobCallback}, but its success method takes a long rather than a String, saving
+ * you some parsing.
+ */
 public abstract class StackMobCountCallback extends StackMobCallback {
     @Override
     public void done(HttpVerb requestVerb,
@@ -39,6 +44,10 @@ public abstract class StackMobCountCallback extends StackMobCallback {
 
     }
 
+    /**
+     * override this method to receive a number as the result of a successful StackMob call
+     * @param count the result of the count operation
+     */
     abstract public void success(long count);
 
     public void success(String count){}

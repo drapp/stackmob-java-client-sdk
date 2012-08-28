@@ -24,6 +24,25 @@ import com.stackmob.sdk.util.Http;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The basic callback class for responding to asynchronous StackMob calls. Most methods in the {@link com.stackmob.sdk.api.StackMob}
+ * class take one of these as an argument. It's standard practice to subclass on the fly.
+ * <pre>
+ * {@code
+ * stackmob.doSomething(argument, new StackMobCallback() {
+ *     public void success(String responseBody) {
+ *         assertNotNull(responseBody);
+ *         latch.countDown();
+ *     }
+ *
+ *     public void failure(StackMobException e) {
+ *         fail(e.getMessage());
+ *     }
+ * }
+ * }
+ * </pre>
+ * When a callback is invoked you will generally not be in the main thread, so react accordingly.
+ */
 public abstract class StackMobCallback extends StackMobRawCallback {
     @Override
     public void done(HttpVerb requestVerb,
@@ -41,6 +60,15 @@ public abstract class StackMobCallback extends StackMobRawCallback {
         }
     }
 
+    /**
+     * override this method to handles cases where a call has succeeded.
+     * @param responseBody the response string received from StackMob
+     */
     abstract public void success(String responseBody);
+
+    /**
+     * override this method to handle errors
+     * @param e a representation of the error that occurred
+     */
     abstract public void failure(StackMobException e);
 }

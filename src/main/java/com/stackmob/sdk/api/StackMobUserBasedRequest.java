@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-public class StackMobUserBasedRequest extends StackMobRequest {
+class StackMobUserBasedRequest extends StackMobRequest {
 
     private Object requestObject;
 

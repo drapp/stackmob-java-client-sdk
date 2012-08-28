@@ -33,10 +33,33 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * The StackMob object is your interface for accessing StackMob's many features. Its functions include:
+ * <ul>
+ * <li>Logging in and managing user sessions</li>
+ * <li>Datastore API Methods</li>
+ * <li>Push API Requests</li>
+ * </ul>
+ * <p>
+ * A StackMob instance is created with authorization credentials along with some optional configuration
+ * parameters. To use different configurations in one app, simply instantiate multiple StackMob objects.
+ */
 public class StackMob {
 
+    /**
+     * Describes the two different OAuth versions the SDK can use. The Push API currently only supports
+     * OAuth1 and will use that regardless of this setting.
+     */
     public static enum OAuthVersion {
+        /**
+         * OAuth1 uses a private key embedded in your app to authenticate. Apps authenticated like this
+         * have authorization overriding any Access Controls you may have set up. This setting is
+         * recommended for admin consoles only, and not for production apps.
+         */
         One,
+        /**
+         * OAuth2 authenticates individual users
+         */
         Two
     }
 
@@ -287,6 +310,10 @@ public class StackMob {
         this.pushUrlFormat = pushUrlFormat;
     }
 
+    /**
+     * Copy constructor
+     * @param other the StackMob to copy
+     */
     public StackMob(StackMob other) {
         this.session = other.session;
         this.userRedirectedCallback = other.redirectedCallback;
@@ -295,6 +322,11 @@ public class StackMob {
         this.executor = other.executor;
     }
 
+    /**
+     * Sets the type of push this StackMob instance will do. The default is
+     * GCM. Use this to switch back to C2DM if you need to
+     * @param type C2DM or GCM
+     */
     public void setPushType(PushType type) {
         this.defaultPushType = type;
     }
@@ -333,6 +365,13 @@ public class StackMob {
         return req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
+    /**
+     * Refresh the current OAuth2 login. This oridinarily happens automatically, but this method
+     * can give you finer control if you need it. Logins last an hour by default. Once they expire
+     * they need to be refreshed. Make sure not to send multiple refresh token requests.
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
+     */
     public StackMobRequestSendResult refreshToken(StackMobRawCallback callback) {
         if(!getSession().isOAuth2()) {
             return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new StackMobException("This method is only available with oauth2"));

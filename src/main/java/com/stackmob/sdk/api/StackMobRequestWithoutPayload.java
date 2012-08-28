@@ -24,7 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.Map;
 import java.util.List;
 
-public class StackMobRequestWithoutPayload extends StackMobRequest {
+class StackMobRequestWithoutPayload extends StackMobRequest {
     public StackMobRequestWithoutPayload(ExecutorService executor,
                                          StackMobSession session,
                                          HttpVerbWithoutPayload verb,

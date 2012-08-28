@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-public class StackMobAccessTokenRequest extends StackMobRequest {
+class StackMobAccessTokenRequest extends StackMobRequest {
 
     public static StackMobAccessTokenRequest newRefreshTokenRequest(ExecutorService executor, StackMobSession session, StackMobRedirectedCallback redirectedCallback, StackMobRawCallback callback) {
 

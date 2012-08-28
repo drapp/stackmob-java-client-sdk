@@ -22,6 +22,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The most basic callback you can supply to StackMob methods. This is a specialized method, {@link StackMobCallback} should be
+ * used in most cases. This callback receives every detail of the request and response, for cases when you want to check header
+ * values or get other information.
+ */
 public abstract class StackMobRawCallback {
 
     protected HttpVerb requestVerb;

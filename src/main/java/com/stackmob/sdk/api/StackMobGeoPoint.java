@@ -13,20 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.stackmob.sdk.callback;
+package com.stackmob.sdk.api;
 
-import com.stackmob.sdk.exception.StackMobException;
+import com.stackmob.sdk.util.GeoPoint;
 
 /**
- * A callback that does absolutely nothing regardless of success or failure. Supply
- * this to StackMob calls when you don't care about the results
- * @see StackMobCallback
+ *
  */
-public class StackMobNoopCallback extends StackMobCallback {
-
-    @Override
-    public void success(String responseBody) { }
-
-    @Override
-    public void failure(StackMobException e) { }
+public class StackMobGeoPoint extends GeoPoint {
+    public StackMobGeoPoint(Double lon, Double lat) {
+        super(lon, lat);
+    }
 }

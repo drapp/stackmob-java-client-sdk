@@ -74,7 +74,7 @@ public abstract class StackMobModel {
     }
 
 
-    public static class DateAsNumberTypeAdapter extends TypeAdapter<Date> {
+    private static class DateAsNumberTypeAdapter extends TypeAdapter<Date> {
 
         @Override
         public void write(JsonWriter jsonWriter, Date date) throws IOException {
