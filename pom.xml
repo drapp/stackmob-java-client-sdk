@@ -182,6 +182,7 @@
 			    <show>protected</show>
 			    <source>1.5</source>
 			    <sourcepath>${basedir}/src/main/java/com/stackmob/sdk/api;${basedir}/src/main/java/com/stackmob/sdk/callback;${basedir}/src/main/java/com/stackmob/sdk/exception;${basedir}/src/main/java/com/stackmob/sdk/model;${basedir}/src/main/java/com/stackmob/sdk/push</sourcepath>
+				<stylesheetfile>${basedir}/src/main/resources/stylesheet.css</stylesheetfile>
 			  </configuration>
 		</plugin>
 	  </plugins>
