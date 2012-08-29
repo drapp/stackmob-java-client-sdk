@@ -49,6 +49,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The base class for StackMob's internal representation of a request. This class is only meant to be used inside the sdk
+ */
 public abstract class StackMobRequest {
     
     public static final List<Map.Entry<String, String>> EmptyHeaders = new ArrayList<Map.Entry<String, String>>();
