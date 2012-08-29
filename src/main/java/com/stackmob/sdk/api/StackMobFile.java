@@ -18,10 +18,19 @@ package com.stackmob.sdk.api;
 
 import com.stackmob.sdk.util.BinaryFieldFormatter;
 
+/**
+ * Represents binary data to be uploaded to StackMob and hosted on S3 as a file.
+ */
 public class StackMobFile {
     
     private String value;
-    
+
+    /**
+     * create a StackMobFile with the information needed for the corresponding S3 file
+     * @param contentType The content type of the file to be created
+     * @param fileName The filename of the file to be created
+     * @param bytes The bytes of the file to be created
+     */
     public StackMobFile(String contentType, String fileName, byte[] bytes) {
         BinaryFieldFormatter formatter = new BinaryFieldFormatter(contentType, fileName, bytes);
         value = formatter.getJsonValue();

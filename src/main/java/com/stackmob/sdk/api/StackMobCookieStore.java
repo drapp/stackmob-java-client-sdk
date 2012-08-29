@@ -27,6 +27,9 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Used internally by the sdk to manage OAuth1 cookies.
+ */
 public class StackMobCookieStore {
 
     protected static final String SetCookieHeaderKey = "Set-Cookie";

@@ -20,6 +20,10 @@ import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 
 import java.util.Map;
 
+/**
+ * Sets defaults for newly create StackMob objects. This class is meant to be filled in when using the SDK source directly, and isn't useful when working
+ * with the SDK as a jar. For Android, use StackMobCommon.init instead.
+ */
 public class StackMobConfiguration {
 
     public static final OAuthVersion OAUTH_VERSION = OAuthVersion.Two;
@@ -37,13 +41,13 @@ public class StackMobConfiguration {
 
     public static boolean ENABLE_LOGGING = false;
 
-    public static StackMobRedirectedCallback redirectedCallback = new StackMobRedirectedCallback() {
+    private static StackMobRedirectedCallback redirectedCallback = new StackMobRedirectedCallback() {
         @Override public void redirected(String originalURL, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
             //do nothing for now
         }
     };
     
-    public static StackMob newStackMob() {
+    static StackMob newStackMob() {
         StackMob stackmob = new StackMob(OAUTH_VERSION,
                                          API_KEY,
                                          API_SECRET,
