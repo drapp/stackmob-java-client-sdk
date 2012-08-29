@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2012 StackMob
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,10 @@ import com.stackmob.sdk.push.StackMobPushToken;
 
 import java.util.*;
 
+/**
+ * A specialized subclass of StackMobModel to represent users of your app. Extend this class with the fields you want and you have an object that knows how to do logins as
+ * well as synchronize itself with the cloud.
+ */
 public class StackMobUser extends StackMobModel {
 
     /**

@@ -35,6 +35,110 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 
+/**
+ * The base class for StackMob data objects. Extend this class with the fields you want, and you have an object that knows how to synchronize itself with the cloud
+ *
+ * <pre>
+ * {@code
+ * public class Task extends StackMobModel {
+ *     private String name;
+ *     private Date dueDate;
+ *     private int priority;
+ *     private boolean done;
+ *
+ *     public Task(String name) {
+ *         super(Task.class);
+ *         this.name = name;
+ *     }
+ *
+ *     //Add whatever setters/getters/other functionality you want here
+ * }
+ * }
+ * </pre>
+ *
+ * You can then create objects, manipulate them, and save/load them whenever you want
+ *
+ * <pre>
+ * {@code
+ * Task myTask = new Task("write javadocs");
+ * myTask.save();
+ *
+ * // ... do other stuff
+ *
+ * myTask.fetch(new StackMobModelCallback() {
+ *     public void success() {
+ *         // The blogPostTask object is now filled in with data.
+ *         // You can ignore the responseBody argument.
+ *     }
+ *
+ *     public void failure(StackMobException e) {
+ *         // handle failure case
+ *     }
+ * });
+ * }
+ * </pre>
+ *
+ * You can also do complex queries and get model classes back as a result:
+ * <pre>
+ * {@code
+ * // Add constraints
+ * StackMobModelQuery<Task> highPriorityQuery = new StackMobModelQuery<Task>(Task.class).field(new StackMobField("priority").isGreaterThanOrEqualTo( 3).isLessThan(6)).fieldIsEqualTo("done", false);
+ *
+ * // Do an actual query
+ * Task.query(highPriorityQuery, new StackMobQueryCallback<Task>() {
+ *     public void success(List<Task> result) {
+ *         // handle success
+ *     }
+ *
+ *     public void failure(StackMobException e) {
+ *         // handle failure
+ *     }
+ * });
+ * }
+ * </pre>
+ *
+ * If you use model classes as fields, you end up with a tree-like structure that you can save/load to any depth
+ *
+ * <pre>
+ * {@code
+ * public class TaskList extends StackMobModel {
+ *     private String name;
+ *     private List<Task> tasks = new ArrayList<Task>();
+ *     public TaskList(String name, List<Task> tasks) {
+ *         super(TaskList.class);
+ *         this.name = name;
+ *         this.tasks = tasks;
+ *     }
+ * }
+ *
+ * Task javadocsTask = new Task("Write javadocs");
+ * Task proofreadTask = new Task("Proofread");
+ * TaskList blogTasks = new TaskList("Blog Tasks", Arrays.asList(blogPostTask, proofreadTask));
+ * blogTasks.saveWithDepth(1);
+ * }
+ * </pre>
+ *
+ * Fields in a model can be any of the following:
+ *
+ * <ul>
+ * <li> Java primitives/Strings</li>
+ * <li> java.util.Date, java.math.BigInteger, java.math.BigDecimal</li>
+ * <li> Classes extending StackMobModel</li>
+ * <li> Arrays and java Collections of the above</li>
+ * </ul>
+ *
+ * Models are not inherently thread-safe; since they're just objects there's
+ * nothing to stop you from accessing/modifying fields while fetch is in the
+ * middle of updating them, or modifying an array field from different threads
+ * and overwriting yourself. It's up to you to use standard thread-safety
+ * procedures when dealing with models like you would with any java object.
+ *
+ *
+ * Class and field names must be alphanumeric (no underscores) and at least three characters. If your model class has any required initialization it should happen in a zero args constructor. When
+ * objects are created during queries and fetches field initialization may not happen, and other constructors may not be called.
+ *
+ *
+ */
 public abstract class StackMobModel {
 
     /**
@@ -123,11 +227,20 @@ public abstract class StackMobModel {
     private transient boolean hasData;
     private static final Gson gson = getGson();
 
+    /**
+     * create a new model of the specified class with an id overriding the default, automatically
+     * generated one. This should be called by the subclass constructor.
+     * @param actualClass The subclass, specified because of type erasure
+     */
     public StackMobModel(String id, Class<? extends StackMobModel> actualClass) {
         this(actualClass);
         this.id = id;
     }
 
+    /**
+     * create a new model of the specified class. This must be called by the subclass constructor.
+     * @param actualClass The subclass, specified because of type erasure
+     */
     public StackMobModel(Class<? extends StackMobModel> actualClass) {
         init(actualClass);
     }
@@ -165,16 +278,29 @@ public abstract class StackMobModel {
     private String getFieldName(String jsonName) {
         return getFieldNameFromJsonName(actualClass, jsonName);
     }
-    
+
+    /**
+     * set the object's id. The id is a special field used as a primary key for an object. If not
+     * specified this will be automatically generated when the object is saved
+     * @param id the primary key of the object
+     */
     public void setID(String id) {
         this.id = id;
     }
-    
+
+    /**
+     * get the object's id. This was either set manually or generated on save
+     * @return the primary key of the object
+     */
     public String getID() {
         return id;
     }
 
-    protected void setActualClass(Class<? extends StackMobModel> actualClass) {
+    /**
+     * set the actual subclass of this model
+     * @param actualClass the actual subclass
+     */
+    void setActualClass(Class<? extends StackMobModel> actualClass) {
         this.actualClass = actualClass;
     }
 
@@ -188,15 +314,27 @@ public abstract class StackMobModel {
         return schemaName;
     }
 
+    /**
+     * Determines the field name for the primary key on the server. By
+     * default it's the name of the class in lower case plus "_id". Override
+     * in subclasses to change that. Must be 3-25 alphanumeric characters
+     * @return the id field name
+     */
     public String getIDFieldName() {
         return schemaName +"_id";
     }
 
+    /**
+     * Check if the object has been loaded with data or if it's just a stub with an id.
+     * Objects can end up as stubs if you load an object tree to less than its full depth. Objects
+     * without data shouldn't be used except to check the id or fetch data
+     * @return whether or not this object has data
+     */
     public boolean hasData() {
         return hasData;
     }
     
-    protected void fillFieldFromJson(String jsonName, JsonElement json) throws StackMobException {
+    private void fillFieldFromJson(String jsonName, JsonElement json) throws StackMobException {
         try {
             if(jsonName.equals(getIDFieldName())) {
                 // The id field is special, its name doesn't match the field
@@ -251,7 +389,7 @@ public abstract class StackMobModel {
     /**
      * Turns a field which is either an Array or Collection of StackMobModels and turns in into a collection
      */
-    protected Collection<StackMobModel> getFieldAsCollection(Field field) throws IllegalAccessException {
+    Collection<StackMobModel> getFieldAsCollection(Field field) throws IllegalAccessException {
         if(field.getType().isArray()) {
             // grab the existing collection/array if there is one. We want to reuse any existing objects.
             // Otherwise we might end up clobbering a full object with just an id.
@@ -265,7 +403,7 @@ public abstract class StackMobModel {
     /**
      * Sets a field which is either an Array or Collection of StackMobModels using a list
      */
-    protected void setFieldFromList(Field field, List<? extends StackMobModel> list, Class<? extends StackMobModel> modelClass) throws IllegalAccessException, InstantiationException {
+    void setFieldFromList(Field field, List<? extends StackMobModel> list, Class<? extends StackMobModel> modelClass) throws IllegalAccessException, InstantiationException {
         // We want to reuse the existing collection if at all possible
         if(field.getType().isArray()) {
             StackMobModel[] modelArray = (StackMobModel[]) field.get(this);
@@ -298,7 +436,7 @@ public abstract class StackMobModel {
         field.set(this,gson.fromJson("[]", field.getType()));
     }
     
-    protected static List<StackMobModel> updateModelListFromJson(JsonArray array, Collection<? extends StackMobModel> existingModels, Class<? extends StackMobModel> modelClass) throws IllegalAccessException, InstantiationException, StackMobException {
+    static List<StackMobModel> updateModelListFromJson(JsonArray array, Collection<? extends StackMobModel> existingModels, Class<? extends StackMobModel> modelClass) throws IllegalAccessException, InstantiationException, StackMobException {
         List<StackMobModel> result = new ArrayList<StackMobModel>();
         for(JsonElement json : array) {
             StackMobModel model = getExistingModel(existingModels, json);
@@ -315,7 +453,7 @@ public abstract class StackMobModel {
      * @param json
      * @return
      */
-    protected static StackMobModel getExistingModel(Collection<? extends StackMobModel> oldList, JsonElement json) {
+    static StackMobModel getExistingModel(Collection<? extends StackMobModel> oldList, JsonElement json) {
         if(oldList != null) {
             //First try to find the existing model in the list
             for(StackMobModel model : oldList) {
@@ -344,15 +482,22 @@ public abstract class StackMobModel {
         }
         throw new NoSuchFieldException(fieldName);
     }
-    
+
+    /**
+     * fill the objects fields in from a json string. This isn't necessary during normal usage of a model class, but can be useful
+     * if you've had to serialize the class for some reason
+     * @param jsonString a json string as produced by {@link #toJson()}
+     * @throws StackMobException
+     */
     public void fillFromJson(String jsonString) throws StackMobException {
         fillFromJson(new JsonParser().parse(jsonString));
     }
 
-    protected void fillFromJson(JsonElement json) throws StackMobException {
+    void fillFromJson(JsonElement json) throws StackMobException {
         fillFromJson(json, null);
     }
-    protected void fillFromJson(JsonElement json, List<String> selection) throws StackMobException {
+
+    void fillFromJson(JsonElement json, List<String> selection) throws StackMobException {
         if(json.isJsonPrimitive()) {
             //This ought to be an unexpanded relation then
             setID(json.getAsJsonPrimitive().getAsString());
@@ -371,7 +516,7 @@ public abstract class StackMobModel {
      * @param json
      * @return
      */
-    protected boolean hasSameID(JsonElement json) {
+    boolean hasSameID(JsonElement json) {
         if(getID() == null) return false;
         if(json.isJsonPrimitive()) {
             return getID().equals(json.getAsJsonPrimitive().getAsString());
@@ -380,7 +525,7 @@ public abstract class StackMobModel {
         return idFromJson != null && getID().equals(idFromJson.getAsString());
     }
     
-    protected void setID(JsonElement json) {
+    void setID(JsonElement json) {
         if(json.isJsonPrimitive()) {
             setID(json.getAsJsonPrimitive().getAsString());
         } else {
@@ -469,11 +614,20 @@ public abstract class StackMobModel {
         }
         return outgoing;
     }
-    
+
+    /**
+     * Converts the model into its Json representation. This method is used internally while communicating with the cloud, but can also come in handy anytime you need a string representation of your model objects, such as passing them around in Intents on Android.
+     * @return a json representation of the object
+     */
     public String toJson() {
         return toJsonWithDepth(0);
     }
-    
+
+    /**
+     * Converts the model into its Json representation, expanding any sub-objects to the given depth. Be sure to use the right depth, or you'll end up with empty sub-objects.
+     * @param depth the depth to expand to
+     * @return a json representation of the object and its children to the depth
+     */
     public String toJsonWithDepth(int depth) {
         return toJsonWithDepth(depth, new RelationMapping());
     }
@@ -485,19 +639,39 @@ public abstract class StackMobModel {
     protected String toJsonWithDepth(int depth, RelationMapping mapping) {
         return toJsonElement(depth, mapping).toString();
     }
-    
+
+    /**
+     * Reload the object from the server. This version is not recommended since it gives no indication of when the load is complete. This is not thread safe, make
+     * sure the object isn't disturbed during the load.
+     */
     public void fetch() {
         fetch(new StackMobNoopCallback());
     }
 
-    public void load(int depth) {
+    /**
+     * Reload the object from the server to the given depth. This version is not recommended since it gives no indication of when the load is complete. This is not thread safe, make
+     * sure the object isn't disturbed during the load.
+     * @param depth the depth to expand to
+     */
+    public void fetch(int depth) {
         fetchWithDepth(depth, new StackMobNoopCallback());
     }
 
+    /**
+     * Reload the object from the server. This is not thread safe, make
+     * sure the object isn't disturbed during the load.
+     * @param callback invoked when the load is complete
+     */
     public void fetch(StackMobCallback callback) {
         fetchWithDepth(0, callback);
     }
-    
+
+    /**
+     * Reload the object from the server to the given depth. This is not thread safe, make
+     * sure the object isn't disturbed during the load.
+     * @param depth the depth to expand to
+     * @param callback invoked when the load is complete
+     */
     public void fetchWithDepth(int depth, StackMobCallback callback) {
         Map<String,String> args = new HashMap<String, String>();
         if(depth > 0) args.put("_expand", String.valueOf(depth));
@@ -516,19 +690,35 @@ public abstract class StackMobModel {
             }
         });
     }
-    
+
+    /**
+     * Save the object to the server
+     */
     public void save() {
         save(new StackMobNoopCallback());
     }
 
+    /**
+     * Save the object and its children to the server to the given depth.
+     * @param depth the depth to expand to
+     */
     public void saveWithDepth(int depth) {
         saveWithDepth(depth, new StackMobNoopCallback());
     }
 
+    /**
+     * Save the object to the server
+     * @param callback invoked when the save is complete
+     */
     public void save(StackMobCallback callback) {
         saveWithDepth(0, callback);
     }
 
+    /**
+     * Save the object and its children to the server to the given depth.
+     * @param depth the depth to expand to
+     * @param callback invoked when the save is complete
+     */
     public void saveWithDepth(int depth, StackMobCallback callback) {
         RelationMapping mapping = new RelationMapping();
         String json = toJsonWithDepth(depth, mapping);
@@ -549,10 +739,17 @@ public abstract class StackMobModel {
         });
     }
 
+    /**
+     * delete the object from the server
+     */
     public void destroy() {
         destroy(new StackMobNoopCallback());
     }
 
+    /**
+     * delete the object from the server
+     * @param callback invoked when the delete is complete
+     */
     public void destroy(StackMobCallback callback) {
         StackMob.getStackMob().delete(getSchemaName(), id, callback);
     }

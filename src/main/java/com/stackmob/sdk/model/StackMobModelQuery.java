@@ -64,6 +64,7 @@ import java.util.List;
  *         // handle failure
  *     }
  * });
+ * }
  * </pre>
  *
  *
@@ -209,13 +210,6 @@ public class StackMobModelQuery<T extends StackMobModel>{
         query.fieldIsWithinBox(field, lowerLeft, upperRight);
         return this;
     }
-
-    /**
-     * add an "IN" to your query. test whether the given field's value is in the given list of possible values
-     * @param field the field whose value to test
-     * @param values the values against which to match
-     * @return the new query that resulted from adding this operation
-     */
 
     /**
      * add an "IN" to your query. test whether the given field's value is in the given list of possible values
