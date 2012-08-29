@@ -16,7 +16,13 @@
 
 package com.stackmob.sdk.api;
 
+/**
+ * Represents the success or failure of an attempt to send a request. This only captures the sending, not the response
+ */
 public class StackMobRequestSendResult {
+    /**
+     * Sent or Failed
+     */
     public static enum RequestSendStatus {
         SENT,
         FAILED
@@ -24,11 +30,20 @@ public class StackMobRequestSendResult {
 
     private RequestSendStatus status;
     private Throwable failureReason;
+
+    /**
+     * create a failed result
+     * @param status sent or failed
+     * @param failureReason what went wrong
+     */
     public StackMobRequestSendResult(RequestSendStatus status, Throwable failureReason) {
         this.status = status;
         this.failureReason = failureReason;
     }
 
+    /**
+     * create a successful result
+     */
     public StackMobRequestSendResult() {
         this(RequestSendStatus.SENT, null);
     }

@@ -26,6 +26,9 @@ import org.apache.commons.codec.binary.Base64;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Represent information about a users's login with StackMob. This class is only meant to be used within the SDK
+ */
 public class StackMobSession {
 
     private static String SIGNATURE_ALGORITHM = "HmacSHA1";

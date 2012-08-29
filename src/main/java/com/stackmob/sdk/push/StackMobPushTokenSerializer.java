@@ -23,6 +23,9 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import java.lang.reflect.Type;
 
+/**
+ * Serializes a push token
+ */
 public class StackMobPushTokenSerializer implements JsonSerializer<StackMobPushToken>{
     public JsonElement serialize(StackMobPushToken token, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject object = new JsonObject();

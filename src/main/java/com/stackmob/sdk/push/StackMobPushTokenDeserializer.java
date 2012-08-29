@@ -19,6 +19,9 @@ package com.stackmob.sdk.push;
 import com.google.gson.*;
 import java.lang.reflect.Type;
 
+/**
+ * Deserializes a push token
+ */
 public class StackMobPushTokenDeserializer implements JsonDeserializer<StackMobPushToken> {
     public StackMobPushToken deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
         JsonObject obj = json.getAsJsonObject();
