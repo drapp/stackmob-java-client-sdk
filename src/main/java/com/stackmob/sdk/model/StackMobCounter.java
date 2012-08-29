@@ -40,7 +40,7 @@ public class StackMobCounter {
     }
 
     /**
-     *
+     * get the current local value of the counter
      * @return the current local value of the counter
      */
     public synchronized int get() {
@@ -48,7 +48,7 @@ public class StackMobCounter {
     }
 
     /**
-     *
+     * get the value that will be use for incrementing the counter on the next save
      * @return the value that will be use for incrementing the counter on the next save
      */
     public synchronized int getIncrement() {

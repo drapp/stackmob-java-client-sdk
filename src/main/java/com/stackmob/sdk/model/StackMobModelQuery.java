@@ -27,6 +27,10 @@ import com.stackmob.sdk.util.GeoPoint;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @param <T>
+ */
 public class StackMobModelQuery<T extends StackMobModel>{
 
     Class<T> classOfT;

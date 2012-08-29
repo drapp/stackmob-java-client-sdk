@@ -75,7 +75,7 @@ public class StackMobQuery {
         }
     }
 
-    private static enum Operator {
+    static enum Operator {
         LT("lt"),
         GT("gt"),
         LTE("lte"),

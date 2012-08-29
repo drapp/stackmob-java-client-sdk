@@ -52,6 +52,7 @@ public class StackMobConfiguration {
                                          API_KEY,
                                          API_SECRET,
                                          USER_OBJECT_NAME,
+                                         null,
                                          API_VERSION,
                                          API_URL_FORMAT,
                                          PUSH_API_URL_FORMAT,

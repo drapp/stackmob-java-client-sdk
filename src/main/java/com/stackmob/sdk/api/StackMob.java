@@ -604,7 +604,6 @@ public class StackMob {
     }
 
     /**
-     /**
      * login to StackMob with Facebook credentials. The credentials should match a existing user object that has a linked Facebook
      * account, via either {@link #registerWithFacebookToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
      * {@link #linkUserWithFacebookToken(String, com.stackmob.sdk.callback.StackMobRawCallback)}

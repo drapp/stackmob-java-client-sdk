@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.stackmob.sdk;
+package com.stackmob.sdk.api;
 
+import com.stackmob.sdk.StackMobTestCommon;
 import com.stackmob.sdk.util.GeoPoint;
 import org.junit.Test;
 import static org.junit.Assert.*;
