@@ -952,13 +952,13 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        final StackMob.RegistrationIDAndUser tokenAndUser = new StackMob.RegistrationIDAndUser("0000000000000000000000000000000000000000000000000000000000000000", "bodie", StackMob.RegistrationIDAndUser.PLATFORM_IOS, true);
-        stackmob.postPush("register_device_token_universal", tokenAndUser, new StackMobCallback() {
+        final StackMobPushToken pushToken = new StackMobPushToken("0000000000000000000000000000000000000000000000000000000000000000", StackMobPushToken.TokenType.iOS);
+        stackmob.registerForPushWithUser("bodie", pushToken, true, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
 
-                stackmob.removePushToken(tokenAndUser.token.get("token"), StackMobPushToken.TokenType.Android, new StackMobCallback() {
+                stackmob.removePushToken(pushToken.getToken(), StackMobPushToken.TokenType.Android, new StackMobCallback() {
                     @Override
                     public void success(String responseBody) {
                         asserter.markNotJsonError(responseBody);

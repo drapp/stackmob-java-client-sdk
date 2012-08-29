@@ -47,8 +47,8 @@ import java.util.concurrent.Executors;
 public class StackMob {
 
     /**
-     * Describes the two different OAuth versions the SDK can use. The Push API currently only supports
-     * OAuth1 and will use that regardless of this setting.
+     * The two different OAuth versions the SDK can use for authentication. The Push API currently only supports
+     * OAuth1 and will use that regardless of which oauth version you're using.
      */
     public static enum OAuthVersion {
         /**
@@ -58,13 +58,22 @@ public class StackMob {
          */
         One,
         /**
-         * OAuth2 authenticates individual users
+         * OAuth2 authenticates individual users and allows user-based roles and access permissions.
          */
         Two
     }
 
+    /**
+     * Describes the two different Android Push systems the sdk can use.
+     */
     public static enum PushType {
+        /**
+         * The old, deprecated Android Push, included for legacy reasons.
+         */
         C2DM,
+        /**
+         * The new Android Push, used by default.
+         */
         GCM
     }
 
@@ -76,36 +85,33 @@ public class StackMob {
 
     private final Object urlFormatLock = new Object();
 
-    public static class RegistrationIDAndUser {
-        public static String PLATFORM_IOS = "ios";
-        public static String PLATFORM_ANDROID_C2DM = "android";
-        public static String PLATFORM_ANDROID_GCM = "androidGCM";
+     private static class RegistrationIDAndUser {
 
         public String userId;
         public Map<String, String> token = new HashMap<String, String>();
         public Boolean overwrite = null;
 
         public RegistrationIDAndUser(String registrationID, String user) {
-          this(registrationID, user, "android");
+          this(registrationID, user, StackMobPushToken.TokenType.Android);
         }
 
-        public RegistrationIDAndUser(String registrationID, String user, String platform) {
+        public RegistrationIDAndUser(String registrationID, String user, StackMobPushToken.TokenType platform) {
             userId = user;
             token.put("token", registrationID);
-            token.put("type", platform);
+            token.put("type", platform.toString());
         }
-        public RegistrationIDAndUser(String registrationID, String user, String platform, boolean overwrite) {
+        public RegistrationIDAndUser(String registrationID, String user, StackMobPushToken.TokenType platform, boolean overwrite) {
             this(registrationID, user, platform);
             this.overwrite = overwrite;
         }
 
         public RegistrationIDAndUser(String registrationID, String user, PushType type, boolean overwrite) {
-            this(registrationID, user, type == PushType.C2DM ? PLATFORM_ANDROID_C2DM : PLATFORM_ANDROID_GCM);
+            this(registrationID, user, type == PushType.C2DM ? StackMobPushToken.TokenType.AndroidC2DM : StackMobPushToken.TokenType.Android);
             this.overwrite = overwrite;
         }
 
         public RegistrationIDAndUser(String registrationID, String user, boolean overwrite) {
-            this(registrationID, user, "android", overwrite);
+            this(registrationID, user, StackMobPushToken.TokenType.Android, overwrite);
         }
     }
     
@@ -672,23 +678,22 @@ public class StackMob {
     }
 
     /**
-     * register a user for C2DM push notifications
-     * @param username the StackMob username to register
-     * @param registrationID the C2DM registration ID. see http://code.google.com/android/c2dm/#registering for detail on how to get this ID
+     * register a user for Android Push notifications. This uses GCM unless specified otherwise.
+     * @param username the StackMob username to associate with this token
+     * @param registrationID the GCM registration ID obtained from GCM see http://developer.android.com/guide/google/gcm/gcm.html#registering for detail on how to get this ID
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
     public StackMobRequestSendResult registerForPushWithUser(String username,
                                                              String registrationID,
                                                              StackMobRawCallback callback) {
-        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, defaultPushType, false);
-        return postPush("register_device_token_universal", tokenAndUser, callback);
+        return registerForPushWithUser(username, registrationID, false, callback);
     }
 
     /**
-     * register a user for C2DM push notifications
-     * @param username the StackMob username to register
-     * @param registrationID the C2DM registration ID. see http://code.google.com/android/c2dm/#registering for detail on how to get this ID
+     * register a user for Android Push notifications. This uses GCM unless specified otherwise.
+     * @param username the StackMob username to associate with this token
+     * @param registrationID the GCM registration ID obtained from GCM see http://developer.android.com/guide/google/gcm/gcm.html#registering for detail on how to get this ID
      * @param overwrite whether to overwrite existing entries
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
@@ -698,6 +703,22 @@ public class StackMob {
                                                              boolean overwrite,
                                                              StackMobRawCallback callback) {
         RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, defaultPushType, overwrite);
+        return postPush("register_device_token_universal", tokenAndUser, callback);
+    }
+
+    /**
+     * register a user for Android Push notifications.
+     * @param username the StackMob username to associate with this token
+     * @param token a token containing a registration id and platform
+     * @param overwrite whether to overwrite existing entries
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
+     */
+    public StackMobRequestSendResult registerForPushWithUser(String username,
+                                                             StackMobPushToken token,
+                                                             boolean overwrite,
+                                                             StackMobRawCallback callback) {
+        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(token.getToken(), username, token.getTokenType(), overwrite);
         return postPush("register_device_token_universal", tokenAndUser, callback);
     }
 
@@ -1060,7 +1081,7 @@ public class StackMob {
         return postRelated(path, primaryId, relatedField, relatedObjects, callback);
     }
 
-    public StackMobRequestSendResult postPush(String path,
+    private StackMobRequestSendResult postPush(String path,
                           Object requestObject,
                           StackMobRawCallback callback) {
         return new StackMobPushRequest(this.executor,

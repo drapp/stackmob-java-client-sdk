@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-public class StackMobPushRequest extends StackMobRequestWithPayload {
+class StackMobPushRequest extends StackMobRequestWithPayload {
 
     public StackMobPushRequest(ExecutorService executor, StackMobSession session, Object requestObject, String method, StackMobRawCallback cb, StackMobRedirectedCallback redirCb) {
         super(executor, session, HttpVerbWithPayload.POST, EmptyHeaders, EmptyParams, requestObject, method, cb, redirCb);
