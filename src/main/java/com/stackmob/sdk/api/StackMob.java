@@ -302,6 +302,7 @@ public class StackMob {
 
     /**
      * a legacy constructor with a subset of the possible parameters
+     * @deprecated
      * @param oauthVersion whether to use oauth1 or oauth2
      * @param apiKey the api key for your app
      * @param apiSecret the api secret for your app
@@ -324,6 +325,7 @@ public class StackMob {
 
     /**
      * a legacy constructor with a subset of the possible parameters
+     * @deprecated
      * @param apiKey the api key for your app
      * @param apiSecret the api secret for your app
      * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
@@ -344,6 +346,7 @@ public class StackMob {
 
     /**
      * a legacy constructor with a subset of the possible parameters
+     * @deprecated
      * @param apiKey the api key for your app
      * @param apiSecret the api secret for your app
      * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
@@ -447,7 +450,7 @@ public class StackMob {
     }
 
     /**
-     * Refresh the current OAuth2 login. This oridinarily happens automatically, but this method
+     * Refresh the current OAuth2 login. This ordinarily happens automatically, but this method
      * can give you finer control if you need it. Logins last an hour by default. Once they expire
      * they need to be refreshed. Make sure not to send multiple refresh token requests.
      * @param callback callback to be called when the server returns. may execute in a separate thread
@@ -465,7 +468,7 @@ public class StackMob {
     }
 
     /**
-     * call the logout method on StackMob
+     * call the logout method on StackMob, invalidating your credentials.
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
@@ -481,6 +484,7 @@ public class StackMob {
 
     /**
      * call the startsession method on StackMob
+     * @deprecated
      * @param callback callback to call when the method completes
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
@@ -500,7 +504,9 @@ public class StackMob {
     ////////////////////
 
     /**
-     * call the twitterlogin method on stackmob
+     * login to StackMob with twitter credentials. The credentials should match a existing user object that has a linked Twitter
+     * account, via either {@link #registerWithTwitterToken(String, String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
+     * {@link #linkUserWithTwitterToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)}
      * @param token the twitter session key (this is a per user key - different from the consumer key)
      * @param secret the twitter session secret (this is a per user secret - different from the consumer secret)
      * @param callback callback to be called when the server returns. may execute in a separate thread
@@ -534,7 +540,7 @@ public class StackMob {
     }
 
     /**
-     * call the twitterStatusUpdate method on StackMob
+     * update the logged in users’s Twitter status. The logged in user must have a linked Twitter account.
      * @param message the message to send. must be <= 140 characters
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
@@ -552,7 +558,7 @@ public class StackMob {
     }
 
     /**
-     * create a new user on stackmob and associate it with an existing twitter user
+     * create a new user on StackMob and associate it with an existing Twitter user via Twitter credentials.
      * @param token the twitter session key (this is a per user key - different from the consumer key)
      * @param secret the twitter session secret (this is a per user secret - different from the consumer secret)
      * @param username the username that the user should have
@@ -576,7 +582,7 @@ public class StackMob {
     }
 
     /**
-     * link an existing stackmob user with an existing twitter user
+     * link an existing StackMob user with an existing Twitter user via Twitter credentials.
      * @param token the twitter session key (this is a per user key - different from the consumer key)
      * @param secret the twitter session secret (this is a per user secret - different from the consumer secret)
      * @param callback callback to be called when the server returns. may execute in a separate thread
@@ -598,7 +604,10 @@ public class StackMob {
     }
 
     /**
-     * login into facebook on the StackMob platform
+     /**
+     * login to StackMob with Facebook credentials. The credentials should match a existing user object that has a linked Facebook
+     * account, via either {@link #registerWithFacebookToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
+     * {@link #linkUserWithFacebookToken(String, com.stackmob.sdk.callback.StackMobRawCallback)}
      * @param token the facebook user token
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
@@ -629,7 +638,7 @@ public class StackMob {
     }
 
     /**
-     * create a new StackMob user and link that user with a facebook account
+     * create a new user on StackMob and associate it with an existing Facebook user via Facebook credentials.
      * @param token the facebook user token
      * @param username the StackMob username that the new user should have
      * @param callback callback to be called when the server returns. may execute in a separate thread
@@ -651,7 +660,7 @@ public class StackMob {
     }
 
     /**
-     * link an existing StackMob user with a Facebook user
+     * link an existing StackMob user with an existing Facebook user via Facebook credentials.
      * @param token the Facebook user token
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
@@ -670,7 +679,7 @@ public class StackMob {
     }
 
     /**
-     * post a message to facebook. this method will not post to FB and will return nothing if there is no user logged into FB
+     * post a message to Facebook. This method will not post to FB and will return nothing if there is no user logged into FB.
      * @param msg the message to post
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
@@ -1239,8 +1248,7 @@ public class StackMob {
     }
 
     /**
-     * Do an atomic update on a an integer field in a particular object and schema
-     *
+     * do an atomic update on a an integer field in a particular object and schema
      * @param path the path to put
      * @param id the id of the object to put
      * @param field the field to increment
@@ -1469,18 +1477,27 @@ public class StackMob {
     /**
      * Gets the user object for the currently logged in oauth2 user. Invokes the failure callback if there
      * is no logged in user
-     * @param callback
-     * @return
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
     public StackMobRequestSendResult getLoggedInUser(StackMobCallback callback) {
         return get("user/loggedInUser", callback);
     }
 
-    // Logged in user checking
+    /**
+     * get the logged in user locally. This method is deprecated and {@link #getLoggedInUser(com.stackmob.sdk.callback.StackMobCallback)} should be
+     * use instead
+     * @deprecated
+     * @return the logged in user
+     */
     public String getLoggedInUser() {
         return isLoggedIn() ? session.getLastUserLoginName() : null;
     }
 
+    /**
+     * check whether a user is currently logged in. In rare cases when a user is logged off remotely this may be inaccurate
+     * @return whether the user is logged in
+     */
     public boolean isLoggedIn() {
         if(getSession().isOAuth2()) {
             return getSession().oauth2TokenValid();
@@ -1494,10 +1511,20 @@ public class StackMob {
         return false;
     }
 
+    /**
+     * check if a specific user is logged in. Use {@link #getLoggedInUser(com.stackmob.sdk.callback.StackMobCallback)} instead
+     * @deprecated
+     * @param username the user to check
+     * @return whether that user is logged in
+     */
     public boolean isUserLoggedIn(String username) {
         return username != null && username.equals(this.getLoggedInUser());
     }
 
+    /**
+     * check whether the user is logged out.
+     * @return whether the user is logged out
+     */
     public boolean isLoggedOut() {
         if(getSession().isOAuth2()) {
             return getSession().getOAuth2TokenExpiration() != null && !getSession().oauth2TokenValid();
@@ -1508,8 +1535,6 @@ public class StackMob {
         }
     }
 
-
-
     /**
      * get the session that this StackMob object contains
      * @return the session
@@ -1518,11 +1543,18 @@ public class StackMob {
         return session;
     }
 
+    /**
+     * set a specific session
+     * @param session the session to set
+     */
     public void setSession(StackMobSession session) {
         this.session = session;
     }
 
-
+    /**
+     * get the OAuthVersion this StackMob object is configured for
+     * @return the current OAuth version
+     */
     public OAuthVersion getOAuthVersion() {
         return session.getOAuthVersion();
     }
