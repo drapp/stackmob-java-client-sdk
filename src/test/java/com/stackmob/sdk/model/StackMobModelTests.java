@@ -121,7 +121,7 @@ public class StackMobModelTests extends StackMobTestCommon {
                        "\"author\":KnR}";
         System.out.println(json);
         Book book = new Book();
-        book.fillFromJson(new JsonParser().parse(json));
+        ((StackMobModel) book).fillFromJson(new JsonParser().parse(json));
         assertEquals(bookName1, book.getTitle());
         assertEquals(bookPublisher1, book.getPublisher());
         assertNotNull(book.getAuthor());
@@ -136,7 +136,7 @@ public class StackMobModelTests extends StackMobTestCommon {
                        "\"author\":{\"author_id\":\"KnR\", " +
                                      "\"name\":\"Kernighan and Ritchie\"}}";
         Book book = new Book();
-        book.fillFromJson(new JsonParser().parse(json));
+        ((StackMobModel) book).fillFromJson(new JsonParser().parse(json));
         assertEquals(bookName1, book.getTitle());
         assertEquals(bookPublisher1, book.getPublisher());
         assertNotNull(book.getAuthor());
@@ -242,7 +242,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     @Test public void testModelArrayFromJSON() throws Exception {
         String json = "{\"name\":\"SF Public Library\",\"books\":[{\"title\":\"foo\",\"publisher\":\"bar\",\"author\":{\"name\":\"baz\",\"author_id\":\"baz\"},\"book_id\":\"foobar\"},{\"title\":\"foo2\",\"publisher\":\"bar2\",\"author\":{\"name\":\"baz\",\"author_id\":\"baz\"},\"book_id\":\"foo2bar2\"}]}";
         Library lib = new Library();
-        lib.fillFromJson(new JsonParser().parse(json));
+        ((StackMobModel)lib).fillFromJson(new JsonParser().parse(json));
 
         assertEquals(lib.name,"SF Public Library");
         assertNotNull(lib.books);
@@ -273,7 +273,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     @Test public void noIDChildrenFromJSON() throws Exception {
         String json = "{\"title\":\"Oliver\",\"publisher\":\"Penguin\",\"author\":{\"name\":\"Dickens\"}}";
         Book b = new Book();
-        b.fillFromJson(new JsonParser().parse(json));
+        ((StackMobModel) b).fillFromJson(new JsonParser().parse(json));
         assertNull(b.getID());
         assertEquals("Oliver", b.getTitle());
         assertEquals("Penguin", b.getPublisher());
@@ -285,7 +285,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         Book b = new Book("foo","bar", new Author("baz"));
         b.getAuthor().setID("baz");
         //The json has the same author with no data
-        b.fillFromJson(new JsonParser().parse("{\"title\":\"foo\",\"publisher\":\"bar\",\"author\":\"baz\",\"book_id\":\"foobar\"}"));
+        ((StackMobModel) b).fillFromJson(new JsonParser().parse("{\"title\":\"foo\",\"publisher\":\"bar\",\"author\":\"baz\",\"book_id\":\"foobar\"}"));
         assertEquals("baz", b.getAuthor().getName());
     }
 
