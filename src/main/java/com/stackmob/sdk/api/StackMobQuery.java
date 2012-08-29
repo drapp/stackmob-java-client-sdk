@@ -307,6 +307,16 @@ public class StackMobQuery {
     }
 
     /**
+     * same as {@link #fieldIsLessThan(String, String)}, except works with Strings
+     * @param field the field whose value to test
+     * @param val the value against which to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobQuery fieldIsLessThan(String field, int val) {
+        return putInMap(field, Operator.LT, String.valueOf(val));
+    }
+
+    /**
      * same as {@link #fieldIsLessThan(String, String)}, except applies "<=" instead of "<"
      * @param field the field whose value to test
      * @param val the value against which to test
@@ -314,6 +324,16 @@ public class StackMobQuery {
      */
     public StackMobQuery fieldIslessThanOrEqualTo(String field, String val) {
         return putInMap(field, Operator.LTE, val);
+    }
+
+    /**
+     * same as {@link #fieldIsLessThan(String, String)}, except applies "<=" instead of "<"
+     * @param field the field whose value to test
+     * @param val the value against which to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobQuery fieldIsLessThanOrEqualTo(String field, int val) {
+        return putInMap(field, Operator.LTE, String.valueOf(val));
     }
 
     /**
@@ -327,6 +347,16 @@ public class StackMobQuery {
     }
 
     /**
+     * same as {@link #fieldIsLessThan(String, String)}, except applies ">" instead of "<"
+     * @param field the field whose value to test
+     * @param val the value against which to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobQuery fieldIsGreaterThan(String field, int val) {
+        return putInMap(field, Operator.GT, String.valueOf(val));
+    }
+
+    /**
      * same as {@link #fieldIsLessThan(String, String)}, except applies ">=" instead of "<"
      * @param field the field whose value to test
      * @param val the value against which to test
@@ -334,6 +364,16 @@ public class StackMobQuery {
      */
     public StackMobQuery fieldIsGreaterThanOrEqualTo(String field, String val) {
         return putInMap(field, Operator.GTE, val);
+    }
+
+    /**
+     * same as {@link #fieldIsLessThan(String, String)}, except applies ">=" instead of "<"
+     * @param field the field whose value to test
+     * @param val the value against which to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobQuery fieldIsGreaterThanOrEqualTo(String field, int val) {
+        return putInMap(field, Operator.GTE, String.valueOf(val));
     }
 
     /**

@@ -25,26 +25,76 @@ import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.util.GeoPoint;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Query for a model class on the server based on a number of constraints. This class is used as an argument to {@link StackMobModel#query(Class, com.stackmob.sdk.api.StackMobQuery, com.stackmob.sdk.callback.StackMobQueryCallback)}
+ * Each constraint returns a new {@code StackMobModelQuery}, so they can be chained. Use {@link StackMobField} to add mutiple constraints on a field without repeating yourself
+ * <pre>
+ * {@code
  *
- * @param <T>
+ * // Add constraints
+ * StackMobModelQuery<User> isThirtySomethingQuery = new StackMobModelQuery<User>(User.class).fieldIsGreaterThanOrEqualTo("age", 30).fieldIsLessThan("age", 40);
+ *
+ * // The same using StackMobField
+ * StackMobModelQuery<User> isThirtySomethingQuery2 = new StackMobModelQuery<User>(User.class).field(new StackMobField("age").isGreaterThanOrEqualTo(30).isLessThan(40))
+ *
+ * // Check values in arrays
+ * StackMobModelQuery<User> friendsWithBobOrAliceQuery = new StackMobModelQuery<User>(User.class).fieldIsIn("friends", Arrays.asList("bob", "alice"));
+ *
+ * // Do an actual query
+ * User.query(isThirtySomethingQuery, new StackMobQueryCallback<User>() {
+ *     public void success(List<User> result) {
+ *         // handle success
+ *     }
+ *
+ *     public void failure(StackMobException e) {
+ *         // handle failure
+ *     }
+ * });
+ *
+ * // Do a count query
+ * User.count(isThirtySomethingQuery, new StackMobQueryCallback<User>() {
+ *     public void success(List<User> result) {
+ *         // handle success
+ *     }
+ *
+ *     public void failure(StackMobException e) {
+ *         // handle failure
+ *     }
+ * });
+ * </pre>
+ *
+ *
+ * @param <T> the subclass of StackMobModel you with to query for
  */
 public class StackMobModelQuery<T extends StackMobModel>{
 
     Class<T> classOfT;
     StackMobQuery query;
 
+    /**
+     * Create a new query for the given subclass of StackMobModel
+     * @param classOfT because java needs explicit classes passed in everywhere
+     */
     public StackMobModelQuery(Class<T> classOfT) {
         this.classOfT = classOfT;
         this.query = new StackMobQuery(this.classOfT.getSimpleName().toLowerCase());
     }
-    
+
+    /**
+     * get the underlying StackMobQuery
+     * @return the query
+     */
     public StackMobQuery getQuery() {
         return query;
     }
 
+    /**
+     * send the query with a callback to be invoked with the results
+     * @param callback a callback that will be invoked with the results
+     */
     public void send(StackMobQueryCallback<T> callback) {
         final StackMobQueryCallback<T> furtherCallback = callback;
         StackMob.getStackMob().get(query, new StackMobCallback() {
@@ -67,10 +117,19 @@ public class StackMobModelQuery<T extends StackMobModel>{
         });
     }
 
+    /**
+     * send the query, but rather than returning the results just return a count of them
+     * @param callback called with the count on success
+     */
     public void count(StackMobCountCallback callback) {
         StackMob.getStackMob().count(query, callback);
     }
-    
+
+    /**
+     * Add all the constraints specified in this StackMobField object
+     * @param fieldObj a field with constraints
+     * @return the new query that resulted from adding this operation
+     */
     public StackMobModelQuery<T> field(StackMobField fieldObj) {
       query.add(fieldObj.getQuery());
       return this;
@@ -212,6 +271,17 @@ public class StackMobModelQuery<T extends StackMobModel>{
     }
 
     /**
+     * same as {@link #fieldIsLessThan(String, String)}, except works with Strings
+     * @param field the field whose value to test
+     * @param val the value against which to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobModelQuery<T> fieldIsLessThan(String field, int val) {
+        query.fieldIsLessThan(field, val);
+        return this;
+    }
+
+    /**
      * same as {@link #fieldIsLessThan(String, String)}, except applies "<=" instead of "<"
      * @param field the field whose value to test
      * @param val the value against which to test
@@ -219,6 +289,17 @@ public class StackMobModelQuery<T extends StackMobModel>{
      */
     public StackMobModelQuery<T> fieldIsLessThanOrEqualTo(String field, String val) {
         query.fieldIslessThanOrEqualTo(field, val);
+        return this;
+    }
+
+    /**
+     * same as {@link #fieldIsLessThan(String, String)}, except applies "<=" instead of "<"
+     * @param field the field whose value to test
+     * @param val the value against which to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobModelQuery<T> fieldIsLessThanOrEqualTo(String field, int val) {
+        query.fieldIsLessThanOrEqualTo(field, val);
         return this;
     }
 
@@ -234,12 +315,34 @@ public class StackMobModelQuery<T extends StackMobModel>{
     }
 
     /**
+     * same as {@link #fieldIsLessThan(String, String)}, except applies ">" instead of "<"
+     * @param field the field whose value to test
+     * @param val the value against which to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobModelQuery<T> fieldIsGreaterThan(String field, int val) {
+        query.fieldIsGreaterThan(field, val);
+        return this;
+    }
+
+    /**
      * same as {@link #fieldIsLessThan(String, String)}, except applies ">=" instead of "<"
      * @param field the field whose value to test
      * @param val the value against which to test
      * @return the new query that resulted from adding this operation
      */
     public StackMobModelQuery<T> fieldIsGreaterThanOrEqualTo(String field, String val) {
+        query.fieldIsGreaterThanOrEqualTo(field, val);
+        return this;
+    }
+
+    /**
+     * same as {@link #fieldIsLessThan(String, String)}, except applies ">=" instead of "<"
+     * @param field the field whose value to test
+     * @param val the value against which to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobModelQuery<T> fieldIsGreaterThanOrEqualTo(String field, int val) {
         query.fieldIsGreaterThanOrEqualTo(field, val);
         return this;
     }
@@ -302,7 +405,7 @@ public class StackMobModelQuery<T extends StackMobModel>{
     /**
      * restricts the fields returned in the query
      * @param fields the fields to return
-     * @return
+     * @return the new query that resulted from adding this operation
      */
     public StackMobModelQuery<T> select(List<String> fields) {
         query.select(fields);

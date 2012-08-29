@@ -22,10 +22,7 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobQuery;
-import com.stackmob.sdk.callback.StackMobCallback;
-import com.stackmob.sdk.callback.StackMobIntermediaryCallback;
-import com.stackmob.sdk.callback.StackMobNoopCallback;
-import com.stackmob.sdk.callback.StackMobQueryCallback;
+import com.stackmob.sdk.callback.*;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.util.Pair;
 import com.stackmob.sdk.util.RelationMapping;
@@ -39,6 +36,24 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 public abstract class StackMobModel {
+
+    /**
+     * Run a query on the server to get all the instances of your model within certain constraints
+     * @param q The query to run
+     * @param callback The callback to be invoked upon returning
+     */
+    public static <T extends StackMobModel> void query(StackMobModelQuery<T> q, StackMobQueryCallback<T> callback) {
+        q.send(callback);
+    }
+
+    /**
+     * Run a count query on the server to count all the instances of your model within certain constraints
+     * @param q The query to run
+     * @param callback The callback to be invoked upon returning
+     */
+    public static <T extends StackMobModel> void count(StackMobModelQuery<T> q, StackMobCountCallback callback) {
+        q.count(callback);
+    }
 
     /**
      * Run a query on the server to get all the instances of your model within certain constraints
