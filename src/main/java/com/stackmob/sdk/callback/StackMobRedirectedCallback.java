@@ -18,6 +18,31 @@ package com.stackmob.sdk.callback;
 
 import java.util.Map;
 
+/**
+ * This callback can be supplied to StackMob so that it will be called if the StackMob platform issues a redirect. You should use this callback to cache the new URLs. here is a sample callback:
+ * <pre>
+ * {@code
+ * new StackMobRedirectedCallback() {
+ *   public void redirected(HttpRequest origRequest, HttpResponse response, HttpRequest newRequest) {
+ *       try {
+ *           URI uri = new URI(newRequest.getRequestLine().getUri());
+ *           cache(uri.getHost);
+ *       }
+ *        catch (URISyntaxException e) {
+ *           handleException(e);
+ *       }
+ *   }
+ * }
+ * }
+ * </pre>
+ */
 public interface StackMobRedirectedCallback {
+    /**
+     * Invoked when a redirect has been issued
+     * @param originalUrl the url being redirected from
+     * @param redirectHeaders headers that came with the redirect
+     * @param redirectBody the body that came with the redirect
+     * @param newURL the url being redirected to
+     */
     void redirected(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL);
 }
