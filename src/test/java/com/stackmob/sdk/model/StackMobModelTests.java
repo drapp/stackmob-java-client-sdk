@@ -18,7 +18,10 @@ package com.stackmob.sdk.model;
 
 import com.google.gson.*;
 import com.stackmob.sdk.StackMobTestCommon;
+import com.stackmob.sdk.api.StackMobFile;
+import com.stackmob.sdk.api.StackMobGeoPoint;
 import com.stackmob.sdk.callback.StackMobCallback;
+import com.stackmob.sdk.callback.StackMobModelCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.testobjects.Author;
@@ -31,6 +34,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.*;
 
+import static com.stackmob.sdk.concurrencyutils.CountDownLatchUtils.latch;
 import static com.stackmob.sdk.concurrencyutils.CountDownLatchUtils.latchOne;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -711,6 +715,89 @@ public class StackMobModelTests extends StackMobTestCommon {
                 latch.countDown();
             }
         });
+    }
+
+
+    public static class GeoThing extends StackMobModel {
+        public GeoThing() {
+            super(GeoThing.class);
+        }
+
+        public StackMobGeoPoint geoblob;
+    }
+
+    @Test
+    public void testGeoPoints() throws Exception {
+        final GeoThing thing = new GeoThing();
+        thing.geoblob = new StackMobGeoPoint(137.0, 13.0);
+        thing.save(new StackMobModelCallback() {
+            @Override
+            public void success() {
+                thing.geoblob = null;
+                thing.fetch(new StackMobModelCallback() {
+                    @Override
+                    public void success() {
+                        assertEquals(thing.geoblob.getLongitude(), 137.0, 0);
+                        assertEquals(thing.geoblob.getLatitude(), 13.0, 0);
+                        thing.destroy();
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void failure(StackMobException e) {
+                        asserter.markException(e);
+                    }
+                });
+
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
+    public static class BinaryTest extends StackMobModel {
+        public BinaryTest() {
+            super(BinaryTest.class);
+        }
+
+        public StackMobFile thing;
+    }
+
+    @Test
+    public void testBinaryFile() throws Exception {
+        final BinaryTest test = new BinaryTest();
+        test.thing = new StackMobFile("text/plain", "foo.txt", "hello world".getBytes());
+        test.save(new StackMobModelCallback() {
+            @Override
+            public void success() {
+                assertNotNull(test.thing.getS3Url());
+                test.thing = null;
+                test.fetch(new StackMobModelCallback() {
+                    @Override
+                    public void success() {
+                        assertNotNull(test.thing.getS3Url());
+                        test.destroy();
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void failure(StackMobException e) {
+                        asserter.markException(e);
+                    }
+                });
+
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
     }
 
 

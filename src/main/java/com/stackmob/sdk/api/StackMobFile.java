@@ -24,6 +24,7 @@ import com.stackmob.sdk.util.BinaryFieldFormatter;
 public class StackMobFile {
     
     private String value;
+    private String url;
 
     /**
      * create a StackMobFile with the information needed for the corresponding S3 file
@@ -34,6 +35,39 @@ public class StackMobFile {
     public StackMobFile(String contentType, String fileName, byte[] bytes) {
         BinaryFieldFormatter formatter = new BinaryFieldFormatter(contentType, fileName, bytes);
         value = formatter.getJsonValue();
+    }
+
+    /**
+     * create a StackMobFile that just wraps an url from S3
+     * @param url the S3 url
+     */
+    public StackMobFile(String url) {
+      this.url = url;
+    }
+
+    /**
+     * get the url on S3 where this file has been uploaded
+     * @return the S3 url
+     */
+    public String getS3Url() {
+        return url;
+    }
+
+    /**
+     * set the url for this file once uploaded
+     * @param url the url where the file is located
+     */
+    public void setS3Url(String url) {
+        this.value = null;
+        this.url = url;
+    }
+
+    /**
+     * get a binary string suitable for posting to StackMob
+     * @return a binary representation of this file
+     */
+    public String getBinaryString() {
+        return value;
     }
     
     @Override

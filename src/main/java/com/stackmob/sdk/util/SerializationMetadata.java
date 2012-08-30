@@ -17,6 +17,8 @@
 package com.stackmob.sdk.util;
 
 import com.stackmob.sdk.api.StackMob;
+import com.stackmob.sdk.api.StackMobFile;
+import com.stackmob.sdk.api.StackMobGeoPoint;
 import com.stackmob.sdk.model.StackMobCounter;
 import com.stackmob.sdk.model.StackMobModel;
 
@@ -36,6 +38,8 @@ public enum SerializationMetadata {
     OBJECT,
     MODEL,
     COUNTER,
+    GEOPOINT,
+    BINARY,
     PRIMITIVE_ARRAY,
     OBJECT_ARRAY,
     MODEL_ARRAY;
@@ -85,6 +89,10 @@ public enum SerializationMetadata {
             return MODEL;
         } else if(StackMobCounter.class.isAssignableFrom(field.getType())) {
             return COUNTER;
+        } else if(StackMobGeoPoint.class.isAssignableFrom(field.getType())) {
+            return GEOPOINT;
+        } else if(StackMobFile.class.isAssignableFrom(field.getType())) {
+            return BINARY;
         } else {
             return OBJECT;
         }

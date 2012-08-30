@@ -26,26 +26,13 @@ import java.util.Map;
  * be reflected in the model class
  */
 public abstract class StackMobModelCallback extends StackMobCallback {
-    @Override
-    public void done(HttpVerb requestVerb,
-                     String requestURL,
-                     List<Map.Entry<String, String>> requestHeaders,
-                     String requestBody,
-                     Integer responseStatusCode,
-                     List<Map.Entry<String, String>> responseHeaders,
-                     byte[] responseBody) {
-        super.done(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, responseBody);
-        if(Http.isSuccess(responseStatusCode)) {
-            success();
-        }
-
-    }
-
     /**
      * override this method to be notified of success after a callback. Any changes caused by the action will now
      * be reflected in the model class and/or on the server.
      */
     abstract public void success();
 
-    public void success(String count){}
+    public void success(String count){
+        success();
+    }
 }

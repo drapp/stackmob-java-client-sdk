@@ -26,6 +26,9 @@ public class GeoPoint {
   private Double lat = Double.NaN;
 
   public GeoPoint(Double lon, Double lat) {
+    if(lon < -180 || lon > 180 || lat < -90 || lat > 90) {
+        throw new IllegalArgumentException("Invalid latitude/longitude. Longitude must be between -180 and 180, while Latitude must be between -90 and 90");
+    }
     this.lon = lon;
     this.lat = lat;
   }

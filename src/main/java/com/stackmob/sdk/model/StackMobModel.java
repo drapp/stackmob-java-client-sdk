@@ -21,6 +21,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.stackmob.sdk.api.StackMob;
+import com.stackmob.sdk.api.StackMobFile;
 import com.stackmob.sdk.api.StackMobQuery;
 import com.stackmob.sdk.callback.*;
 import com.stackmob.sdk.exception.StackMobException;
@@ -123,9 +124,12 @@ import java.util.*;
  * <ul>
  * <li> Java primitives/Strings</li>
  * <li> java.util.Date, java.math.BigInteger, java.math.BigDecimal</li>
+ * <li> {@link StackMobCounter}
  * <li> Classes extending StackMobModel</li>
  * <li> Arrays and java Collections of the above</li>
+ * <li> {@link StackMobFile} and {@link com.stackmob.sdk.api.StackMobGeoPoint} (these must be set up in the schema first)</li>
  * </ul>
+ *
  *
  * Models are not inherently thread-safe; since they're just objects there's
  * nothing to stop you from accessing/modifying fields while fetch is in the
@@ -333,7 +337,36 @@ public abstract class StackMobModel {
     public boolean hasData() {
         return hasData;
     }
-    
+
+    private void fillModel(Field field, JsonElement json) throws StackMobException, IllegalAccessException { // Delegate any expanded relations to the appropriate object
+        StackMobModel relatedModel = (StackMobModel) field.get(this);
+        // If there's a model with the same id, keep it. Otherwise create a new one
+        if(relatedModel == null || !relatedModel.hasSameID(json)) {
+            relatedModel = newInstance((Class<? extends StackMobModel>) field.getType());
+        }
+        relatedModel.fillFromJson(json);
+        field.set(this, relatedModel);
+    }
+
+    private void fillModelArray(Field field, JsonElement json) throws InstantiationException, IllegalAccessException, StackMobException {
+        Class<? extends StackMobModel> actualModelClass = (Class<? extends StackMobModel>) SerializationMetadata.getComponentClass(field);
+        Collection<StackMobModel> existingModels = getFieldAsCollection(field);
+        List<StackMobModel> newModels = updateModelListFromJson(json.getAsJsonArray(), existingModels, actualModelClass);
+        setFieldFromList(field, newModels, actualModelClass);
+    }
+
+    private void fillCounter(Field field, JsonElement json) throws IllegalAccessException {
+        StackMobCounter counter = (StackMobCounter) field.get(this);
+        int newValue = json.getAsJsonPrimitive().getAsInt();
+        if(counter == null) {
+            counter = new StackMobCounter();
+            counter.set(newValue);
+            field.set(this, counter);
+        } else {
+            counter.set(newValue);
+        }
+    }
+
     private void fillFieldFromJson(String jsonName, JsonElement json) throws StackMobException {
         try {
             if(jsonName.equals(getIDFieldName())) {
@@ -346,28 +379,19 @@ public abstract class StackMobModel {
                     Field field = getField(fieldName);
                     field.setAccessible(true);
                     if(getMetadata(fieldName) == MODEL) {
-                        // Delegate any expanded relations to the appropriate object
-                        StackMobModel relatedModel = (StackMobModel) field.get(this);
-                        // If there's a model with the same id, keep it. Otherwise create a new one
-                        if(relatedModel == null || !relatedModel.hasSameID(json)) {
-                            relatedModel = newInstance((Class<? extends StackMobModel>) field.getType());
-                        }
-                        relatedModel.fillFromJson(json);
-                        field.set(this, relatedModel);
+                        fillModel(field, json);
                     } else if(getMetadata(fieldName) == MODEL_ARRAY) {
-                        Class<? extends StackMobModel> actualModelClass = (Class<? extends StackMobModel>) SerializationMetadata.getComponentClass(field);
-                        Collection<StackMobModel> existingModels = getFieldAsCollection(field);
-                        List<StackMobModel> newModels = updateModelListFromJson(json.getAsJsonArray(), existingModels, actualModelClass);
-                        setFieldFromList(field, newModels, actualModelClass);
+                        fillModelArray(field, json);
                     } else if(getMetadata(fieldName) == COUNTER) {
-                        StackMobCounter counter = (StackMobCounter) field.get(this);
-                        int newValue = json.getAsJsonPrimitive().getAsInt();
-                        if(counter == null) {
-                            counter = new StackMobCounter();
-                            counter.set(newValue);
-                            field.set(this, counter);
+                        fillCounter(field, json);
+                    } else if(getMetadata(fieldName) == BINARY) {
+                        StackMobFile file = (StackMobFile) field.get(this);
+                        String url = json.getAsJsonPrimitive().getAsString();
+                        if(file == null) {
+                            StackMobFile newFile = new StackMobFile(url);
+                            field.set(this, newFile);
                         } else {
-                            counter.set(newValue);
+                            file.setS3Url(url);
                         }
                     } else {
                         // Let gson do its thing
@@ -503,7 +527,7 @@ public abstract class StackMobModel {
             setID(json.getAsJsonPrimitive().getAsString());
         } else {
             for (Map.Entry<String, JsonElement> jsonField : json.getAsJsonObject().entrySet()) {
-                if(selection == null || selection.contains(jsonField.getKey())) {
+                if(selection == null || selection.contains(jsonField.getKey()) || getMetadata(jsonField.getKey()) == BINARY) {
                     fillFieldFromJson(jsonField.getKey(), jsonField.getValue());
                 }
             }
@@ -541,6 +565,45 @@ public abstract class StackMobModel {
         return list;
     }
 
+    private void replaceModelJson(JsonObject json, String fieldName, RelationMapping mapping, int depth) {
+        json.remove(fieldName);
+        try {
+            Field relationField = getField(fieldName);
+            relationField.setAccessible(true);
+            StackMobModel relatedModel = (StackMobModel) relationField.get(this);
+            mapping.add(fieldName,relatedModel.getSchemaName());
+            JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, mapping);
+            mapping.leave();
+            if(relatedJson != null) json.add(fieldName, relatedJson);
+        } catch (Exception ignore) { } //Should never happen
+    }
+
+    private void replaceModelArrayJson(JsonObject json, String fieldName, RelationMapping mapping, int depth) {
+        json.remove(fieldName);
+        try {
+            Field relationField = getField(fieldName);
+            relationField.setAccessible(true);
+            JsonArray array = new JsonArray();
+            Collection<StackMobModel> relatedModels;
+            if(relationField.getType().isArray()) {
+                relatedModels = Arrays.asList((StackMobModel[])relationField.get(this));
+            } else {
+                relatedModels = (Collection<StackMobModel>) relationField.get(this);
+            }
+            boolean first = true;
+            for(StackMobModel relatedModel : relatedModels) {
+                if(first) {
+                    mapping.add(fieldName,relatedModel.getSchemaName());
+                    first = false;
+                }
+                JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, mapping);
+                if(relatedJson != null) array.add(relatedJson);
+            }
+            if(!first) mapping.leave();
+            json.add(fieldName, array);
+        } catch (Exception ignore) { } //Should never happen
+    }
+
     private JsonElement toJsonElement(int depth, RelationMapping mapping) {
         // Set the id here as opposed to on the server to avoid a race condition
         if(getID() == null) setID(UUID.randomUUID().toString().replace("-",""));
@@ -548,43 +611,13 @@ public abstract class StackMobModel {
         JsonObject json = gson.toJsonTree(this).getAsJsonObject();
         JsonObject outgoing = new JsonObject();
         for(String fieldName : getFieldNames(json)) {
+            String newFieldName = fieldName;
             ensureValidFieldName(fieldName);
             JsonElement value = json.get(fieldName);
             if(getMetadata(fieldName) == MODEL) {
-                json.remove(fieldName);
-                try {
-                    Field relationField = getField(fieldName);
-                    relationField.setAccessible(true);
-                    StackMobModel relatedModel = (StackMobModel) relationField.get(this);
-                    mapping.add(fieldName,relatedModel.getSchemaName());
-                    JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, mapping);
-                    mapping.leave();
-                    if(relatedJson != null) json.add(fieldName, relatedJson);
-                } catch (Exception ignore) { } //Should never happen
+                replaceModelJson(json, fieldName, mapping, depth);
             } else if(getMetadata(fieldName) == MODEL_ARRAY) {
-                json.remove(fieldName);
-                try {
-                    Field relationField = getField(fieldName);
-                    relationField.setAccessible(true);
-                    JsonArray array = new JsonArray();
-                    Collection<StackMobModel> relatedModels;
-                    if(relationField.getType().isArray()) {
-                        relatedModels = Arrays.asList((StackMobModel[])relationField.get(this));
-                    } else {
-                        relatedModels = (Collection<StackMobModel>) relationField.get(this);
-                    }
-                    boolean first = true;
-                    for(StackMobModel relatedModel : relatedModels) {
-                        if(first) {
-                            mapping.add(fieldName,relatedModel.getSchemaName());
-                            first = false;
-                        }
-                        JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, mapping);
-                        if(relatedJson != null) array.add(relatedJson);
-                    }
-                    if(!first) mapping.leave();
-                    json.add(fieldName, array);
-                } catch (Exception ignore) { } //Should never happen
+                replaceModelArrayJson(json, fieldName, mapping, depth);
             } else if(getMetadata(fieldName) == OBJECT) {
                 //We don't support subobjects. Gson automatically converts a few types like
                 //Date and BigInteger to primitive types, but anything else has to be an error.
@@ -597,7 +630,7 @@ public abstract class StackMobModel {
                     StackMobCounter counter = (StackMobCounter) getField(fieldName).get(this);
                     switch(counter.getMode()) {
                         case INCREMENT: {
-                            fieldName += "[inc]";
+                            newFieldName += "[inc]";
                             json.add(fieldName, new JsonPrimitive(counter.getIncrement()));
                             break;
                         }
@@ -606,8 +639,20 @@ public abstract class StackMobModel {
                     counter.reset();
 
                 } catch (Exception ignore) { } //Should never happen
+            } else if(getMetadata(fieldName) == BINARY) {
+                json.remove(fieldName);
+                try {
+                    StackMobFile file = (StackMobFile) getField(fieldName).get(this);
+                    if(file.getBinaryString() != null) {
+                        json.add(fieldName, new JsonPrimitive(file.getBinaryString()));
+                    } else {
+                        //don't post the url
+                        newFieldName = null;
+                    }
+
+                } catch(Exception ignore) { } //Should never happen
             }
-            outgoing.add(fieldName.toLowerCase(), json.get(fieldName));
+            if(newFieldName != null) outgoing.add(newFieldName.toLowerCase(), json.get(fieldName));
         }
         if(id != null) {
             outgoing.addProperty(getIDFieldName(),id);
