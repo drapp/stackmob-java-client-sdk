@@ -2,6 +2,4 @@ com.stackmob.sdk.api
 com.stackmob.sdk.callback
 com.stackmob.sdk.exception
 com.stackmob.sdk.model
-com.stackmob.sdk.net
 com.stackmob.sdk.push
-com.stackmob.sdk.util
