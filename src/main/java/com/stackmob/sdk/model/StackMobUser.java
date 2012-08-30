@@ -23,7 +23,6 @@ import com.stackmob.sdk.callback.StackMobQueryCallback;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.push.StackMobPushToken;
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion;
 
 import java.util.*;
 
