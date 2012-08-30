@@ -107,7 +107,7 @@ public class StackMobUser extends StackMobModel {
         });
     }
     
-    private String password;
+    String password;
 
     /**
      * create a new user of the specified class with a username and password.
