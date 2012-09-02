@@ -168,7 +168,7 @@ public class StackMobTests extends StackMobTestCommon {
         StackMobObjectOnServer<User> user = doLoginLogout(StackMob.OAuthVersion.Two, false);
         final CountDownLatch localLatch = latchOne();
         final MultiThreadAsserter localAsserter = new MultiThreadAsserter();
-        StackMob.getStackMob().get("restricted", new StackMobCallback() {
+        StackMob.getStackMob().getDatastore().get("restricted", new StackMobCallback() {
             @Override public void success(String responseBody) {
                 localLatch.countDown();
             }
@@ -211,7 +211,7 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
         //This will fail, but it should cause us to sync up with the server
-        StackMob.getStackMob().startSession(new StackMobCallback() {
+        StackMob.getStackMob().getLoggedInUser(new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markException(new Exception("request with bad time succeeded"));
@@ -234,7 +234,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get("game", new StackMobCallback() {
+        stackmob.getDatastore().get("game", new StackMobCallback() {
             @Override public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
                 List<Game> games = gson.fromJson(responseBody, Game.ListTypeToken);
@@ -260,7 +260,7 @@ public class StackMobTests extends StackMobTestCommon {
 
         Map<String, String> arguments = new HashMap<String, String>();
         arguments.put("name", game.name);
-        stackmob.get("game", arguments, new StackMobCallback() {
+        stackmob.getDatastore().get("game", arguments, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -289,7 +289,7 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
         StackMobQuery q = new StackMobQuery("account");
         q.expandDepthIs(1);
-        stackmob.get(q, new StackMobCallback() {
+        stackmob.getDatastore().get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 JsonElement elt = new JsonParser().parse(responseBody);
@@ -315,7 +315,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(query, new StackMobCallback() {
+        stackmob.getDatastore().get(query, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -343,7 +343,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(query, new StackMobCallback() {
+        stackmob.getDatastore().get(query, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -372,7 +372,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(query, new StackMobCallback() {
+        stackmob.getDatastore().get(query, new StackMobCallback() {
             @Override public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
                 List<Game> games = gson.fromJson(responseBody, Game.ListTypeToken);
@@ -399,7 +399,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(q, new StackMobCallback() {
+        stackmob.getDatastore().get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -429,7 +429,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(query, new StackMobCallback() {
+        stackmob.getDatastore().get(query, new StackMobCallback() {
             @Override public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
                 List<Game> games = gson.fromJson(responseBody, Game.ListTypeToken);
@@ -456,7 +456,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(q, new StackMobCallback() {
+        stackmob.getDatastore().get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -486,7 +486,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(query, new StackMobCallback() {
+        stackmob.getDatastore().get(query, new StackMobCallback() {
             @Override public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
                 List<Game> games = gson.fromJson(responseBody, Game.ListTypeToken);
@@ -513,7 +513,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(q, new StackMobCallback() {
+        stackmob.getDatastore().get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -547,7 +547,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(q, new StackMobCallback() {
+        stackmob.getDatastore().get(q, new StackMobCallback() {
             @Override public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
                 List<Game> gamesFromServer = gson.fromJson(responseBody, Game.ListTypeToken);
@@ -586,7 +586,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(q, new StackMobCallback() {
+        stackmob.getDatastore().get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -613,7 +613,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        localStackmob.post("game", g, new StackMobCallback() {
+        localStackmob.getDatastore().post("game", g, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -661,7 +661,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.post(schema, args, new StackMobCallback() {
+        stackmob.getDatastore().post(schema, args, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -694,7 +694,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.delete("game", objectOnServer.getObjectId(), new StackMobCallback() {
+        stackmob.getDatastore().delete("game", objectOnServer.getObjectId(), new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -722,7 +722,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.put(game.getName(), objectId, updatedGame, new StackMobCallback() {
+        stackmob.getDatastore().put(game.getName(), objectId, updatedGame, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -751,7 +751,7 @@ public class StackMobTests extends StackMobTestCommon {
         games.add(game2);
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        stackmob.postBulk(game1.getName(), games, new StackMobCallback() {
+        stackmob.getDatastore().postBulk(game1.getName(), games, new StackMobCallback() {
           @Override
           public void success(String responseBody) {
               asserter.markNotJsonError(responseBody);
@@ -780,7 +780,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
         
-        stackmob.postRelatedBulk(game.getName(), gameOnServer.getObjectId(), "moderators", users, new StackMobCallback() {
+        stackmob.getDatastore().postRelatedBulk(game.getName(), gameOnServer.getObjectId(), "moderators", users, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -809,7 +809,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
         
-        stackmob.postRelated(game.getName(), gameOnServer.getObjectId(), "moderators", user, new StackMobCallback() {
+        stackmob.getDatastore().postRelated(game.getName(), gameOnServer.getObjectId(), "moderators", user, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
               asserter.markNotJsonError(responseBody);
@@ -835,7 +835,7 @@ public class StackMobTests extends StackMobTestCommon {
       
         List<String> newModerators = Arrays.asList("one","two");
         
-        stackmob.putRelated(game.getName(), gameOnServer.getObjectId(), "moderators", newModerators, new StackMobCallback() {
+        stackmob.getDatastore().putRelated(game.getName(), gameOnServer.getObjectId(), "moderators", newModerators, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -864,7 +864,7 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
       
         List<String> idsToDelete = Arrays.asList("two","three");
-        stackmob.deleteIdsFrom(game.getName(), gameOnServer.getObjectId(), "moderators", idsToDelete, false, new StackMobCallback() {
+        stackmob.getDatastore().deleteIdsFrom(game.getName(), gameOnServer.getObjectId(), "moderators", idsToDelete, false, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -1097,7 +1097,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.count(query, new StackMobCountCallback() {
+        stackmob.getDatastore().count(query, new StackMobCountCallback() {
             @Override public void success(long result) {
                 asserter.markEquals((int)result, expectedCount);
                 latch.countDown();
@@ -1161,7 +1161,7 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
         CounterTest test = new CounterTest("foo", 5);
         StackMobObjectOnServer<CounterTest> obj = createOnServer(test, CounterTest.class);
-        StackMob.getStackMob().updateAtomicCounter("countertest", obj.getObject().getIdField(), "counter", -2, new StackMobCallback() {
+        StackMob.getStackMob().getDatastore().updateAtomicCounter("countertest", obj.getObject().getIdField(), "counter", -2, new StackMobCallback() {
             @Override public void success(String result) {
                 asserter.markEquals(3, new JsonParser().parse(result).getAsJsonObject().get("counter").getAsJsonPrimitive().getAsInt());
                 latch.countDown();
@@ -1181,7 +1181,7 @@ public class StackMobTests extends StackMobTestCommon {
         CounterTest test = new CounterTest("foo", 5);
         StackMobObjectOnServer<CounterTest> obj = createOnServer(test, CounterTest.class);
         test.counter = -2;
-        StackMob.getStackMob().putAndUpdateAtomicCounters("countertest", "foo", test, Arrays.asList("counter"), new StackMobCallback() {
+        StackMob.getStackMob().getDatastore().putAndUpdateAtomicCounters("countertest", "foo", test, Arrays.asList("counter"), new StackMobCallback() {
             @Override public void success(String result) {
                 asserter.markEquals(3, new JsonParser().parse(result).getAsJsonObject().get("counter").getAsJsonPrimitive().getAsInt());
                 latch.countDown();

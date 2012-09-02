@@ -197,7 +197,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get("foobar/baz!@#$", new StackMobCallback() {
+        stackmob.getDatastore().get("foobar/baz!@#$", new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 assertTrue(responseBody.startsWith("{\"createddate\":1345250420156,\"foobar_id\":\"baz!@#$\""));

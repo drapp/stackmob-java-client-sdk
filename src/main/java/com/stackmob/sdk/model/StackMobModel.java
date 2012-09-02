@@ -152,7 +152,7 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, final StackMobQueryCallback<T> callback) {
-        StackMob.getStackMob().get(q, new StackMobCallback() {
+        StackMob.getStackMob().getDatastore().get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 JsonArray array = new JsonParser().parse(responseBody).getAsJsonArray();
@@ -178,7 +178,7 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void count(StackMobQuery q, StackMobCountCallback callback) {
-        StackMob.getStackMob().count(q, callback);
+        StackMob.getStackMob().getDatastore().count(q, callback);
     }
 
     /**
@@ -210,7 +210,7 @@ public abstract class StackMobModel {
      */
     public static <T extends StackMobModel> void saveMultiple(List<T> models, StackMobCallback callback) {
         if(models.size() == 0) throw new IllegalArgumentException("Empty list");
-        StackMob.getStackMob().post(models.get(0).getSchemaName(), toJsonArray(models), callback);
+        StackMob.getStackMob().getDatastore().post(models.get(0).getSchemaName(), toJsonArray(models), callback);
 
     }
 
@@ -748,7 +748,7 @@ public abstract class StackMobModel {
         Map<String,String> args = new HashMap<String, String>();
         if(depth > 0) args.put("_expand", String.valueOf(depth));
         Map<String,String> headers = new HashMap<String, String>();
-        StackMob.getStackMob().get(getSchemaName() + "/" + id, args, headers , new StackMobIntermediaryCallback(callback) {
+        StackMob.getStackMob().getDatastore().get(getSchemaName() + "/" + id, args, headers , new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;
@@ -796,7 +796,7 @@ public abstract class StackMobModel {
         String json = toJsonWithDepth(depth, mapping);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
         headers.add(new Pair<String,String>("X-StackMob-Relations", mapping.toHeaderString()));
-        StackMob.getStackMob().post(getSchemaName(), json, headers, new StackMobIntermediaryCallback(callback) {
+        StackMob.getStackMob().getDatastore().post(getSchemaName(), json, headers, new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;
@@ -823,7 +823,7 @@ public abstract class StackMobModel {
      * @param callback invoked when the delete is complete
      */
     public void destroy(StackMobCallback callback) {
-        StackMob.getStackMob().delete(getSchemaName(), id, callback);
+        StackMob.getStackMob().getDatastore().delete(getSchemaName(), id, callback);
     }
 
 
@@ -856,7 +856,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().putRelated(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), callback);
+        StackMob.getStackMob().getDatastore().putRelated(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), callback);
     }
 
     /**
@@ -879,7 +879,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().postRelated(schemaName, id, field.toLowerCase(), toJsonArray(objs), callback);
+        StackMob.getStackMob().getDatastore().postRelated(schemaName, id, field.toLowerCase(), toJsonArray(objs), callback);
     }
 
     /**
@@ -901,7 +901,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), false, callback);
+        StackMob.getStackMob().getDatastore().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), false, callback);
 
     }
 
@@ -924,6 +924,6 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), true, callback);
+        StackMob.getStackMob().getDatastore().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), true, callback);
     }
 }

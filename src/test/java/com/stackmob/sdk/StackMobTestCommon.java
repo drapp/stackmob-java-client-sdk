@@ -97,7 +97,7 @@ public class StackMobTestCommon {
 
         final AtomicReference<String> ref = new AtomicReference<String>(null);
 
-        stackmob.post(obj.getName(), obj, new StackMobCallback() {
+        stackmob.getDatastore().post(obj.getName(), obj, new StackMobCallback() {
             @Override public void success(String responseBody) {
                 if(!asserter.markNotJsonError(responseBody)) {
                     try {
