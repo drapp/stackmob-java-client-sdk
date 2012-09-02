@@ -16,6 +16,7 @@
 
 package com.stackmob.sdk.callback;
 
+import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerb;
 
 import java.util.Arrays;
@@ -38,6 +39,8 @@ public abstract class StackMobRawCallback {
     protected byte[] responseBody;
     protected int retriesRemaining = 3;
 
+
+    public abstract void unsent(StackMobException e);
 
     /**
      * the method that will be called when the call to StackMob is complete. may be executed in a background thread

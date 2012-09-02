@@ -44,6 +44,12 @@ import java.util.Map;
  * When a callback is invoked you will generally not be in the main thread, so react accordingly.
  */
 public abstract class StackMobCallback extends StackMobRawCallback {
+
+    @Override
+    public void unsent(StackMobException e) {
+        failure(e);
+    }
+
     @Override
     public void done(HttpVerb requestVerb,
                      String requestURL,

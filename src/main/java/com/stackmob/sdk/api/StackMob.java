@@ -300,9 +300,8 @@ public class StackMob {
      * call the login method on StackMob
      * @param params parameters to pass to the login method
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult login(Map<String, String> params, StackMobRawCallback callback) {
+    public void login(Map<String, String> params, StackMobRawCallback callback) {
         session.setLastUserLoginName(params.get("username"));
         StackMobRequest req;
         if(getSession().isOAuth2()) {
@@ -323,7 +322,7 @@ public class StackMob {
                                                callback,
                                                this.redirectedCallback);
         }
-        return req.setUrlFormat(this.apiUrlFormat).sendRequest();
+        req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -331,27 +330,25 @@ public class StackMob {
      * can give you finer control if you need it. Logins last an hour by default. Once they expire
      * they need to be refreshed. Make sure not to send multiple refresh token requests.
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult refreshToken(StackMobRawCallback callback) {
+    public void refreshToken(StackMobRawCallback callback) {
         if(!getSession().isOAuth2()) {
-            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new StackMobException("This method is only available with oauth2"));
+            callback.unsent(new StackMobException("This method is only available with oauth2"));
         }
 
         if(!getSession().oauth2RefreshTokenValid()) {
-            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, new StackMobException("Refresh token invalid"));
+            callback.unsent(new StackMobException("Refresh token invalid"));
         }
-        return StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, this.redirectedCallback, callback).setUrlFormat(this.apiUrlFormat).sendRequest();
+        StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, this.redirectedCallback, callback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
      * call the logout method on StackMob, invalidating your credentials.
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult logout(StackMobRawCallback callback) {
+    public void logout(StackMobRawCallback callback) {
         session.setOAuth2TokensAndExpiration(null, null, null, 0);
-        return new StackMobUserBasedRequest(this.executor,
+        new StackMobUserBasedRequest(this.executor,
                                      this.session,
                                      "logout",
                                      StackMobRequest.EmptyParams,
@@ -370,9 +367,8 @@ public class StackMob {
      * @param token the twitter session key (this is a per user key - different from the consumer key)
      * @param secret the twitter session secret (this is a per user secret - different from the consumer secret)
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult twitterLogin(String token,
+    public void twitterLogin(String token,
                                                   String secret,
                                                   StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
@@ -395,7 +391,7 @@ public class StackMob {
                     callback,
                     this.redirectedCallback);
         }
-        return req.setUrlFormat(this.apiUrlFormat).sendRequest();
+        req.setUrlFormat(this.apiUrlFormat).sendRequest();
 
     }
 
@@ -403,13 +399,12 @@ public class StackMob {
      * update the logged in users’s Twitter status. The logged in user must have a linked Twitter account.
      * @param message the message to send. must be <= 140 characters
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult twitterStatusUpdate(String message,
+    public void twitterStatusUpdate(String message,
                                                          StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("tw_st", message);
-        return new StackMobUserBasedRequest(this.executor,
+        new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "twitterStatusUpdate",
                                             params,
@@ -423,9 +418,8 @@ public class StackMob {
      * @param secret the twitter session secret (this is a per user secret - different from the consumer secret)
      * @param username the username that the user should have
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult registerWithTwitterToken(String token,
+    public void registerWithTwitterToken(String token,
                                                               String secret,
                                                               String username,
                                                               StackMobRawCallback callback) {
@@ -433,7 +427,7 @@ public class StackMob {
         params.put("tw_tk", token);
         params.put("tw_ts", secret);
         params.put("username", username);
-        return new StackMobUserBasedRequest(this.executor,
+        new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "createUserWithTwitter",
                                             params,
@@ -446,16 +440,15 @@ public class StackMob {
      * @param token the twitter session key (this is a per user key - different from the consumer key)
      * @param secret the twitter session secret (this is a per user secret - different from the consumer secret)
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult linkUserWithTwitterToken(String token,
+    public void linkUserWithTwitterToken(String token,
                                          String secret,
                                          StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("tw_tk", token);
         params.put("tw_ts", secret);
 
-        return new StackMobUserBasedRequest(this.executor,
+        new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "linkUserWithTwitter",
                                             params,
@@ -469,9 +462,8 @@ public class StackMob {
      * {@link #linkUserWithFacebookToken(String, com.stackmob.sdk.callback.StackMobRawCallback)}
      * @param token the facebook user token
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult facebookLogin(String token,
+    public void facebookLogin(String token,
                                                    StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("fb_at", token);
@@ -493,7 +485,7 @@ public class StackMob {
                                                callback,
                                                this.redirectedCallback);
         }
-        return req.setUrlFormat(this.apiUrlFormat).sendRequest();
+        req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -501,16 +493,15 @@ public class StackMob {
      * @param token the facebook user token
      * @param username the StackMob username that the new user should have
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult registerWithFacebookToken(String token,
+    public void registerWithFacebookToken(String token,
                                                                String username,
                                                                StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("fb_at", token);
         params.put("username", username);
 
-        return new StackMobUserBasedRequest(this.executor,
+        new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "createUserWithFacebook",
                                             params,
@@ -522,14 +513,13 @@ public class StackMob {
      * link an existing StackMob user with an existing Facebook user via Facebook credentials.
      * @param token the Facebook user token
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult linkUserWithFacebookToken(String token,
+    public void linkUserWithFacebookToken(String token,
                                                                StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("fb_at", token);
 
-        return new StackMobUserBasedRequest(this.executor,
+        new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "linkUserWithFacebook",
                                             params,
@@ -541,14 +531,13 @@ public class StackMob {
      * post a message to Facebook. This method will not post to FB and will return nothing if there is no user logged into FB.
      * @param msg the message to post
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult facebookPostMessage(String msg,
+    public void facebookPostMessage(String msg,
                                                          StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("message", msg);
 
-        return new StackMobUserBasedRequest(this.executor,
+        new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "postFacebookMessage",
                                             params,
@@ -559,19 +548,17 @@ public class StackMob {
     /**
      * get facebook user info for the current user. this method will return nothing if there is no currently logged in FB user
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult getFacebookUserInfo(StackMobRawCallback callback) {
-        return new StackMobUserBasedRequest(this.executor, this.session, "getFacebookUserInfo", new HashMap<String, String>(), callback, this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    public void getFacebookUserInfo(StackMobRawCallback callback) {
+        new StackMobUserBasedRequest(this.executor, this.session, "getFacebookUserInfo", new HashMap<String, String>(), callback, this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
      * get twitter user info for the current user. this method will return nothing if there is no currently logged in twitter user
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult getTwitterUserInfo(StackMobRawCallback callback) {
-        return new StackMobUserBasedRequest(this.executor, this.session, "getTwitterUserInfo", new HashMap<String, String>(), callback, this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    public void getTwitterUserInfo(StackMobRawCallback callback) {
+        new StackMobUserBasedRequest(this.executor, this.session, "getTwitterUserInfo", new HashMap<String, String>(), callback, this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     //Forgot/reset password
@@ -580,15 +567,14 @@ public class StackMob {
      * send out a password reset email to a user who's forgotten their password
      * @param username the user who's forgotten their password
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
 
-    public StackMobRequestSendResult forgotPassword(String username,
+    public void forgotPassword(String username,
                                                    StackMobRawCallback callback) {
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("username", username);
-        return new StackMobUserBasedRequest(this.executor,
+        new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             HttpVerbWithPayload.POST,
                                             StackMobRequest.EmptyHeaders,
@@ -604,10 +590,9 @@ public class StackMob {
      * @param oldPassword the old temporary password
      * @param newPassword the new password that the user just created
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
 
-    public StackMobRequestSendResult resetPassword(String oldPassword,
+    public void resetPassword(String oldPassword,
                                                    String newPassword,
                                                    StackMobRawCallback callback) {
 
@@ -618,7 +603,7 @@ public class StackMob {
         newPW.put("password", newPassword);
         params.put("old", oldPW);
         params.put("new", newPW);
-        return new StackMobUserBasedRequest(this.executor,
+        new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             HttpVerbWithPayload.POST,
                                             StackMobRequest.EmptyHeaders,
@@ -633,10 +618,9 @@ public class StackMob {
      * Gets the user object for the currently logged in oauth2 user. Invokes the failure callback if there
      * is no logged in user
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult getLoggedInUser(StackMobCallback callback) {
-        return datastore.get("user/loggedInUser", callback);
+    public void getLoggedInUser(StackMobCallback callback) {
+        datastore.get("user/loggedInUser", callback);
     }
 
     /**

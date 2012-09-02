@@ -162,10 +162,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
                 fail(e.getMessage());
             }
         }, redirectedCallback);
-        StackMobRequestSendResult sendResult = request.sendRequest();
         asserter.assertLatchFinished(latch);
-        assertEquals(sendResult.getStatus(), StackMobRequestSendResult.RequestSendStatus.SENT);
-        assertNull(sendResult.getFailureReason());
     }
 
     @Test
@@ -186,10 +183,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
                 latch.countDown();
             }
         }, redirectedCallback);
-        StackMobRequestSendResult sendResult = request.setUrlFormat("nonexistent").sendRequest();
         asserter.assertLatchFinished(latch);
-        assertEquals(sendResult.getStatus(), StackMobRequestSendResult.RequestSendStatus.SENT);
-        assertNull(sendResult.getFailureReason());
     }
 
     @Test

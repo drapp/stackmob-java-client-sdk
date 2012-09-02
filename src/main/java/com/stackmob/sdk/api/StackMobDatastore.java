@@ -18,11 +18,11 @@ package com.stackmob.sdk.api;
 import com.google.gson.*;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
+import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
 import com.stackmob.sdk.request.StackMobRequest;
-import com.stackmob.sdk.request.StackMobRequestSendResult;
 import com.stackmob.sdk.request.StackMobRequestWithPayload;
 import com.stackmob.sdk.request.StackMobRequestWithoutPayload;
 import com.stackmob.sdk.util.Http;
@@ -53,11 +53,10 @@ public class StackMobDatastore {
      * do a get request on the StackMob platform
      * @param path the path to get
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult get(String path,
+    public void get(String path,
                                          StackMobRawCallback callback) {
-        return new StackMobRequestWithoutPayload(this.executor,
+        new StackMobRequestWithoutPayload(this.executor,
                 this.session,
                 HttpVerbWithoutPayload.GET,
                 StackMobRequest.EmptyHeaders,
@@ -73,9 +72,8 @@ public class StackMobDatastore {
      * @param arguments arguments to be encoded into the query string of the get request
      * @param headerMap any additional headers to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult get(String path,
+    public void get(String path,
                                          Map<String, String> arguments,
                                          Map<String, String> headerMap,
                                          StackMobRawCallback callback) {
@@ -84,7 +82,7 @@ public class StackMobDatastore {
             headers.add(header);
         }
 
-        return get(path, arguments, headers, callback);
+        get(path, arguments, headers, callback);
     }
 
     /**
@@ -93,13 +91,12 @@ public class StackMobDatastore {
      * @param arguments arguments to be encoded into the query string of the get request
      * @param headers any additional headers to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult get(String path,
+    public void get(String path,
                                          Map<String, String> arguments,
                                          List<Map.Entry<String, String>> headers,
                                          StackMobRawCallback callback) {
-        return new StackMobRequestWithoutPayload(this.executor,
+        new StackMobRequestWithoutPayload(this.executor,
                 this.session,
                 HttpVerbWithoutPayload.GET,
                 headers,
@@ -114,23 +111,21 @@ public class StackMobDatastore {
      * @param path the path to get
      * @param arguments the arguments to be encoded into the query string of the get request
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult get(String path,
+    public void get(String path,
                                          Map<String, String> arguments,
                                          StackMobRawCallback callback) {
-        return this.get(path, arguments, StackMobRequest.EmptyHeaders, callback);
+        this.get(path, arguments, StackMobRequest.EmptyHeaders, callback);
     }
 
     /**
      * do a get request on the StackMob platform
      * @param query the query to run
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult get(StackMobQuery query,
+    public void get(StackMobQuery query,
                                          StackMobRawCallback callback) {
-        return this.get("/"+query.getObjectName(), query.getArguments(), query.getHeaders(), callback);
+        this.get("/"+query.getObjectName(), query.getArguments(), query.getHeaders(), callback);
     }
 
 
@@ -140,13 +135,11 @@ public class StackMobDatastore {
      * @param path the path to get
      * @param requestObject the object to serialize and send in the POST body. this object will be serialized with Gson
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult post(String path,
+    public void post(String path,
                                           Object requestObject,
                                           StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
                 HttpVerbWithPayload.POST,
                 StackMobRequest.EmptyHeaders,
@@ -162,12 +155,11 @@ public class StackMobDatastore {
      * @param path the path to get
      * @param body the json body
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult post(String path,
+    public void post(String path,
                                           String body,
                                           StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
                 HttpVerbWithPayload.POST,
                 StackMobRequest.EmptyHeaders,
@@ -184,13 +176,12 @@ public class StackMobDatastore {
      * @param body the json body
      * @param headers any additional headers to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult post(String path,
+    public void post(String path,
                                           String body,
                                           List<Map.Entry<String, String>>  headers,
                                           StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
                 HttpVerbWithPayload.POST,
                 headers,
@@ -206,13 +197,11 @@ public class StackMobDatastore {
      * @param path the path to get
      * @param requestObjects List of objects to serialize and send in the POST body. the list will be serialized with Gson
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public <T> StackMobRequestSendResult postBulk(String path,
+    public <T> void postBulk(String path,
                                                   List<T> requestObjects,
                                                   StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
                 HttpVerbWithPayload.POST,
                 StackMobRequest.EmptyHeaders,
@@ -230,14 +219,13 @@ public class StackMobDatastore {
      * @param relatedField name of the relation
      * @param relatedObject related object to post
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult postRelated(String path,
+    public void postRelated(String path,
                                                  String primaryId,
                                                  String relatedField,
                                                  Object relatedObject,
                                                  StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
                 HttpVerbWithPayload.POST,
                 StackMobRequest.EmptyHeaders,
@@ -255,14 +243,13 @@ public class StackMobDatastore {
      * @param relatedField name of the relation
      * @param relatedObject related object to post
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult postRelated(String path,
+    public void postRelated(String path,
                                                  String primaryId,
                                                  String relatedField,
                                                  String relatedObject,
                                                  StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
                 HttpVerbWithPayload.POST,
                 StackMobRequest.EmptyHeaders,
@@ -280,14 +267,13 @@ public class StackMobDatastore {
      * @param relatedField name of the relation
      * @param relatedObjects list of related objects to post. the list will be serialized with Gson
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public <T> StackMobRequestSendResult postRelatedBulk(String path,
+    public <T> void postRelatedBulk(String path,
                                                          String primaryId,
                                                          String relatedField,
                                                          List<T> relatedObjects,
                                                          StackMobRawCallback callback) {
-        return postRelated(path, primaryId, relatedField, relatedObjects, callback);
+        postRelated(path, primaryId, relatedField, relatedObjects, callback);
     }
 
 
@@ -297,13 +283,12 @@ public class StackMobDatastore {
      * @param id the id of the object to PUT
      * @param requestObject the object to serialize and send in the PUT body. this object will be serialized with Gson
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult put(String path,
+    public void put(String path,
                                          String id,
                                          Object requestObject,
                                          StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
                 HttpVerbWithPayload.PUT,
                 StackMobRequest.EmptyHeaders,
@@ -320,13 +305,12 @@ public class StackMobDatastore {
      * @param id the id of the object to put
      * @param body the json body
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult put(String path,
+    public void put(String path,
                                          String id,
                                          String body,
                                          StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
                 HttpVerbWithPayload.PUT,
                 StackMobRequest.EmptyHeaders,
@@ -345,9 +329,8 @@ public class StackMobDatastore {
      * @param requestObject the object to serialize and send in the PUT body. this object will be serialized with Gson
      * @param counterFields a list of the fields in the object to be treated as counters being incremented
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult putAndUpdateAtomicCounters(String path,
+    public void putAndUpdateAtomicCounters(String path,
                                                                 String id,
                                                                 Object requestObject,
                                                                 List<String> counterFields,
@@ -359,7 +342,7 @@ public class StackMobDatastore {
                 obj.add(field.getKey() + "[inc]", field.getValue());
             }
         }
-        return put(path, id, obj.toString(), callback);
+        put(path, id, obj.toString(), callback);
     }
 
     /**
@@ -369,16 +352,15 @@ public class StackMobDatastore {
      * @param field the field to increment
      * @param value the value to increment by
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult updateAtomicCounter(String path,
+    public void updateAtomicCounter(String path,
                                                          String id,
                                                          String field,
                                                          int value,
                                                          StackMobRawCallback callback) {
         JsonObject body = new JsonObject();
         body.add(field + "[inc]", new JsonPrimitive(value));
-        return put(path, id, body.toString(), callback);
+        put(path, id, body.toString(), callback);
     }
 
     /**
@@ -389,14 +371,13 @@ public class StackMobDatastore {
      * @param relatedIds list of ids to atomically add to the relation. The type should be the same type as the primary
      *                   key field of the related object
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public <T> StackMobRequestSendResult putRelated(String path,
+    public <T> void putRelated(String path,
                                                     String primaryId,
                                                     String relatedField,
                                                     List<T> relatedIds,
                                                     StackMobRawCallback callback) {
-        return new StackMobRequestWithPayload(this.executor,
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
                 HttpVerbWithPayload.PUT,
                 StackMobRequest.EmptyHeaders,
@@ -413,13 +394,11 @@ public class StackMobDatastore {
      * @param path the path to delete
      * @param id the id of the object to put
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request.
-     * contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult delete(String path,
+    public void delete(String path,
                                             String id,
                                             StackMobRawCallback callback) {
-        return new StackMobRequestWithoutPayload(this.executor,
+        new StackMobRequestWithoutPayload(this.executor,
                 this.session,
                 HttpVerbWithoutPayload.DELETE,
                 StackMobRequest.EmptyHeaders,
@@ -438,9 +417,8 @@ public class StackMobDatastore {
      *                    ids should be same type as the primary id of the related type (most likely String or Integer)
      * @param cascadeDeletes true if related objects specified in idsToDelete should also be deleted
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public <T> StackMobRequestSendResult deleteIdsFrom(String path,
+    public <T> void deleteIdsFrom(String path,
                                                        String primaryId,
                                                        String field,
                                                        List<T> idsToDelete,
@@ -457,7 +435,7 @@ public class StackMobDatastore {
         if (cascadeDeletes) {
             headers.add(new Pair<String, String>("X-StackMob-CascadeDelete", "true"));
         }
-        return new StackMobRequestWithoutPayload(this.executor,
+        new StackMobRequestWithoutPayload(this.executor,
                 this.session,
                 HttpVerbWithoutPayload.DELETE,
                 headers,
@@ -477,7 +455,7 @@ public class StackMobDatastore {
      * @param cascadeDelete true if related object specified in idToDelete should also be deleted
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public <T> StackMobRequestSendResult deleteIdFrom(String path,
+    public <T> void deleteIdFrom(String path,
                                                       String primaryId,
                                                       String field,
                                                       T idToDelete,
@@ -487,7 +465,7 @@ public class StackMobDatastore {
         if (cascadeDelete) {
             headers.add(new Pair<String, String>("X-StackMob-CascadeDelete", "true"));
         }
-        return new StackMobRequestWithoutPayload(this.executor,
+        new StackMobRequestWithoutPayload(this.executor,
                 this.session,
                 HttpVerbWithoutPayload.DELETE,
                 headers,
@@ -501,23 +479,25 @@ public class StackMobDatastore {
      * retrieve the number of objects for a schema on the StackMob platform
      * @param path the path to get
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult count(String path,
+    public void count(String path,
                                            StackMobRawCallback callback) {
-        return count(new StackMobQuery(path), callback);
+        count(new StackMobQuery(path), callback);
     }
 
     /**
      * retrieve the number of objects for a query on the StackMob platform
      * @param query the query to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
      */
-    public StackMobRequestSendResult count(StackMobQuery query,
+    public void count(StackMobQuery query,
                                            StackMobRawCallback callback) {
         final StackMobRawCallback userCallback = callback;
-        return get(query.isInRange(0, 0), new StackMobRawCallback() {
+        get(query.isInRange(0, 0), new StackMobRawCallback() {
+            @Override
+            public void unsent(StackMobException e) {
+                userCallback.unsent(e);
+            }
             @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
                 if(Http.isSuccess(responseStatusCode)) {

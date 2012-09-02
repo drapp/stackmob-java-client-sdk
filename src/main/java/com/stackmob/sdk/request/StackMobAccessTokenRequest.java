@@ -20,6 +20,7 @@ import com.google.gson.JsonParser;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
+import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 
@@ -60,6 +61,12 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
 
     private static StackMobRawCallback getIntermediaryCallback(final StackMobSession session, final StackMobRawCallback callback) {
         return new StackMobRawCallback() {
+            @Override
+            public void unsent(StackMobException e) {
+                callback.unsent(e);
+            }
+
+
             @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
                 JsonElement responseElt = new JsonParser().parse(new String(responseBody));
