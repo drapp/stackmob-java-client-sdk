@@ -37,7 +37,6 @@ public class StackMobSession {
     private String secret;
     private String userObjectName;
     private int apiVersionNumber;
-    private String appName = null;
     private String lastUserLoginName;
     private long serverTimeDiff = 0;
     private OAuthVersion oauthVersion;
@@ -47,35 +46,18 @@ public class StackMobSession {
     private Date oauth2TokenExpiration;
     private Boolean httpsOverride = null;
 
-    public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
-        this(oauthVersion, key, secret, userObjectName, apiVersionNumber, null);
-    }
-
-    public StackMobSession(String key, String secret, String userObjectName, String appName, int apiVersionNumber) {
-        this(key, secret, userObjectName, apiVersionNumber, null);
-    }
-
-    public StackMobSession(String key, String secret, String userObjectName, int apiVersionNumber, String appName) {
-        this(OAuthVersion.One, key, secret, userObjectName, apiVersionNumber, appName);
-    }
-
-    public StackMobSession(OAuthVersion oauthVersion, String key, String secret, String userObjectName, int apiVersionNumber, String appName) {
-        if(key.equals(StackMobConfiguration.DEFAULT_API_KEY) || (oauthVersion != OAuthVersion.Two && secret.equals(StackMobConfiguration.DEFAULT_API_SECRET))) {
-            throw new RuntimeException("You forgot to set your api key and secret");
-        }
+    public StackMobSession(OAuthVersion oauthVersion, int apiVersionNumber, String key, String secret, String userObjectName) {
         this.oauthVersion = oauthVersion;
         this.key = key;
         this.secret = secret;
         this.userObjectName = userObjectName;
         this.apiVersionNumber = apiVersionNumber;
-        this.appName = appName;
     }
 
     public StackMobSession(StackMobSession that) {
         this.oauthVersion = that.oauthVersion;
         this.key = that.key;
         this.secret = that.secret;
-        this.appName = that.appName;
         this.userObjectName = that.userObjectName;
         this.apiVersionNumber = that.apiVersionNumber;
         this.serverTimeDiff = that.serverTimeDiff;
@@ -98,10 +80,6 @@ public class StackMobSession {
 
     public int getApiVersionNumber() {
         return apiVersionNumber;
-    }
-
-    public String getAppName() {
-        return appName;
     }
 
     protected long getLocalTime() {

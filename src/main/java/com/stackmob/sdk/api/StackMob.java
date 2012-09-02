@@ -66,8 +66,10 @@ public class StackMob {
     }
 
     private StackMobSession session;
-    private String apiUrlFormat = StackMobRequest.DEFAULT_API_URL_FORMAT;
-    private String pushUrlFormat = StackMobRequest.DEFAULT_PUSH_URL_FORMAT;
+    private String userIdName;
+    private String passwordField;
+    private String apiUrlFormat;
+    private String pushUrlFormat;
     private ExecutorService executor;
 
 
@@ -79,6 +81,19 @@ public class StackMob {
     private static String userAgentName = "Java Client";
     private static String version = null;
     private static StackMobLogger logger = new StackMobLogger();
+
+
+    public static String DEFAULT_API_HOST = "api.stackmob.com";
+    public static String DEFAULT_PUSH_HOST = "push.stackmob.com";
+    public static String DEFAULT_USER_SCHEMA_NAME = "user";
+    public static String DEFAULT_USER_ID = "username";
+    public static String DEFAULT_PASSWORD_FIELD = "password";
+    public static StackMobRedirectedCallback DEFAULT_REDIRECTED_CALLBACK = new StackMobRedirectedCallback() {
+        @Override
+        public void redirected(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
+            // Do nothing
+        }
+    };
 
     /**
      * The current android sdk version
@@ -101,10 +116,9 @@ public class StackMob {
         return version;
     }
 
-    public static String getUserAgent(String appName) {
-        return String.format("StackMob (%s; %s)%s", userAgentName,
-                getVersion(),
-                (appName == null) ? "" : "/" + appName);
+    public static String getUserAgent() {
+        return String.format("StackMob (%s; %s)", userAgentName,
+                getVersion());
     }
 
     /**
@@ -169,13 +183,10 @@ public class StackMob {
     private static StackMob stackmob;
 
     /**
-     * Get the singleton StackMob object. If none exists, one is created from the values in {@link StackMobConfiguration}
+     * Get the singleton StackMob object.
      * @return the singleton StackMob
      */
     public static synchronized StackMob getStackMob() {
-        if(stackmob == null) {
-            stackmob = StackMobConfiguration.newStackMob();
-        }
         return stackmob;
     }
 
@@ -188,52 +199,36 @@ public class StackMob {
     }
 
     /**
-     * the preferred StackMob constructor. Unspecified parameters get reasonable defaults
-     * @param apiKey the api key for your app
-     * @param apiSecret the api secret for your app
-     * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
-     * @param appName the name of your application
+     * a StackMob constructor allowing you to specify the OAuth version.
      * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
+     * @param apiKey the api key for your app
      */
-    public StackMob(String apiKey, String apiSecret, String userObjectName, String appName, Integer apiVersionNumber) {
-        this(OAuthVersion.One, apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
+    public StackMob(Integer apiVersionNumber, String apiKey) {
+        this(OAuthVersion.Two, apiVersionNumber, apiKey, null);
     }
 
     /**
      * a StackMob constructor allowing you to specify the OAuth version.
      * @param oauthVersion whether to use oauth1 or oauth2
-     * @param apiKey the api key for your app
-     * @param apiSecret the api secret for your app
-     * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
-     * @param appName the name of your application
      * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
-     */
-    public StackMob(OAuthVersion oauthVersion, String apiKey, String apiSecret, String userObjectName, String appName, Integer apiVersionNumber) {
-        this.session = new StackMobSession(oauthVersion, apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
-        this.executor = createNewExecutor();
-        this.stackmobPush = new StackMobPush(executor, session, "", redirectedCallback);
-        if(stackmob == null) StackMob.setStackMob(this);
-    }
-
-    /**
-    * a StackMob constructor that leaves you with now app name in the user-agent
-    * @param apiKey the api key for your app
-    * @param apiSecret the api secret for your app
-    * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty string here and do not use the login, logout, facebook or twitter methods, as they will fail
-    * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
-    */
-    public StackMob(String apiKey, String apiSecret, String userObjectName, Integer apiVersionNumber) {
-        this(apiKey, apiSecret, userObjectName,  null, apiVersionNumber);
-    }
-
-    /**
-     * a StackMob constructor that allows you to do your own caching of URLs for redirection
-     * @param oauthVersion whether to use oauth1 or oauth2
      * @param apiKey the api key for your app
      * @param apiSecret the api secret for your app
-     * @param userObjectName the name of your app's user object
-     * @param apiVersionNumber the version number of your app's API that you want to use with this object. pass 0 for sandbox
-     * @param urlFormat the format of URLs to use. for instance: api.mob1.stackmob.com
+     */
+    public StackMob(OAuthVersion oauthVersion, Integer apiVersionNumber, String apiKey, String apiSecret) {
+        this(oauthVersion, apiVersionNumber, apiKey, apiSecret, DEFAULT_API_HOST, DEFAULT_PUSH_HOST, DEFAULT_USER_SCHEMA_NAME, DEFAULT_USER_ID, DEFAULT_PASSWORD_FIELD, DEFAULT_REDIRECTED_CALLBACK);
+    }
+
+    /**
+     * the most complete StackMob constructor allowing you to set values for everything
+     * @param oauthVersion whether to use oauth1 or oauth2
+     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
+     * @param apiKey the api key for your app
+     * @param apiSecret the api secret for your app. Can be null if you're using OAuth2
+     * @param apiHost the base of the url for api requests
+     * @param pushHost the base of the url for push requests
+     * @param userSchema the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
+     * @param userIdName the name of your app's user object primary key
+     * @param passwordFieldName the name of your app's user object primary key
      * @param redirectedCallback callback to be called if the StackMob platform issues a redirect. you should use this callback to cache the new URLs. here is a sample callback:
      * <code>
      * new StackMobRedirectedCallback() {
@@ -252,107 +247,24 @@ public class StackMob {
      * note that this callback may be called in a background thread
      */
     public StackMob(OAuthVersion oauthVersion,
+                    Integer apiVersionNumber,
                     String apiKey,
                     String apiSecret,
-                    String userObjectName,
-                    Integer apiVersionNumber,
-                    String urlFormat,
+                    String apiHost,
+                    String pushHost,
+                    String userSchema,
+                    String userIdName,
+                    String passwordFieldName,
                     StackMobRedirectedCallback redirectedCallback) {
-        this(oauthVersion, apiKey, apiSecret, userObjectName, null, apiVersionNumber, urlFormat, StackMobRequest.DEFAULT_PUSH_URL_FORMAT, redirectedCallback);
-    }
-
-    /**
-     * a legacy constructor with a subset of the possible parameters
-     * @deprecated
-     * @param oauthVersion whether to use oauth1 or oauth2
-     * @param apiKey the api key for your app
-     * @param apiSecret the api secret for your app
-     * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
-     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
-     * @param apiUrlFormat the url for api requests
-     * @param pushUrlFormat the url for push requests
-     * @param redirectedCallback a calback to be called on redirection
-     */
-    public StackMob(OAuthVersion oauthVersion,
-                    String apiKey,
-                    String apiSecret,
-                    String userObjectName,
-                    Integer apiVersionNumber,
-                    String apiUrlFormat,
-                    String pushUrlFormat,
-                    StackMobRedirectedCallback redirectedCallback) {
-        this(oauthVersion, apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
-    }
-
-    /**
-     * a legacy constructor with a subset of the possible parameters
-     * @deprecated
-     * @param apiKey the api key for your app
-     * @param apiSecret the api secret for your app
-     * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
-     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
-     * @param apiUrlFormat the url for api requests
-     * @param pushUrlFormat the url for push requests
-     * @param redirectedCallback a calback to be called on redirection
-     */
-    public StackMob(String apiKey,
-                    String apiSecret,
-                    String userObjectName,
-                    Integer apiVersionNumber,
-                    String apiUrlFormat,
-                    String pushUrlFormat,
-                    StackMobRedirectedCallback redirectedCallback) {
-        this(OAuthVersion.One, apiKey, apiSecret, userObjectName, null, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
-    }
-
-    /**
-     * a legacy constructor with a subset of the possible parameters
-     * @deprecated
-     * @param apiKey the api key for your app
-     * @param apiSecret the api secret for your app
-     * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
-     * @param appName the name of your application
-     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
-     * @param apiUrlFormat the url for api requests
-     * @param pushUrlFormat the url for push requests
-     * @param redirectedCallback a calback to be called on redirection
-     */
-    public StackMob(String apiKey,
-                    String apiSecret,
-                    String userObjectName,
-                    String appName,
-                    Integer apiVersionNumber,
-                    String apiUrlFormat,
-                    String pushUrlFormat,
-                    StackMobRedirectedCallback redirectedCallback) {
-        this(OAuthVersion.One, apiKey,apiSecret, userObjectName, appName, apiVersionNumber, apiUrlFormat, pushUrlFormat, redirectedCallback);
-    }
-
-    /**
-     * the most complete StackMob constructor allowing you to set values for everything
-     * @param oauthVersion whether to use oauth1 or oauth2
-     * @param apiKey the api key for your app
-     * @param apiSecret the api secret for your app
-     * @param userObjectName the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
-     * @param appName the name of your application
-     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
-     * @param apiUrlFormat the url for api requests
-     * @param pushUrlFormat the url for push requests
-     * @param redirectedCallback a calback to be called on redirection
-     */
-    public StackMob(OAuthVersion oauthVersion,
-                    String apiKey,
-                    String apiSecret,
-                    String userObjectName,
-                    String appName,
-                    Integer apiVersionNumber,
-                    String apiUrlFormat,
-                    String pushUrlFormat,
-                    StackMobRedirectedCallback redirectedCallback) {
-        this(oauthVersion, apiKey, apiSecret, userObjectName, appName, apiVersionNumber);
+        this.session = new StackMobSession(oauthVersion, apiVersionNumber, apiKey, apiSecret, userSchema);
+        this.executor = createNewExecutor();
+        if(stackmob == null) StackMob.setStackMob(this);
+        this.apiUrlFormat = apiHost;
+        this.pushUrlFormat = pushHost;
+        this.userIdName = userIdName;
+        this.passwordField = passwordFieldName;
         this.userRedirectedCallback = redirectedCallback;
-        this.apiUrlFormat = apiUrlFormat;
-        this.pushUrlFormat = pushUrlFormat;
+        this.stackmobPush = new StackMobPush(executor, session, pushHost, redirectedCallback);
     }
 
     /**

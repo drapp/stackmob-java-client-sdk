@@ -326,7 +326,7 @@ public abstract class StackMobRequest {
             headerList.add(new Pair<String, String>("Content-Type", getContentType()));
         }
         headerList.add(new Pair<String, String>("Accept", accept));
-        headerList.add(new Pair<String, String>("User-Agent", StackMob.getUserAgent(session.getAppName())));
+        headerList.add(new Pair<String, String>("User-Agent", StackMob.getUserAgent()));
         String cookieHeader = cookieStore.cookieHeader();
         if(cookieHeader.length() > 0) headerList.add(new Pair<String, String>("Cookie", cookieHeader));
 

@@ -18,7 +18,6 @@ package com.stackmob.sdk;
 
 import com.google.gson.Gson;
 import com.stackmob.sdk.api.StackMob;
-import com.stackmob.sdk.api.StackMobConfiguration;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
@@ -45,8 +44,9 @@ public class StackMobTestCommon {
     protected final StackMob stackmob;
 
     public StackMobTestCommon() {
-        String apiKey = StackMobConfiguration.API_KEY;
-        String apiSecret = StackMobConfiguration.API_SECRET;
+        String apiKey = "API_KEY";
+        String apiSecret = "API_SECRET";
+        int apiVersion = 0;
 
         String envKey = System.getenv(ENVIRONMENT_KEY_KEY);
         String envSecret = System.getenv(ENVIRONMENT_SECRET_KEY);
@@ -64,11 +64,7 @@ public class StackMobTestCommon {
             apiSecret = vmSecret;
         }
 
-        StackMob.setStackMob(new StackMob(StackMob.OAuthVersion.One,  apiKey, apiSecret, StackMobConfiguration.USER_OBJECT_NAME, StackMobConfiguration.API_VERSION, StackMobConfiguration.API_URL_FORMAT, StackMobConfiguration.PUSH_API_URL_FORMAT, new StackMobRedirectedCallback() {
-            @Override public void redirected(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
-                //do nothing
-            }
-        }));
+        StackMob.setStackMob(new StackMob(StackMob.OAuthVersion.One, apiVersion, apiKey, apiSecret));
         if(envHTTPS != null) {
             StackMob.getStackMob().getSession().setEnableHTTPS(false);
         }
