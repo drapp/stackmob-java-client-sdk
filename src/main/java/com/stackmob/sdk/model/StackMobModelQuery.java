@@ -76,12 +76,23 @@ public class StackMobModelQuery<T extends StackMobModel>{
     StackMobQuery query;
 
     /**
-     * Create a new query for the given subclass of StackMobModel
+     * Create a new query for the given subclass of StackMobModel. Assumes your model hasn't
+     * override {@code getSchemaName}
      * @param classOfT because java needs explicit classes passed in everywhere
      */
     public StackMobModelQuery(Class<T> classOfT) {
+        this(classOfT, classOfT.getSimpleName().toLowerCase());
+    }
+
+    /**
+     * Create a new query for the given subclass of StackMobModel. Use this if you've
+     * overridden {@code getSchemaName} and your model classname is different from your
+     * schema's name.
+     * @param classOfT because java needs explicit classes passed in everywhere
+     */
+    public StackMobModelQuery(Class<T> classOfT, String schemaName) {
         this.classOfT = classOfT;
-        this.query = new StackMobQuery(this.classOfT.getSimpleName().toLowerCase());
+        this.query = new StackMobQuery(schemaName);
     }
 
     /**

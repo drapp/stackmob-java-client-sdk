@@ -1147,6 +1147,31 @@ public class StackMob {
                                             this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
+    /**
+     * post a new related object to an existing object. the relation of the root object is updated
+     * @param path the path to get
+     * @param primaryId id of the object with the relation
+     * @param relatedField name of the relation
+     * @param relatedObject related object to post
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
+     */
+    public StackMobRequestSendResult postRelated(String path,
+                                                 String primaryId,
+                                                 String relatedField,
+                                                 String relatedObject,
+                                                 StackMobRawCallback callback) {
+        return new StackMobRequestWithPayload(this.executor,
+                this.session,
+                HttpVerbWithPayload.POST,
+                StackMobRequest.EmptyHeaders,
+                StackMobRequest.EmptyParams,
+                relatedObject,
+                String.format("%s/%s/%s", path, primaryId, relatedField),
+                callback,
+                this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
   /**
    * post a list of new related objects to an existing object. the relation of the root object is updated
    * @param path the path to get

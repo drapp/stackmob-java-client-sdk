@@ -146,7 +146,7 @@ import java.util.*;
 public abstract class StackMobModel {
 
     /**
-     * Run a query on the server to get all the instances of your model within certain constraints
+     * run a query on the server to get all the instances of your model within certain constraints
      * @param q The query to run
      * @param callback The callback to be invoked upon returning
      */
@@ -155,7 +155,7 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Run a count query on the server to count all the instances of your model within certain constraints
+     * run a count query on the server to count all the instances of your model within certain constraints
      * @param q The query to run
      * @param callback The callback to be invoked upon returning
      */
@@ -164,7 +164,7 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Run a query on the server to get all the instances of your model within certain constraints
+     * run a query on the server to get all the instances of your model within certain constraints
      * @param theClass The class of your model
      * @param q The query to run
      * @param callback The callback to be invoked upon returning
@@ -177,7 +177,7 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Create a new instance of the specified model class from a json string. Useful if you've serialized a model class for some
+     * create a new instance of the specified model class from a json string. Useful if you've serialized a model class for some
      * reason and now want to deserialize it.
      * @param classOfT The class to instantiate
      * @param json The string to deserialize
@@ -194,6 +194,28 @@ public abstract class StackMobModel {
         T newObject = new Gson().fromJson("{}", classOfT);
         newObject.init(classOfT);
         return newObject;
+    }
+
+
+    /**
+     * save multiple objects in one batch. This is equivalent to calling save on each
+     * @param models
+     * @param callback
+     * @param <T>
+     */
+    public static <T extends StackMobModel> void saveMultiple(List<T> models, StackMobCallback callback) {
+        if(models.size() == 0) throw new IllegalArgumentException("Empty list");
+        StackMob.getStackMob().post(models.get(0).getSchemaName(), toJsonArray(models), callback);
+
+    }
+
+
+    private static <T extends StackMobModel> String toJsonArray(List<T> models) {
+        JsonArray array = new JsonArray();
+        for(T model : models) {
+            array.add(model.toJsonElement(0, new RelationMapping()));
+        }
+        return array.toString();
     }
 
 
@@ -799,4 +821,104 @@ public abstract class StackMobModel {
         StackMob.getStackMob().delete(getSchemaName(), id, callback);
     }
 
+
+    private <T extends StackMobModel> List<String> getIdsFromModels(List<T> models) {
+        List<String> ids = new ArrayList<String>();
+        for(T model : models) {
+            ids.add(model.id);
+        }
+        return ids;
+    }
+
+    /**
+     * append model objects to a collection field in this object. The items must match the type of the array, or
+     * an exception will be thrown. The objects should already exist on the server; to append and create
+     * objects, use {@link #appendAndSave(String, java.util.List, com.stackmob.sdk.callback.StackMobCallback)}.
+     * The items will be added to the list both locally and on the server.
+     *
+     * @throws IllegalArgumentException if the type of the field doesn't match the input objects
+     * @param field the name of the field to append to. The field must be a java Collection
+     * @param objs the objects to append to
+     * @param callback invoked when the append is complete
+     * @param <T> the type of objects being appended
+     */
+    public <T extends StackMobModel> void append(String field, List<T> objs, StackMobCallback callback) {
+        try {
+            Collection<T> existingCollection = (Collection<T>) getField(field).get(this);
+            for(T obj : objs) {
+                existingCollection.add(obj);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Type of input objects does not match the type of the field");
+        }
+        StackMob.getStackMob().putRelated(schemaName, id, field, getIdsFromModels(objs), callback);
+    }
+
+    /**
+     * append model objects to a collection field in this object. The items must match the type of the array, or
+     * an exception will be thrown. The objects will be created and also added as children of this object
+     * both locally and on the server.
+     *
+     * @throws IllegalArgumentException if the type of the field doesn't match the input objects
+     * @param field the name of the field to append to. The field must be a java Collection
+     * @param objs the objects to append to
+     * @param callback invoked when the append is complete
+     * @param <T> the type of objects being appended
+     */
+    public <T extends StackMobModel> void appendAndSave(String field, List<T> objs, StackMobCallback callback) {
+        try {
+            Collection<T> existingCollection = (Collection<T>) getField(field).get(this);
+            for(T obj : objs) {
+                existingCollection.add(obj);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Type of input objects does not match the type of the field");
+        }
+        StackMob.getStackMob().postRelated(schemaName, id, field, toJsonArray(objs), callback);
+    }
+
+    /**
+     * remove values from a collection on the client and server. The items must match the type of the array, or
+     * an exception will be thrown.
+     *
+     * @throws IllegalArgumentException if the type of the field doesn't match the input objects
+     * @param field the name of the field to remove from. The field must be a java Collection
+     * @param objs the objects to remove from
+     * @param callback invoked when the remove is complete
+     * @param <T> the type of objects being removed
+     */
+    public <T extends StackMobModel> void remove(String field,  List<T> objs, StackMobCallback callback) {
+        try {
+            Collection<T> existingCollection = (Collection<T>) getField(field).get(this);
+            for(T obj : objs) {
+                existingCollection.remove(obj);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Type of input objects does not match the type of the field");
+        }
+        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field, getIdsFromModels(objs), false, callback);
+
+    }
+
+    /**
+     * remove objects from a collection and delete them on the client and server. The items must match the type of the array, or
+     * an exception will be thrown.
+     *
+     * @throws IllegalArgumentException if the type of the field doesn't match the input objects
+     * @param field the name of the field to remove from. The field must be a java Collection
+     * @param objs the objects to remove from
+     * @param callback invoked when the remove is complete
+     * @param <T> the type of objects being removed
+     */
+    public <T extends StackMobModel> void removeAndDelete(String field,  List<T> objs, StackMobCallback callback) {
+        try {
+            Collection<T> existingCollection = (Collection<T>) getField(field).get(this);
+            for(T obj : objs) {
+                existingCollection.remove(obj);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Type of input objects does not match the type of the field");
+        }
+        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field, getIdsFromModels(objs), true, callback);
+    }
 }
