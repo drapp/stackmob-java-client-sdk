@@ -17,6 +17,8 @@ package com.stackmob.sdk.testobjects;
 
 import com.stackmob.sdk.model.StackMobModel;
 
+import java.util.List;
+
 public class Library extends StackMobModel {
 
     public Library() {
@@ -25,4 +27,5 @@ public class Library extends StackMobModel {
     
     public String name;
     public Book[] books;
+    public List<Book> bookList;
 }

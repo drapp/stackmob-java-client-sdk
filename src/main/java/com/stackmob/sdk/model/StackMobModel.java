@@ -851,7 +851,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().putRelated(schemaName, id, field, getIdsFromModels(objs), callback);
+        StackMob.getStackMob().putRelated(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), callback);
     }
 
     /**
@@ -874,7 +874,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().postRelated(schemaName, id, field, toJsonArray(objs), callback);
+        StackMob.getStackMob().postRelated(schemaName, id, field.toLowerCase(), toJsonArray(objs), callback);
     }
 
     /**
@@ -896,7 +896,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field, getIdsFromModels(objs), false, callback);
+        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), false, callback);
 
     }
 
@@ -919,6 +919,6 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field, getIdsFromModels(objs), true, callback);
+        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), true, callback);
     }
 }

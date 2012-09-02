@@ -28,6 +28,7 @@ import com.stackmob.sdk.testobjects.Author;
 import com.stackmob.sdk.testobjects.Book;
 import com.stackmob.sdk.testobjects.Library;
 import com.stackmob.sdk.util.RelationMapping;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -767,6 +768,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         public StackMobFile thing;
     }
 
+    @Ignore //don't upload this binary file all the time
     @Test
     public void testBinaryFile() throws Exception {
         final BinaryTest test = new BinaryTest();
@@ -799,6 +801,69 @@ public class StackMobModelTests extends StackMobTestCommon {
         });
         asserter.assertLatchFinished(latch);
     }
+
+    @Test
+    public void testSaveBulk() throws Exception {
+        final Author joyce = new Author("James Joyce");
+        final Author dickens = new Author("Charles Dickens");
+        Author.saveMultiple(Arrays.asList(joyce, dickens), new StackMobModelCallback() {
+            @Override
+            public void success() {
+                assertNotNull(joyce.getID());
+                assertNotNull(dickens.getID());
+                joyce.destroy();
+                dickens.destroy();
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
+    @Test
+    public void testAppendAndSave() throws Exception {
+        final Author joyce = new Author("James Joyce");
+        final Author dickens = new Author("Charles Dickens");
+        final Book bleakHouse = new Book("Bleak House", "Penguin", dickens);
+        final Book ulysses = new Book("Ulysses", "Penguin", joyce);
+        final Book oliverTwist = new Book("Oliver Twist", "Penguin", dickens);
+        final Library myLib = new Library();
+        myLib.bookList = new ArrayList<Book>();
+        myLib.bookList.add(bleakHouse);
+        myLib.saveWithDepth(1, new StackMobModelCallback() {
+            @Override
+            public void success() {
+                myLib.appendAndSave("bookList", Arrays.asList(ulysses, oliverTwist), new StackMobModelCallback() {
+                    @Override
+                    public void success() {
+                        assertEquals(3, myLib.bookList.size());
+                        myLib.destroy();
+                        bleakHouse.destroy();
+                        ulysses.destroy();
+                        oliverTwist.destroy();
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void failure(StackMobException e) {
+                        asserter.markException(e);
+                    }
+                });
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+
+        asserter.assertLatchFinished(latch);
+    }
+
 
 
 

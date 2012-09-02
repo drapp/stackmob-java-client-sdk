@@ -23,7 +23,7 @@ public class RelationMapping {
 
 
     public void add(String path, String schemaName) {
-        String newPath = basePath + path;
+        String newPath = basePath + path.toLowerCase();
         relations.put(newPath, schemaName);
         basePath = newPath + ".";
     }
