@@ -892,7 +892,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.registerForPushWithUser(objectId, token, new StackMobCallback() {
+        stackmob.getPush().registerForPushWithUser(objectId, token, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -921,12 +921,12 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
         final StackMobPushToken pushToken = new StackMobPushToken("0000000000000000000000000000000000000000000000000000000000000000", StackMobPushToken.TokenType.iOS);
-        stackmob.registerForPushWithUser("bodie", pushToken, true, new StackMobCallback() {
+        stackmob.getPush().registerForPushWithUser("bodie", pushToken, true, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
 
-                stackmob.removePushToken(pushToken.getToken(), StackMobPushToken.TokenType.Android, new StackMobCallback() {
+                stackmob.getPush().removePushToken(pushToken, new StackMobCallback() {
                     @Override
                     public void success(String responseBody) {
                         asserter.markNotJsonError(responseBody);
@@ -953,7 +953,7 @@ public class StackMobTests extends StackMobTestCommon {
         StackMobPushToken t = new StackMobPushToken(token, StackMobPushToken.TokenType.Android);
         Map<String, String> payload = new HashMap<String, String>();
         payload.put("foo", "bar");
-        stackmob.pushToTokens(payload, Arrays.asList(t), new StackMobCallback() {
+        stackmob.getPush().pushToTokens(payload, Arrays.asList(t), new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -974,7 +974,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.getTokensForUsers(usernames, new StackMobCallback() {
+        stackmob.getPush().getTokensForUsers(usernames, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);

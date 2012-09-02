@@ -19,8 +19,8 @@ package com.stackmob.sdk.push;
 /**
  * A push token identifies a specific device for push on a particular platform. The token can then be registered with StackMob and pushed to.
  *
- * @see com.stackmob.sdk.api.StackMob#registerForPushWithUser(String, StackMobPushToken, boolean, com.stackmob.sdk.callback.StackMobRawCallback)
- * @see com.stackmob.sdk.api.StackMob#pushToTokens(java.util.Map, java.util.List, com.stackmob.sdk.callback.StackMobRawCallback)
+ * @see com.stackmob.sdk.push.StackMobPush#registerForPushWithUser(String, StackMobPushToken, boolean, com.stackmob.sdk.callback.StackMobRawCallback)
+ * @see com.stackmob.sdk.push.StackMobPush#pushToTokens(java.util.Map, java.util.List, com.stackmob.sdk.callback.StackMobRawCallback)
  */
 public class StackMobPushToken {
 

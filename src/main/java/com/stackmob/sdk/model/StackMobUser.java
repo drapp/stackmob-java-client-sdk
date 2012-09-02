@@ -226,7 +226,7 @@ public class StackMobUser extends StackMobModel {
      * @param callback invoked when the operation is complete
      */
     public void registerForPush(String registrationID, StackMobRawCallback callback) {
-        StackMob.getStackMob().registerForPushWithUser(getID(), registrationID, callback);
+        StackMob.getStackMob().getPush().registerForPushWithUser(getID(), registrationID, callback);
     }
 
     /**
@@ -234,7 +234,7 @@ public class StackMobUser extends StackMobModel {
      * @param callback invoked when the operation is complete
      */
     public void getPushToken(StackMobRawCallback callback) {
-        StackMob.getStackMob().getTokensForUsers(Arrays.asList(getID()), callback);
+        StackMob.getStackMob().getPush().getTokensForUsers(Arrays.asList(getID()), callback);
     }
 
 }
