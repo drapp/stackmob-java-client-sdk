@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.request;
 
+import com.stackmob.sdk.api.StackMob;
+import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
+import com.stackmob.sdk.request.StackMobRequestWithPayload;
 
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-class StackMobPushRequest extends StackMobRequestWithPayload {
+public class StackMobPushRequest extends StackMobRequestWithPayload {
 
     public StackMobPushRequest(ExecutorService executor, StackMobSession session, Object requestObject, String method, StackMobRawCallback cb, StackMobRedirectedCallback redirCb) {
         super(executor, session, HttpVerbWithPayload.POST, EmptyHeaders, EmptyParams, requestObject, method, cb, redirCb);

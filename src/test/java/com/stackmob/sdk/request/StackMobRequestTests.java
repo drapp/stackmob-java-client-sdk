@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.request;
 
 import com.stackmob.sdk.StackMobTestCommon;
 import com.stackmob.sdk.api.*;

@@ -23,6 +23,7 @@ import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
 import com.stackmob.sdk.push.StackMobPushToken;
+import com.stackmob.sdk.request.*;
 import com.stackmob.sdk.util.Http;
 import com.stackmob.sdk.util.Pair;
 
@@ -141,7 +142,7 @@ public class StackMob {
         return version;
     }
 
-    protected static String getUserAgent(String appName) {
+    public static String getUserAgent(String appName) {
         return String.format("StackMob (%s; %s)%s", userAgentName,
                 getVersion(),
                 (appName == null) ? "" : "/" + appName);

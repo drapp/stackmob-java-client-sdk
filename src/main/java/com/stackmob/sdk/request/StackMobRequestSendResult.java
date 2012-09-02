@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.request;
 
 /**
  * Represents the success or failure of an attempt to send a request. This only captures the sending, not the response
