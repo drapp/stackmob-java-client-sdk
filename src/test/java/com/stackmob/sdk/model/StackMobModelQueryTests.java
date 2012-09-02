@@ -17,6 +17,7 @@ package com.stackmob.sdk.model;
 
 import com.stackmob.sdk.StackMobTestCommon;
 import com.stackmob.sdk.api.StackMobQuery;
+import com.stackmob.sdk.api.StackMobQueryField;
 import com.stackmob.sdk.callback.StackMobCountCallback;
 import com.stackmob.sdk.callback.StackMobQueryCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
@@ -35,7 +36,7 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
     final CountDownLatch latch = latchOne();
 
     @Test public void testQuery() throws Exception {
-        new StackMobModelQuery<Author>(Author.class).isInRange(0,10).send(new StackMobQueryCallback<Author>() {
+        StackMobModel.query(Author.class, new StackMobQuery().isInRange(0,10), new StackMobQueryCallback<Author>() {
             @Override
             public void success(List<Author> result) {
                 asserter.markEquals(11, result.size());
@@ -69,7 +70,7 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
     }
 
     @Test public void testFieldQuery() throws Exception {
-        new StackMobModelQuery<Author>(Author.class).isInRange(0,10).field(new StackMobField("name").isEqualTo("testqueryauthor")).send(new StackMobQueryCallback<Author>() {
+        StackMobModel.query(Author.class, new StackMobQuery().isInRange(0, 10).field(new StackMobQueryField("name").isEqualTo("testqueryauthor")), new StackMobQueryCallback<Author>() {
             @Override
             public void success(List<Author> result) {
                 asserter.markEquals(3, result.size());
@@ -86,7 +87,7 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
     }
 
     @Test public void testCount() throws Exception {
-        new StackMobModelQuery<Author>(Author.class).isInRange(0,10).field(new StackMobField("name").isEqualTo("testqueryauthor")).count(new StackMobCountCallback() {
+        Author.count(new StackMobQuery().isInRange(0,10).field(new StackMobQueryField("name").isEqualTo("testqueryauthor")), new StackMobCountCallback() {
             @Override
             public void success(long count) {
                 asserter.markEquals(3, (int)count);
@@ -102,7 +103,7 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
     }
 
     @Test public void testNotEqualQuery() throws Exception {
-        new StackMobModelQuery<Author>(Author.class).fieldIsNotEqual("name", "tolstoy").send(new StackMobQueryCallback<Author>() {
+        Author.query(Author.class, new StackMobQuery().fieldIsNotEqual("name", "tolstoy"), new StackMobQueryCallback<Author>() {
             @Override
             public void success(List<Author> result) {
                 asserter.markTrue(result.size() > 0);
@@ -121,7 +122,7 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
     }
 
     @Test public void testIsNullQuery() throws Exception {
-        new StackMobModelQuery<Author>(Author.class).fieldIsNull("name").send(new StackMobQueryCallback<Author>() {
+        Author.query(Author.class, new StackMobQuery().fieldIsNull("name"), new StackMobQueryCallback<Author>() {
             @Override
             public void success(List<Author> result) {
                 asserter.markTrue(result.size() > 0);
@@ -140,7 +141,7 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
     }
 
     @Test public void testIsNotNullQuery() throws Exception {
-        new StackMobModelQuery<Author>(Author.class).fieldIsNotNull("name").send(new StackMobQueryCallback<Author>() {
+        Author.query(Author.class, new StackMobQuery().fieldIsNotNull("name"), new StackMobQueryCallback<Author>() {
             @Override
             public void success(List<Author> result) {
                 asserter.markTrue(result.size() > 0);
@@ -170,9 +171,9 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
     }
     
     @Test public void testDefaultCtor() throws Exception {
-        StackMobModelQuery<User> loginUserQuery = new StackMobModelQuery<User>(User.class);
+        StackMobQuery loginUserQuery = new StackMobQuery();
         loginUserQuery.fieldIsEqualTo("username", "drapp");
-        loginUserQuery.send(new StackMobQueryCallback<User>() {
+        User.query(User.class, loginUserQuery, new StackMobQueryCallback<User>() {
             @Override
             public void success(List<User> result) {
                 asserter.markEquals(1, result.size());

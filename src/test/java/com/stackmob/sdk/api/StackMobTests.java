@@ -364,35 +364,6 @@ public class StackMobTests extends StackMobTestCommon {
         objectOnServer.delete();
     }
 
-    @Test public void getWithQueryWithField() throws Exception {
-        final Game g = new Game(Arrays.asList("seven", "six"), "woot");
-        final StackMobObjectOnServer<Game> objectOnServer = createOnServer(g, Game.class);
-
-        StackMobQuery q = new StackMobQuery("game");
-        StackMobQueryWithField qWithField = new StackMobQueryWithField("name", q).isGreaterThanOrEqualTo("sup");
-        final CountDownLatch latch = latchOne();
-        final MultiThreadAsserter asserter = new MultiThreadAsserter();
-
-        stackmob.get(qWithField, new StackMobCallback() {
-            @Override
-            public void success(String responseBody) {
-                asserter.markNotJsonError(responseBody);
-                List<Game> games = gson.fromJson(responseBody, Game.ListTypeToken);
-                asserter.markNotNull(games);
-                asserter.markTrue(games.size() >= 1);
-                asserter.markEquals("woot", games.get(0).name);
-                latch.countDown();
-            }
-
-            @Override
-            public void failure(StackMobException e) {
-                asserter.markException(e);
-            }
-        });
-        asserter.assertLatchFinished(latch);
-        objectOnServer.delete();
-    }
-
     @Test public void getWithNotEqualQuery() throws InterruptedException, StackMobException {
         final Game g = new Game(Arrays.asList("seven", "six"), "woot");
         final StackMobObjectOnServer<Game> objectOnServer = createOnServer(g, Game.class);
@@ -424,12 +395,11 @@ public class StackMobTests extends StackMobTestCommon {
         final Game g = new Game(Arrays.asList("seven", "six"), "woot");
         final StackMobObjectOnServer<Game> objectOnServer = createOnServer(g, Game.class);
 
-        StackMobQuery q = new StackMobQuery("game");
-        StackMobQueryWithField qWithField = new StackMobQueryWithField("name", q).isNotEqualTo("woot");
+        StackMobQuery q = new StackMobQuery("game").field(new StackMobQueryField("name").isNotEqualTo("woot"));
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(qWithField, new StackMobCallback() {
+        stackmob.get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -482,12 +452,11 @@ public class StackMobTests extends StackMobTestCommon {
         final Game g = new Game(Arrays.asList("seven", "six"), "woot");
         final StackMobObjectOnServer<Game> objectOnServer = createOnServer(g, Game.class);
 
-        StackMobQuery q = new StackMobQuery("game");
-        StackMobQueryWithField qWithField = new StackMobQueryWithField("players", q).isNotNull();
+        StackMobQuery q = new StackMobQuery("game").field(new StackMobQueryField("players").isNotNull());
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(qWithField, new StackMobCallback() {
+        stackmob.get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -540,12 +509,11 @@ public class StackMobTests extends StackMobTestCommon {
         final Game g = new Game(null, "woot1");
         final StackMobObjectOnServer<Game> objectOnServer = createOnServer(g, Game.class);
 
-        StackMobQuery q = new StackMobQuery("game");
-        StackMobQueryWithField qWithField = new StackMobQueryWithField("players", q).isNull();
+        StackMobQuery q = new StackMobQuery("game").field(new StackMobQueryField("players").isNull());
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.get(qWithField, new StackMobCallback() {
+        stackmob.get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -574,7 +542,7 @@ public class StackMobTests extends StackMobTestCommon {
         final StackMobObjectOnServer<Game> g1OnServer = createOnServer(g1, Game.class);
         final StackMobObjectOnServer<Game> g2OnServer = createOnServer(g2, Game.class);
 
-        StackMobQuery q = StackMobQuery.objects("game").field("name").isOrderedBy(StackMobQuery.Ordering.ASCENDING).getQuery();
+        StackMobQuery q = StackMobQuery.objects("game").field(new StackMobQueryField("name").isOrderedBy(StackMobQuery.Ordering.ASCENDING));
 
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();

@@ -167,12 +167,13 @@ public class StackMobQuery {
     }
 
     /**
-     * Begin adding constraints to a field via a {@link StackMobQueryWithField}
+     * Begin adding constraints to a field via a {@link StackMobQueryField}
      * @param field the name of the field
      * @return a query specific to that field
      */
-    public StackMobQueryWithField field(String field) {
-        return new StackMobQueryWithField(field, this);
+    public StackMobQuery field(StackMobQueryField field) {
+        add(field.getQuery());
+        return this;
     }
 
     /**

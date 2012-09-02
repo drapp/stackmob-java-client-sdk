@@ -147,11 +147,29 @@ public abstract class StackMobModel {
 
     /**
      * run a query on the server to get all the instances of your model within certain constraints
+     * @param theClass The class of your model
      * @param q The query to run
      * @param callback The callback to be invoked upon returning
      */
-    public static <T extends StackMobModel> void query(StackMobModelQuery<T> q, StackMobQueryCallback<T> callback) {
-        q.send(callback);
+    public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, final StackMobQueryCallback<T> callback) {
+        StackMob.getStackMob().get(q, new StackMobCallback() {
+            @Override
+            public void success(String responseBody) {
+                JsonArray array = new JsonParser().parse(responseBody).getAsJsonArray();
+                List<T> resultList = new ArrayList<T>();
+                for(JsonElement elt : array) {
+                    try {
+                        resultList.add(StackMobModel.newFromJson(theClass, elt.toString()));
+                    } catch (StackMobException ignore) { }
+                }
+                callback.success(resultList);
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                callback.failure(e);
+            }
+        });
     }
 
     /**
@@ -159,21 +177,8 @@ public abstract class StackMobModel {
      * @param q The query to run
      * @param callback The callback to be invoked upon returning
      */
-    public static <T extends StackMobModel> void count(StackMobModelQuery<T> q, StackMobCountCallback callback) {
-        q.count(callback);
-    }
-
-    /**
-     * run a query on the server to get all the instances of your model within certain constraints
-     * @param theClass The class of your model
-     * @param q The query to run
-     * @param callback The callback to be invoked upon returning
-     */
-    public static <T extends StackMobModel> void query(Class<T> theClass, StackMobQuery q, StackMobQueryCallback<T> callback) {
-        StackMobModelQuery<T> query = new StackMobModelQuery<T>(theClass);
-        q.setObjectName(theClass.getSimpleName().toLowerCase());
-        query.query = q;
-        query.send(callback);
+    public static <T extends StackMobModel> void count(StackMobQuery q, StackMobCountCallback callback) {
+        StackMob.getStackMob().count(q, callback);
     }
 
     /**

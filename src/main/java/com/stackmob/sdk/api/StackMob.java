@@ -1004,17 +1004,6 @@ public class StackMob {
     }
 
     /**
-     * do a get request on the StackMob platform
-     * @param query the query to run
-     * @param callback callback to be called when the server returns. may execute in a separate thread
-     * @return a StackMobRequestSendResult representing what happened when the SDK tried to do the request. contains no information about the response - that will be passed to the callback when the response comes back
-     */
-    public StackMobRequestSendResult get(StackMobQueryWithField query,
-                    StackMobRawCallback callback) {
-        return this.get(query.getQuery(), callback);
-    }
-
-    /**
      * do a GET request to the stackmob push service
      * @param path the path of the push request
      * @param arguments the arguments to pass to the push service, in the query string

@@ -20,8 +20,6 @@ import com.stackmob.sdk.StackMobTestCommon;
 import com.stackmob.sdk.util.GeoPoint;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import com.stackmob.sdk.api.StackMobQuery;
-import com.stackmob.sdk.api.StackMobQueryWithField;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -148,27 +146,8 @@ public class StackMobQueryTests extends StackMobTestCommon {
         assertEquals(expected, valSplit);
     }
 
-    @Test
-    public void simpleQueryWithField() {
-        StackMobQueryWithField q = new StackMobQuery(object).field(field);
-        assertEquals(object, q.getQuery().getObjectName());
-        assertEquals(field, q.getField());
-
-        q.isGreaterThan(value).isLessThan(value).isGreaterThanOrEqualTo(value).isLessThanOrEqualTo(value);
-        ArrayList<String> expectedKeys = getExpectedRelationalKeys();
-        assertKeysAndValuesMatch(q.getQuery().getArguments(), expectedKeys, value);
-    }
-
-    @Test
-    public void multiFieldCreation() {
-        StackMobQuery q = new StackMobQuery(object);
-        StackMobQueryWithField qWithField = q.field(field);
-        assertTrue(qWithField == qWithField.field(field));//same field must be the same instance
-        assertFalse(qWithField == qWithField.field(field + "_different"));//diff field must be a diff instance
-    }
-
     @Test public void multiFieldQueries() {
-        StackMobQuery q = new StackMobQuery(object).field(field).isLessThan(value).field(otherField).isGreaterThan(value).getQuery();
+        StackMobQuery q = new StackMobQuery(object).field(new StackMobQueryField(field).isLessThan(value)).field(new StackMobQueryField(otherField).isGreaterThan(value));
         ArrayList<String> expectedKeys = new ArrayList<String>(Arrays.asList(
                                                                             field+StackMobQuery.Operator.LT.getOperatorForURL(),
                                                                             otherField+StackMobQuery.Operator.GT.getOperatorForURL()));
