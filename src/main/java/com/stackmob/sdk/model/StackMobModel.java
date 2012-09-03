@@ -427,9 +427,9 @@ public abstract class StackMobModel {
                 }
             }
         } catch(NoSuchFieldException e) {
-            StackMob.getLogger().logDebug(String.format("Ignoring extraneous json field:\nfield: %s\ndata: %s", jsonName, json.toString()));
+            StackMob.getStackMob().getSession().getLogger().logDebug(String.format("Ignoring extraneous json field:\nfield: %s\ndata: %s", jsonName, json.toString()));
         } catch(JsonSyntaxException e) {
-            StackMob.getLogger().logWarning(String.format("Incoming data does not match data model:\nfield: %s\ndata: %s", jsonName, json.toString()));
+            StackMob.getStackMob().getSession().getLogger().logWarning(String.format("Incoming data does not match data model:\nfield: %s\ndata: %s", jsonName, json.toString()));
         } catch(IllegalAccessException e) {
             throw new StackMobException(e.getMessage());
         } catch (InstantiationException e) {

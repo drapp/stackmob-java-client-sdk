@@ -21,7 +21,8 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import com.stackmob.sdk.api.StackMob.OAuthVersion;
-import com.stackmob.sdk.util.CookieManager;
+import com.stackmob.sdk.util.StackMobCookieManager;
+import com.stackmob.sdk.util.StackMobLogger;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Mac;
@@ -47,7 +48,8 @@ public class StackMobSession {
     private String oauth2RefreshToken;
     private Date oauth2TokenExpiration;
     private Boolean httpsOverride = null;
-    private CookieManager cookieManager = new CookieManager();
+    private StackMobCookieManager cookieManager = new StackMobCookieManager();
+    private StackMobLogger logger = new StackMobLogger();
 
     public StackMobSession(OAuthVersion oauthVersion, int apiVersionNumber, String key, String secret, String userObjectName, String userIdName) {
         this.oauthVersion = oauthVersion;
@@ -68,6 +70,8 @@ public class StackMobSession {
         this.oauth2Token = that.oauth2Token;
         this.oauth2MacKey = that.oauth2MacKey;
         this.oauth2TokenExpiration = that.oauth2TokenExpiration;
+        this.cookieManager = that.cookieManager;
+        this.logger = logger;
     }
 
     public String getKey() {
@@ -96,16 +100,16 @@ public class StackMobSession {
 
     public long getServerTime() {
         if(getServerTimeDiff() != 0) {
-            StackMob.getLogger().logDebug("Adjusting time for server by %d seconds", getServerTimeDiff());
+            logger.logDebug("Adjusting time for server by %d seconds", getServerTimeDiff());
         }
         return getServerTimeDiff() + getLocalTime();
     }
 
     public void recordServerTimeDiff(String timeHeader) {
-        StackMob.getLogger().logDebug("Got a time header of: %s", timeHeader);
+        logger.logDebug("Got a time header of: %s", timeHeader);
         try {
             long serverTime = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz").parse(timeHeader).getTime() / 1000;
-            StackMob.getLogger().logDebug("Got a server time of %d versus local time %d", serverTime, getLocalTime());
+            logger.logDebug("Got a server time of %d versus local time %d", serverTime, getLocalTime());
             saveServerTimeDiff(serverTime - getLocalTime());
         } catch(Exception ignore) { }
     }
@@ -178,12 +182,28 @@ public class StackMobSession {
     }
 
 
-    public void setCookieManager(CookieManager store) {
+    public void setCookieManager(StackMobCookieManager store) {
         cookieManager = store;
     }
 
-    public CookieManager getCookieManager() {
+    public StackMobCookieManager getCookieManager() {
         return cookieManager;
+    }
+
+    /**
+     * Set a custom logger to log events. The defaults are System.out in the java sdk and logcat on Android
+     * @param logger the logger to use
+     */
+    public void setLogger(StackMobLogger logger) {
+        this.logger = logger;
+    }
+
+    /**
+     * Access the current logger
+     * @return the logger being used to receive events
+     */
+    public StackMobLogger getLogger() {
+        return logger;
     }
 
     public String generateMacToken(String method, String uri, String host, String port) {

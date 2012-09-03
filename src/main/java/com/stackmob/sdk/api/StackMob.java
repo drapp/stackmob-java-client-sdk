@@ -21,6 +21,7 @@ import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.push.StackMobPush;
 import com.stackmob.sdk.request.*;
+import com.stackmob.sdk.util.StackMobLogger;
 
 import java.io.IOException;
 import java.net.URI;
@@ -74,7 +75,7 @@ public class StackMob {
     private static final String versionKey= "sdk.version";
     private static String userAgentName = "Java Client";
     private static String version = null;
-    private static StackMobLogger logger = new StackMobLogger();
+
 
 
     public static String DEFAULT_API_HOST = "api.stackmob.com";
@@ -158,21 +159,7 @@ public class StackMob {
         return Executors.newCachedThreadPool();
     }
 
-    /**
-     * Set a custom logger to log events. The defaults are System.out in the java sdk and logcat on Android
-     * @param logger the logger to user
-     */
-    public static void setLogger(StackMobLogger logger) {
-        StackMob.logger = logger;
-    }
 
-    /**
-     * Access the current logger
-     * @return the logger being used to receive events
-     */
-    public static StackMobLogger getLogger() {
-        return logger;
-    }
     
     private static StackMob stackmob;
 

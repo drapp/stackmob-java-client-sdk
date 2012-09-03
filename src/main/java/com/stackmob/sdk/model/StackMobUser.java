@@ -168,7 +168,7 @@ public class StackMobUser extends StackMobModel {
                 try {
                     fillFromJson(responseBody);
                 } catch (StackMobException e) {
-                    StackMob.getLogger().logWarning("Error filling in user model from login" + e);
+                    StackMob.getStackMob().getSession().getLogger().logWarning("Error filling in user model from login" + e);
                 }
                 super.success(responseBody);
             }

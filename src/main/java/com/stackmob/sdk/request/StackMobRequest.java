@@ -29,6 +29,7 @@ import com.stackmob.sdk.push.StackMobPushTokenDeserializer;
 import com.stackmob.sdk.push.StackMobPushTokenSerializer;
 import com.stackmob.sdk.util.Http;
 import com.stackmob.sdk.util.Pair;
+import com.stackmob.sdk.util.StackMobLogger;
 import com.stackmob.sdk.util.StackMobNull;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
@@ -417,12 +418,12 @@ public abstract class StackMobRequest {
                 @Override
                 public String call() throws Exception {
                     try {
-                        StackMob.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
+                        session.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
                         Response ret = req.send();
-                        StackMob.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + (ret.getBody().length() < 1000 ? ret.getBody() : (ret.getBody().subSequence(0, 1000) + " (truncated)")));
+                        session.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + (ret.getBody().length() < 1000 ? ret.getBody() : (ret.getBody().subSequence(0, 1000) + " (truncated)")));
                         if(!session.isOAuth2() && ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
                         if(HttpRedirectHelper.isRedirected(ret.getCode())) {
-                            StackMob.getLogger().logInfo("Response was redirected");
+                            session.getLogger().logInfo("Response was redirected");
                             String newLocation = HttpRedirectHelper.getNewLocation(ret.getHeaders());
                             HttpVerb verb = HttpVerbHelper.valueOf(req.getVerb().toString());
                             OAuthRequest newReq = getOAuthRequest(verb, newLocation);
@@ -476,14 +477,14 @@ public abstract class StackMobRequest {
                                                 ret.getBody().getBytes());
                                     }
                                     catch(Throwable t) {
-                                        StackMob.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
+                                        session.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
                                     }
                                 }
                             }
                         }
                     }
                     catch(Throwable t) {
-                        StackMob.getLogger().logWarning("Invoking callback after unexpected exception %s", StackMobLogger.getStackTrace(t));
+                        session.getLogger().logWarning("Invoking callback after unexpected exception %s", StackMobLogger.getStackTrace(t));
                         cb.setDone(getRequestVerb(req),
                                 req.getUrl(),
                                 getRequestHeaders(req),

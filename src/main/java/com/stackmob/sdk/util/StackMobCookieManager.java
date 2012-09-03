@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Used internally by the sdk to manage OAuth1 cookies.
  */
-public class CookieManager {
+public class StackMobCookieManager {
 
     protected static final String SetCookieHeaderKey = "Set-Cookie";
     protected static final String EXPIRES = "Expires";

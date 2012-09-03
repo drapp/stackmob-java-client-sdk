@@ -205,7 +205,7 @@ public class StackMobTests extends StackMobTestCommon {
         StackMob.getStackMob().setSession(new StackMobSession(StackMob.getStackMob().getSession()) {
             @Override
             public long getLocalTime() {
-                StackMob.getLogger().logWarning("Mocking incorrect time");
+                StackMob.getStackMob().getSession().getLogger().logWarning("Mocking incorrect time");
                 return super.getLocalTime() + 5000;
             }
         });

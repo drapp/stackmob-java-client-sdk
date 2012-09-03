@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.util;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * Logs messages to System.out. When set in {@link StackMob#setLogger(StackMobLogger)}, this class will be used
+ * Logs messages to System.out. When set in {@link com.stackmob.sdk.api.StackMob#setLogger(StackMobLogger)}, this class will be used
  * to log helpful messages. It does nothing unless enabled with {@link #setLogging(boolean)}. This class can be
  * overridden on platforms to log to the appropriate location
  */
