@@ -256,7 +256,7 @@ public class StackMob {
                     String userIdName,
                     String passwordFieldName,
                     StackMobRedirectedCallback redirectedCallback) {
-        this.session = new StackMobSession(oauthVersion, apiVersionNumber, apiKey, apiSecret, userSchema);
+        this.session = new StackMobSession(oauthVersion, apiVersionNumber, apiKey, apiSecret, userSchema, userIdName);
         this.executor = createNewExecutor();
         if(stackmob == null) StackMob.setStackMob(this);
         this.apiUrlFormat = apiHost;
@@ -302,7 +302,6 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void login(Map<String, String> params, StackMobRawCallback callback) {
-        session.setLastUserLoginName(params.get("username"));
         StackMobRequest req;
         if(getSession().isOAuth2()) {
             Map<String, String> newParams = new HashMap<String, String>(params);
@@ -331,7 +330,7 @@ public class StackMob {
      * they need to be refreshed. Make sure not to send multiple refresh token requests.
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void refreshToken(StackMobRawCallback callback) {
+    public void refreshLogin(StackMobRawCallback callback) {
         if(!getSession().isOAuth2()) {
             callback.unsent(new StackMobException("This method is only available with oauth2"));
         }
@@ -624,18 +623,15 @@ public class StackMob {
     }
 
     /**
-     * TODO fix
      * get the logged in user locally. This method is deprecated and {@link #getLoggedInUser(com.stackmob.sdk.callback.StackMobCallback)} should be
      * use instead
-     * @deprecated
      * @return the logged in user
      */
-    public String getLoggedInUser() {
+    public String getLoggedInUsername() {
         return isLoggedIn() ? session.getLastUserLoginName() : null;
     }
 
     /**
-     * TODO fix
      * check whether a user is currently logged in. In rare cases when a user is logged off remotely this may be inaccurate
      * @return whether the user is logged in
      */
@@ -653,14 +649,12 @@ public class StackMob {
     }
 
     /**
-     * TODO fix
      * check if a specific user is logged in. Use {@link #getLoggedInUser(com.stackmob.sdk.callback.StackMobCallback)} instead
-     * @deprecated
      * @param username the user to check
      * @return whether that user is logged in
      */
     public boolean isUserLoggedIn(String username) {
-        return username != null && username.equals(this.getLoggedInUser());
+        return username != null && username.equals(this.getLoggedInUsername());
     }
 
     /**

@@ -36,6 +36,7 @@ public class StackMobSession {
     private String key;
     private String secret;
     private String userObjectName;
+    private String userIdName;
     private int apiVersionNumber;
     private String lastUserLoginName;
     private long serverTimeDiff = 0;
@@ -46,11 +47,12 @@ public class StackMobSession {
     private Date oauth2TokenExpiration;
     private Boolean httpsOverride = null;
 
-    public StackMobSession(OAuthVersion oauthVersion, int apiVersionNumber, String key, String secret, String userObjectName) {
+    public StackMobSession(OAuthVersion oauthVersion, int apiVersionNumber, String key, String secret, String userObjectName, String userIdName) {
         this.oauthVersion = oauthVersion;
         this.key = key;
         this.secret = secret;
         this.userObjectName = userObjectName;
+        this.userIdName = userIdName;
         this.apiVersionNumber = apiVersionNumber;
     }
 
@@ -76,6 +78,10 @@ public class StackMobSession {
 
     public String getUserObjectName() {
         return userObjectName;
+    }
+
+    public String getUserIdName() {
+        return userIdName;
     }
 
     public int getApiVersionNumber() {
@@ -110,11 +116,11 @@ public class StackMobSession {
         return serverTimeDiff;
     }
 
-    protected void setLastUserLoginName(String username) {
+    public void setLastUserLoginName(String username) {
         lastUserLoginName = username;
     }
 
-    protected String getLastUserLoginName() {
+    public String getLastUserLoginName() {
         return lastUserLoginName;
     }
 

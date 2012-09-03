@@ -40,7 +40,7 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
         newParams.put("mac_algorithm", "hmac-sha-1");
         return new StackMobAccessTokenRequest(executor,
                 session,
-                "refreshToken",
+                "refreshLogin",
                 newParams,
                 callback,
                 redirectedCallback);
@@ -88,6 +88,7 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                     if(stackmobElt != null && stackmobElt.isJsonObject()) {
                         // Return only the user to be compatible with the old login
                         JsonElement userElt = stackmobElt.getAsJsonObject().get("user");
+                        session.setLastUserLoginName(userElt.getAsJsonObject().get(session.getUserIdName()).getAsString());
                         finalResponseBody = userElt.toString().getBytes();
                     }
                 }
