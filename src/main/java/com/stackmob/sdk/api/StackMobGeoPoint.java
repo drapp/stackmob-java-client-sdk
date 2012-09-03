@@ -15,27 +15,38 @@
  */
 package com.stackmob.sdk.api;
 
-import com.stackmob.sdk.util.GeoPoint;
-
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a longitude/latitude that can be stored and queried against in StackMob
+ * Represents a longitude/latitude pair that can be stored and queried against in StackMob
  */
-public class StackMobGeoPoint extends GeoPoint {
+public class StackMobGeoPoint {
+    private static final double EarthRadiusInMi = 3956.6;
+    private static final double EarthRadiusInKm = 6367.5;
+
+    private Double lon = Double.NaN;
+    private Double lat = Double.NaN;
+
+    /**
+     * create a geopoint in terms of longitude and latitude radian
+     * @param lon longitude between +/- 180
+     * @param lat latitude between +/- 90
+     */
     public StackMobGeoPoint(Double lon, Double lat) {
-        super(lon, lat);
+        if(lon < -180 || lon > 180 || lat < -90 || lat > 90) {
+            throw new IllegalArgumentException("Invalid latitude/longitude. Longitude must be between -180 and 180, while Latitude must be between -90 and 90");
+        }
+        this.lon = lon;
+        this.lat = lat;
     }
-
-    //These methods are passed through so we can have nice javadocs in the right place
-
 
     /**
      * the longitude of this geopoint
      * @return the longitude
      */
     public Double getLongitude() {
-        return super.getLongitude();
+        return lon;
     }
 
     /**
@@ -43,7 +54,7 @@ public class StackMobGeoPoint extends GeoPoint {
      * @return the latitude
      */
     public Double getLatitude() {
-        return super.getLatitude();
+        return lat;
     }
 
     /**
@@ -51,7 +62,10 @@ public class StackMobGeoPoint extends GeoPoint {
      * @return a list
      */
     public List<String> asList() {
-        return super.asList();
+        List<String> arguments = new ArrayList<String>();
+        arguments.add(getLatitude().toString());
+        arguments.add(getLongitude().toString());
+        return arguments;
     }
 
     /**
@@ -60,7 +74,7 @@ public class StackMobGeoPoint extends GeoPoint {
      * @return output miles
      */
     public static Double radiansToMi(double radians) {
-        return GeoPoint.radiansToMi(radians);
+        return radians * EarthRadiusInMi;
     }
 
     /**
@@ -69,7 +83,7 @@ public class StackMobGeoPoint extends GeoPoint {
      * @return output kilometers
      */
     public static Double radiansToKm(double radians) {
-        return GeoPoint.radiansToKm(radians);
+        return radians * EarthRadiusInKm;
     }
 
     /**
@@ -78,7 +92,7 @@ public class StackMobGeoPoint extends GeoPoint {
      * @return output radians
      */
     public static Double miToRadians(double mi) {
-        return GeoPoint.miToRadians(mi);
+        return mi / EarthRadiusInMi;
     }
 
     /**
@@ -87,6 +101,9 @@ public class StackMobGeoPoint extends GeoPoint {
      * @return output radians
      */
     public static Double kmToRadians(double km) {
-        return GeoPoint.kmToRadians(km);
+        return km / EarthRadiusInKm;
     }
+
+
+
 }

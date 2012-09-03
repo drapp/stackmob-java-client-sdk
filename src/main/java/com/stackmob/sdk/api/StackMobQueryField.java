@@ -16,8 +16,6 @@
 
 package com.stackmob.sdk.api;
 
-import com.stackmob.sdk.util.GeoPoint;
-
 import java.util.List;
 
 /**
@@ -154,7 +152,7 @@ public class StackMobQueryField {
      * @param point the value against which to test
      * @return a new query with the constraint
      */
-    public StackMobQueryField isNear(GeoPoint point) {
+    public StackMobQueryField isNear(StackMobGeoPoint point) {
         this.q = this.q.fieldIsNear(this.field, point);
         return this;
     }
@@ -165,7 +163,7 @@ public class StackMobQueryField {
      * @param maxDistanceMi the maximum distance
      * @return a new query with the constraint
      */
-    public StackMobQueryField isNearWithinMi(GeoPoint point, Double maxDistanceMi) {
+    public StackMobQueryField isNearWithinMi(StackMobGeoPoint point, Double maxDistanceMi) {
         this.q = this.q.fieldIsNearWithinMi(this.field, point, maxDistanceMi);
         return this;
     }
@@ -176,7 +174,7 @@ public class StackMobQueryField {
      * @param maxDistanceKm the maximum distance
      * @return a new query with the constraint
      */
-    public StackMobQueryField isNearWithinKm(GeoPoint point, Double maxDistanceKm) {
+    public StackMobQueryField isNearWithinKm(StackMobGeoPoint point, Double maxDistanceKm) {
         this.q = this.q.fieldIsNearWithinKm(this.field, point, maxDistanceKm);
         return this;
     }
@@ -187,7 +185,7 @@ public class StackMobQueryField {
      * @param radiusMi the maximum distance
      * @return a new query with the constraint
      */
-    public StackMobQueryField isWithinMi(GeoPoint point, Double radiusMi) {
+    public StackMobQueryField isWithinMi(StackMobGeoPoint point, Double radiusMi) {
         this.q = this.q.fieldIsWithinRadiusInMi(this.field, point, radiusMi);
         return this;
     }
@@ -198,7 +196,7 @@ public class StackMobQueryField {
      * @param radiusKm the maximum distance
      * @return a new query with the constraint
      */
-    public StackMobQueryField isWithinKm(GeoPoint point, Double radiusKm) {
+    public StackMobQueryField isWithinKm(StackMobGeoPoint point, Double radiusKm) {
         this.q = this.q.fieldIsWithinRadiusInKm(this.field, point, radiusKm);
         return this;
     }
@@ -209,7 +207,7 @@ public class StackMobQueryField {
      * @param upperRight the upper right corner of the box
      * @return a new query with the constraint
      */
-    public StackMobQueryField isWithinBox(GeoPoint lowerLeft, GeoPoint upperRight) {
+    public StackMobQueryField isWithinBox(StackMobGeoPoint lowerLeft, StackMobGeoPoint upperRight) {
         this.q = this.q.fieldIsWithinBox(this.field, lowerLeft, upperRight);
         return this;
     }
