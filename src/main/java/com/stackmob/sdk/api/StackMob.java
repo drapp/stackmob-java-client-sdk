@@ -637,7 +637,7 @@ public class StackMob {
      */
     public boolean isLoggedIn() {
         if(getSession().isOAuth2()) {
-            return getSession().oauth2TokenValid();
+            return getSession().oauth2RefreshTokenValid();
         } else {
             Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
             if(sessionCookie != null) {
@@ -646,6 +646,18 @@ public class StackMob {
             }
         }
         return false;
+    }
+
+
+    /**
+     * check whether a {@link #refreshLogin(com.stackmob.sdk.callback.StackMobRawCallback)} call is required
+     * to continue making authenticated requests. This will happen automatically, so there's no reason to
+     * check this method unless you're overriding the existing refresh token system. If there are no credentials
+     * at all this will be false.
+     * @return whether there's a valid refresh token that can be used to refresh the login
+     */
+    public boolean refreshRequired() {
+        return getSession().isOAuth2() && !getSession().oauth2TokenValid();
     }
 
     /**
