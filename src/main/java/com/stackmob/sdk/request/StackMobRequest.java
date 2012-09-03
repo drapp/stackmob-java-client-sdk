@@ -65,15 +65,7 @@ public abstract class StackMobRequest {
     protected static final String REGULAR_SCHEME = "http";
     protected static final String API_KEY_HEADER = "X-StackMob-API-Key";
     protected static final String AUTHORIZATION_HEADER = "Authorization";
-    private static StackMobCookieStore cookieStore = new StackMobCookieStore();
 
-    public static void setCookieStore(StackMobCookieStore store) {
-        cookieStore = store;
-    }
-
-    public static StackMobCookieStore getCookieStore() {
-        return cookieStore;
-    }
 
     protected final ExecutorService executor;
     protected final StackMobSession session;
@@ -326,7 +318,7 @@ public abstract class StackMobRequest {
         }
         headerList.add(new Pair<String, String>("Accept", accept));
         headerList.add(new Pair<String, String>("User-Agent", StackMob.getUserAgent()));
-        String cookieHeader = cookieStore.cookieHeader();
+        String cookieHeader = session.getCookieManager().cookieHeader();
         if(cookieHeader.length() > 0) headerList.add(new Pair<String, String>("Cookie", cookieHeader));
 
         //build user headers
@@ -449,7 +441,7 @@ public abstract class StackMobRequest {
                                 }
                             }
                             if(Http.isSuccess(ret.getCode())) {
-                                cookieStore.storeCookies(ret);
+                                session.getCookieManager().storeCookies(ret);
                             }
                             boolean retried = false;
                             if(Http.isUnavailable(ret.getCode())) {

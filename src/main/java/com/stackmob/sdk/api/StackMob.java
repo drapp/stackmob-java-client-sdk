@@ -16,17 +16,11 @@
 
 package com.stackmob.sdk.api;
 
-import com.google.gson.*;
 import com.stackmob.sdk.callback.*;
 import com.stackmob.sdk.exception.StackMobException;
-import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
-import com.stackmob.sdk.net.HttpVerbWithoutPayload;
 import com.stackmob.sdk.push.StackMobPush;
-import com.stackmob.sdk.push.StackMobPushToken;
 import com.stackmob.sdk.request.*;
-import com.stackmob.sdk.util.Http;
-import com.stackmob.sdk.util.Pair;
 
 import java.io.IOException;
 import java.net.URI;
@@ -639,7 +633,7 @@ public class StackMob {
         if(getSession().isOAuth2()) {
             return getSession().oauth2RefreshTokenValid();
         } else {
-            Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
+            Map.Entry<String, Date> sessionCookie = session.getCookieManager().getSessionCookie();
             if(sessionCookie != null) {
                 boolean cookieIsStillValid = sessionCookie.getValue() == null || sessionCookie.getValue().before(new Date());
                 return cookieIsStillValid && !this.isLoggedOut();
@@ -677,7 +671,7 @@ public class StackMob {
         if(getSession().isOAuth2()) {
             return getSession().getOAuth2TokenExpiration() != null && !getSession().oauth2TokenValid();
         } else {
-            Map.Entry<String, Date> sessionCookie = StackMobRequest.getCookieStore().getSessionCookie();
+            Map.Entry<String, Date> sessionCookie = session.getCookieManager().getSessionCookie();
             //The logged out cookie is a json string.
             return sessionCookie != null && sessionCookie.getKey().contains(":");
         }

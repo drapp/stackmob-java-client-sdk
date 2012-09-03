@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import com.stackmob.sdk.api.StackMob.OAuthVersion;
+import com.stackmob.sdk.util.CookieManager;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Mac;
@@ -46,6 +47,7 @@ public class StackMobSession {
     private String oauth2RefreshToken;
     private Date oauth2TokenExpiration;
     private Boolean httpsOverride = null;
+    private CookieManager cookieManager = new CookieManager();
 
     public StackMobSession(OAuthVersion oauthVersion, int apiVersionNumber, String key, String secret, String userObjectName, String userIdName) {
         this.oauthVersion = oauthVersion;
@@ -173,6 +175,15 @@ public class StackMobSession {
 
     public String getOAuth2RefreshToken() {
         return oauth2RefreshToken;
+    }
+
+
+    public void setCookieManager(CookieManager store) {
+        cookieManager = store;
+    }
+
+    public CookieManager getCookieManager() {
+        return cookieManager;
     }
 
     public String generateMacToken(String method, String uri, String host, String port) {
