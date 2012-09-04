@@ -24,6 +24,7 @@ import com.stackmob.sdk.request.*;
 import com.stackmob.sdk.util.StackMobLogger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -98,10 +99,15 @@ public class StackMob {
         if(version == null ) {
             version = "";
             Properties props = new Properties();
+            InputStream buildProps = null;
             try {
-                props.load(StackMob.class.getClassLoader().getResourceAsStream("build.properties"));
+                buildProps = StackMob.class.getClassLoader().getResourceAsStream("build.properties");
+                props.load(buildProps);
             } catch (IOException e) {
-            } catch (NullPointerException e) { }
+            } catch (NullPointerException e) {
+            } finally {
+                try { buildProps.close(); } catch (Exception ignore) { }
+            }
             if( props.containsKey(versionKey) && props.get(versionKey) != null) {
                 version = props.getProperty(versionKey);
                 //This should be replaced by a real version in maven builds
