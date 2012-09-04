@@ -79,7 +79,30 @@ import java.util.*;
  *
  *
  */
-public class StackMobUser extends StackMobModel {
+public abstract class StackMobUser extends StackMobModel {
+
+
+    /**
+     * send out a password reset email to a user who's forgotten their password
+     * @param username the user who's forgotten their password
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public static void sentForgotPasswordEmail(String username, StackMobCallback callback) {
+        StackMob.getStackMob().forgotPassword(username, callback);
+    }
+
+    /**
+     * send a push notification to a group of users.
+     * @param payload the payload to send
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public <T extends StackMobUser> void pushToMultiple(Map<String, String> payload, List<T> users, StackMobRawCallback callback) {
+        List<String> userIds = new ArrayList<String>();
+        for(T user : users) {
+            userIds.add(user.getID());
+        }
+        StackMob.getStackMob().getPush().pushToUsers(payload, userIds, callback);
+    }
 
     /**
      * Get the currently logged in user. Use to get the user object in place of login when you're starting your app and you find that you're still logged in (via {@link com.stackmob.sdk.api.StackMob#isLoggedIn()}).
@@ -121,14 +144,22 @@ public class StackMobUser extends StackMobModel {
     }
 
     /**
-     * create a new StackMobUser directly with a username and password.
+     * create a new user of the specified class with a username.
+     * @param actualClass the subclass being constructed
      * @param username the user's username
-     * @param password the user's password
      */
-    public StackMobUser(String username, String password) {
-        this(StackMobUser.class, username, password);
+    protected StackMobUser(Class<? extends StackMobUser> actualClass, String username) {
+        this(actualClass, username, null);
     }
-    
+
+    /**
+     * create a new user of the specified class
+     * @param actualClass the subclass being constructed
+     */
+    protected StackMobUser(Class<? extends StackMobUser> actualClass) {
+        this(actualClass, null);
+    }
+
     @Override
     public String getSchemaName() {
         return StackMob.getStackMob().getSession().getUserObjectName();
@@ -165,14 +196,18 @@ public class StackMobUser extends StackMobModel {
             public void success(String responseBody) {
                 // Don't keep the password around after login
                 password = null;
-                try {
-                    fillFromJson(responseBody);
-                } catch (StackMobException e) {
-                    StackMob.getStackMob().getSession().getLogger().logWarning("Error filling in user model from login" + e);
-                }
+                fillUserFromJson(responseBody);
                 super.success(responseBody);
             }
         });
+    }
+
+    private void fillUserFromJson(String responseBody) {
+        try {
+            fillFromJson(responseBody);
+        } catch (StackMobException e) {
+            StackMob.getStackMob().getSession().getLogger().logWarning("Error filling in user model from login" + e);
+        }
     }
 
     /**
@@ -195,6 +230,53 @@ public class StackMobUser extends StackMobModel {
     }
 
     /**
+     * login to StackMob with Facebook credentials. The credentials should match a existing user object that has a linked Facebook
+     * account, via either {@link #createWithFacebook(String, com.stackmob.sdk.callback.StackMobCallback)} or
+     * {@link #linkWithFacebook(String, com.stackmob.sdk.callback.StackMobCallback)}
+     * @param facebookToken the facebook user token
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void loginWithFacebook(String facebookToken, StackMobCallback callback) {
+        StackMob.getStackMob().facebookLogin(facebookToken, new StackMobIntermediaryCallback(callback){
+            @Override
+            public void success(String responseBody) {
+                fillUserFromJson(responseBody);
+                super.success(responseBody);
+            }
+
+        });
+    }
+
+    /**
+     * login to StackMob with twitter credentials. The credentials should match a existing user object that has a linked Twitter
+     * account, via either {@link #createWithTwitter(String, String, com.stackmob.sdk.callback.StackMobCallback)} or
+     * {@link #linkWithTwitter(String, String, com.stackmob.sdk.callback.StackMobCallback)}
+     * @param twitterToken the twitter session key (this is a per user key - different from the consumer key)
+     * @param twitterSecret the twitter session secret (this is a per user secret - different from the consumer secret)
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void loginWithTwitter(String twitterToken, String twitterSecret, StackMobCallback callback) {
+        StackMob.getStackMob().twitterLogin(twitterToken, twitterSecret, new StackMobIntermediaryCallback(callback) {
+            @Override
+            public void success(String responseBody) {
+                fillUserFromJson(responseBody);
+                super.success(responseBody);
+            }
+
+        });
+    }
+
+    /**
+     * Refresh the current OAuth2 login. This ordinarily happens automatically, but this method
+     * can give you finer control if you need it. Logins last an hour by default. Once they expire
+     * they need to be refreshed. Make sure not to send multiple refresh token requests.
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void refreshLogin(StackMobCallback callback) {
+        StackMob.getStackMob().refreshLogin(callback);
+    }
+
+    /**
      * log the user out, clearing all credential
      * @param callback invoked when logout is complete
      */
@@ -207,7 +289,128 @@ public class StackMobUser extends StackMobModel {
      * @return whether the user is logged in
      */
     public boolean isLoggedIn() {
-        return StackMob.getStackMob().isLoggedIn();
+        return StackMob.getStackMob().isUserLoggedIn(getID());
+    }
+
+    /**
+     * check whether a {@link #refreshLogin(com.stackmob.sdk.callback.StackMobCallback)} call is required
+     * to continue making authenticated requests. This will happen automatically, so there's no reason to
+     * check this method unless you're overriding the existing refresh token system. If there are no credentials
+     * at all this will be false.
+     * @return whether there's a valid refresh token that can be used to refresh the login
+     */
+    public boolean refreshRequired() {
+        return isLoggedIn() && StackMob.getStackMob().refreshRequired();
+    }
+
+    /**
+     * create this user on StackMob and associate it with an existing Facebook user via Facebook credentials.
+     * @param facebookToken the facebook user token
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void createWithFacebook(String facebookToken, StackMobCallback callback) {
+        StackMob.getStackMob().registerWithFacebookToken(facebookToken, getID(), new StackMobIntermediaryCallback(callback) {
+            @Override
+            public void success(String responseBody) {
+                fillUserFromJson(responseBody);
+                super.success(responseBody);
+            }
+
+        });
+    }
+
+    /**
+     * create thsi user on StackMob and associate it with an existing Twitter user via Twitter credentials.
+     * @param twitterToken the twitter session key (this is a per user key - different from the consumer key)
+     * @param twitterSecret the twitter session secret (this is a per user secret - different from the consumer secret)
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void createWithTwitter(String twitterToken, String twitterSecret, StackMobCallback callback) {
+        StackMob.getStackMob().registerWithTwitterToken(twitterToken, twitterSecret, getID(), new StackMobIntermediaryCallback(callback) {
+            @Override
+            public void success(String responseBody) {
+                fillUserFromJson(responseBody);
+                super.success(responseBody);
+            }
+
+        });
+    }
+
+    /**
+     * link an user with an existing Facebook user via Facebook credentials. The user must be logged in
+     * @param facebookToken the Facebook user token
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void linkWithFacebook(String facebookToken, StackMobCallback callback) {
+        if(isLoggedIn()) {
+            StackMob.getStackMob().linkUserWithFacebookToken(facebookToken, callback);
+        } else {
+            callback.unsent(new StackMobException("User not logged in"));
+        }
+    }
+
+    /**
+     * link an user with an existing Facebook user via Facebook credentials. The user must be logged in
+     * @param twitterToken the twitter session key (this is a per user key - different from the consumer key)
+     * @param twitterSecret the twitter session secret (this is a per user secret - different from the consumer secret)
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void linkWithTwitter(String twitterToken, String twitterSecret, StackMobCallback callback) {
+        if(isLoggedIn()) {
+            StackMob.getStackMob().linkUserWithTwitterToken(twitterToken, twitterSecret, callback);
+        } else {
+            callback.unsent(new StackMobException("User not logged in"));
+        }
+    }
+
+    /**
+     * post a message to Facebook. This method will not post to FB and will return nothing if there is no user logged into FB.
+     * @param msg the message to post
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void postFacebookMessage(String msg, StackMobRawCallback callback) {
+        if(isLoggedIn()) {
+            StackMob.getStackMob().facebookPostMessage(msg, callback);
+        } else {
+            callback.unsent(new StackMobException("User not logged in"));
+        }
+    }
+
+    /**
+     * update the logged in users’s Twitter status. The logged in user must have a linked Twitter account.
+     * @param message the message to send. must be <= 140 characters
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void postTwitterUpdate(String message, StackMobRawCallback callback) {
+        if(isLoggedIn()) {
+            StackMob.getStackMob().twitterStatusUpdate(message, callback);
+        } else {
+            callback.unsent(new StackMobException("User not logged in"));
+        }
+    }
+
+    /**
+     * get facebook user info for the current user. this method will return nothing if there is no currently logged in FB user
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void getFacebookUserInfo(StackMobRawCallback callback) {
+        if(isLoggedIn()) {
+            StackMob.getStackMob().getFacebookUserInfo(callback);
+        } else {
+            callback.unsent(new StackMobException("User not logged in"));
+        }
+    }
+
+    /**
+     * get twitter user info for the current user. this method will return nothing if there is no currently logged in twitter user
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void getTwitterUserInfo(StackMobRawCallback callback) {
+        if(isLoggedIn()) {
+            StackMob.getStackMob().getTwitterUserInfo(callback);
+        } else {
+            callback.unsent(new StackMobException("User not logged in"));
+        }
     }
 
     /**
@@ -217,7 +420,11 @@ public class StackMobUser extends StackMobModel {
      * @param callback invoked upon completed reset
      */
     public void resetPassword(String oldPassword, String newPassword, StackMobCallback callback) {
-        StackMob.getStackMob().resetPassword(oldPassword, newPassword, callback);
+        if(isLoggedIn()) {
+            StackMob.getStackMob().resetPassword(oldPassword, newPassword, callback);
+        } else {
+            callback.unsent(new StackMobException("User not logged in"));
+        }
     }
 
     /**

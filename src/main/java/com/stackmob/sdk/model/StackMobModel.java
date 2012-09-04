@@ -177,7 +177,7 @@ public abstract class StackMobModel {
      * @param q The query to run
      * @param callback The callback to be invoked upon returning
      */
-    public static <T extends StackMobModel> void count(StackMobQuery q, StackMobCountCallback callback) {
+    public static void count(StackMobQuery q, StackMobCountCallback callback) {
         StackMob.getStackMob().getDatastore().count(q, callback);
     }
 
