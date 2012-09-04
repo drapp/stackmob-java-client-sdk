@@ -16,6 +16,8 @@
 
 package com.stackmob.sdk.api;
 
+import com.stackmob.sdk.util.ListHelpers;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,9 +56,9 @@ public class StackMobQuery {
     private Map<String, String> args = new HashMap<String, String>();
 
     private static final String RangeHeader = "Range";
-    private static final String ExpandHeader = "X-StackMob-Expand";
+
     private static final String OrderByHeader = "X-StackMob-OrderBy";
-    private static final String SelectHeader = "X-StackMob-Select";
+
 
     /**
      * Represents ascending or descending order
@@ -181,7 +183,7 @@ public class StackMobQuery {
      * @return the new query that resulted from adding this operation
      */
     public StackMobQuery fieldIsNear(String field, StackMobGeoPoint point) {
-        return putInMap(field, Operator.NEAR, join(point.asList()));
+        return putInMap(field, Operator.NEAR, ListHelpers.join(point.asList(), ","));
     }
 
     /**
@@ -195,7 +197,7 @@ public class StackMobQuery {
     public StackMobQuery fieldIsNearWithinMi(String field, StackMobGeoPoint point, Double maxDistanceMi) {
         List<String> arguments = point.asList();
         arguments.add(StackMobGeoPoint.miToRadians(maxDistanceMi).toString()); //convert to radians
-        return putInMap(field, Operator.NEAR, join(arguments));
+        return putInMap(field, Operator.NEAR, ListHelpers.join(arguments, ","));
     }
 
     /**
@@ -209,7 +211,7 @@ public class StackMobQuery {
     public StackMobQuery fieldIsNearWithinKm(String field, StackMobGeoPoint point, Double maxDistanceKm) {
         List<String> arguments = point.asList();
         arguments.add(StackMobGeoPoint.kmToRadians(maxDistanceKm).toString()); //convert to radians
-        return putInMap(field, Operator.NEAR, join(arguments));
+        return putInMap(field, Operator.NEAR, ListHelpers.join(arguments, ","));
     }
 
     /**
@@ -222,7 +224,7 @@ public class StackMobQuery {
     public StackMobQuery fieldIsWithinRadiusInMi(String field, StackMobGeoPoint point, Double radiusInMi) {
         List<String> arguments = point.asList();
         arguments.add(StackMobGeoPoint.miToRadians(radiusInMi).toString()); //convert to radians
-        return putInMap(field, Operator.WITHIN, join(arguments));
+        return putInMap(field, Operator.WITHIN, ListHelpers.join(arguments, ","));
     }
 
     /**
@@ -235,7 +237,7 @@ public class StackMobQuery {
     public StackMobQuery fieldIsWithinRadiusInKm(String field, StackMobGeoPoint point, Double radiusInKm) {
         List<String> arguments = point.asList();
         arguments.add(StackMobGeoPoint.kmToRadians(radiusInKm).toString()); //convert to radians
-        return putInMap(field, Operator.WITHIN, join(arguments));
+        return putInMap(field, Operator.WITHIN, ListHelpers.join(arguments, ","));
     }
 
     /**
@@ -249,7 +251,7 @@ public class StackMobQuery {
     public StackMobQuery fieldIsWithinBox(String field, StackMobGeoPoint lowerLeft, StackMobGeoPoint upperRight) {
         List<String> arguments = lowerLeft.asList();
         arguments.addAll(upperRight.asList());
-        return putInMap(field, Operator.WITHIN, join(arguments));
+        return putInMap(field, Operator.WITHIN, ListHelpers.join(arguments, ","));
     }
 
     /**
@@ -266,7 +268,7 @@ public class StackMobQuery {
      * @return the new query that resulted from adding this operation
      */
     public StackMobQuery fieldIsIn(String field, List<String> values) {
-        return putInMap(field, Operator.IN, join(values));
+        return putInMap(field, Operator.IN, ListHelpers.join(values, ","));
     }
 
     /**
@@ -408,17 +410,6 @@ public class StackMobQuery {
     }
 
     /**
-     * set the expand depth of this query. the expand depth instructs the StackMob platform to detect relationships and automatically replace those
-     * relationship IDs with the values that they point to.
-     * @param i the expand depth. at time of writing, StackMob restricts expand depth to maximum 3
-     * @return the new query that resulted from adding this operation
-     */
-    public StackMobQuery expandDepthIs(Integer i) {
-        headers.put(ExpandHeader, i.toString());
-        return this;
-    }
-
-    /**
      * this method lets you add a "LIMIT" and "SKIP" to your query at once. Can be used to implement pagination in your app.
      * @param start the starting object number (inclusive)
      * @param end the ending object number (inclusive)
@@ -440,16 +431,6 @@ public class StackMobQuery {
         return this;
     }
 
-    /**
-     * restricts the fields returned in the query
-     * @param fields the fields to return
-     * @return the new query that resulted from adding this operation
-     */
-    public StackMobQuery select(List<String> fields) {
-        headers.put(SelectHeader,join(fields));
-        return this;
-    }
-
     private StackMobQuery putInMap(String field, Operator operator, String value) {
         args.put(field+operator.getOperatorForURL(), value);
         return this;
@@ -458,23 +439,5 @@ public class StackMobQuery {
     private StackMobQuery putInMap(String field, Operator operator, int value) {
         putInMap(field, operator, Integer.toString(value));
         return this;
-    }
-
-    private String join(List<String> values) {
-        return join(values, ",");
-    }
-
-    private String join(List<String> values, String separator) {
-        StringBuilder builder = new StringBuilder();
-        //equivalent of values.join(",");
-        boolean first = true;
-        for(String val: values) {
-            if(!first) {
-                builder.append(separator);
-            }
-            first = false;
-            builder.append(val);
-        }
-        return builder.toString();
     }
 }

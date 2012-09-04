@@ -54,35 +54,25 @@ public class StackMobDatastore {
      * @param path the path to get
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void get(String path,
-                                         StackMobRawCallback callback) {
+    public void get(String path, StackMobRawCallback callback) {
         new StackMobRequestWithoutPayload(this.executor,
-                this.session,
-                HttpVerbWithoutPayload.GET,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                path,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                          this.session,
+                                          HttpVerbWithoutPayload.GET,
+                                          StackMobRequest.EmptyHeaders,
+                                          StackMobRequest.EmptyParams,
+                                          path,
+                                          callback,
+                                          this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
      * do a get request on the StackMob platform
      * @param path the path to get
-     * @param arguments arguments to be encoded into the query string of the get request
-     * @param headerMap any additional headers to send
+     * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void get(String path,
-                                         Map<String, String> arguments,
-                                         Map<String, String> headerMap,
-                                         StackMobRawCallback callback) {
-        List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
-        for(Map.Entry<String, String> header: headerMap.entrySet()) {
-            headers.add(header);
-        }
-
-        get(path, arguments, headers, callback);
+    public void get(String path, StackMobOptions options, StackMobRawCallback callback) {
+        get(path, StackMobRequest.EmptyParams, options.getHeaders(), callback);
     }
 
     /**
@@ -92,30 +82,15 @@ public class StackMobDatastore {
      * @param headers any additional headers to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void get(String path,
-                                         Map<String, String> arguments,
-                                         List<Map.Entry<String, String>> headers,
-                                         StackMobRawCallback callback) {
+    private void get(String path, Map<String, String> arguments, List<Map.Entry<String, String>> headers, StackMobRawCallback callback) {
         new StackMobRequestWithoutPayload(this.executor,
-                this.session,
-                HttpVerbWithoutPayload.GET,
-                headers,
-                arguments,
-                path,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
-    }
-
-    /**
-     * do a get request on the StackMob platform
-     * @param path the path to get
-     * @param arguments the arguments to be encoded into the query string of the get request
-     * @param callback callback to be called when the server returns. may execute in a separate thread
-     */
-    public void get(String path,
-                                         Map<String, String> arguments,
-                                         StackMobRawCallback callback) {
-        this.get(path, arguments, StackMobRequest.EmptyHeaders, callback);
+                                          this.session,
+                                          HttpVerbWithoutPayload.GET,
+                                          headers,
+                                          arguments,
+                                          path,
+                                          callback,
+                                          this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -123,11 +98,20 @@ public class StackMobDatastore {
      * @param query the query to run
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void get(StackMobQuery query,
-                                         StackMobRawCallback callback) {
-        this.get("/"+query.getObjectName(), query.getArguments(), query.getHeaders(), callback);
+    public void get(StackMobQuery query, StackMobRawCallback callback) {
+        StackMobOptions options = new StackMobOptions().headers(query.getHeaders());
+        this.get("/"+query.getObjectName(), query.getArguments(), options.getHeaders(), callback);
     }
 
+    /**
+     * do a get request on the StackMob platform
+     * @param query the query to run
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void get(StackMobQuery query, StackMobOptions options, StackMobRawCallback callback) {
+        this.get("/"+query.getObjectName(), query.getArguments(), options.headers(query.getHeaders()).getHeaders(), callback);
+    }
 
 
     /**
@@ -136,18 +120,34 @@ public class StackMobDatastore {
      * @param requestObject the object to serialize and send in the POST body. this object will be serialized with Gson
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void post(String path,
-                                          Object requestObject,
-                                          StackMobRawCallback callback) {
+    public void post(String path, Object requestObject, StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
-                this.session,
-                HttpVerbWithPayload.POST,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                requestObject,
-                path,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                       this.session,
+                                       HttpVerbWithPayload.POST,
+                                       StackMobRequest.EmptyHeaders,
+                                       StackMobRequest.EmptyParams,
+                                       requestObject,
+                                       path,
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+    }
+
+    /**
+     * do a post request on the StackMob platform for a single object
+     * @param path the path to get
+     * @param requestObject the object to serialize and send in the POST body. this object will be serialized with Gson
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void post(String path, Object requestObject, StackMobOptions options, StackMobRawCallback callback) {
+        new StackMobRequestWithPayload(this.executor,
+                                       this.session,
+                                       HttpVerbWithPayload.POST,
+                                       options.getHeaders(),
+                                       StackMobRequest.EmptyParams,
+                                       requestObject,
+                                       path,
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -156,40 +156,35 @@ public class StackMobDatastore {
      * @param body the json body
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void post(String path,
-                                          String body,
-                                          StackMobRawCallback callback) {
+    public void post(String path, String body, StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
-                this.session,
-                HttpVerbWithPayload.POST,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                body,
-                path,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                       this.session,
+                                       HttpVerbWithPayload.POST,
+                                       StackMobRequest.EmptyHeaders,
+                                       StackMobRequest.EmptyParams,
+                                       body,
+                                       path,
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
      * do a POST request on the StackMob platform for a single object
      * @param path the path to get
      * @param body the json body
-     * @param headers any additional headers to send
+     * @param options any additional headers to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void post(String path,
-                                          String body,
-                                          List<Map.Entry<String, String>>  headers,
-                                          StackMobRawCallback callback) {
+    public void post(String path, String body, StackMobOptions options, StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
-                this.session,
-                HttpVerbWithPayload.POST,
-                headers,
-                StackMobRequest.EmptyParams,
-                body,
-                path,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                       this.session,
+                                       HttpVerbWithPayload.POST,
+                                       options.getHeaders(),
+                                       StackMobRequest.EmptyParams,
+                                       body,
+                                       path,
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -198,18 +193,16 @@ public class StackMobDatastore {
      * @param requestObjects List of objects to serialize and send in the POST body. the list will be serialized with Gson
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public <T> void postBulk(String path,
-                                                  List<T> requestObjects,
-                                                  StackMobRawCallback callback) {
+    public <T> void postBulk(String path, List<T> requestObjects, StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
-                this.session,
-                HttpVerbWithPayload.POST,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                requestObjects,
-                path,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                       this.session,
+                                       HttpVerbWithPayload.POST,
+                                       StackMobRequest.EmptyHeaders,
+                                       StackMobRequest.EmptyParams,
+                                       requestObjects,
+                                       path,
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -220,20 +213,16 @@ public class StackMobDatastore {
      * @param relatedObject related object to post
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void postRelated(String path,
-                                                 String primaryId,
-                                                 String relatedField,
-                                                 Object relatedObject,
-                                                 StackMobRawCallback callback) {
+    public void postRelated(String path, String primaryId, String relatedField, Object relatedObject, StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
-                this.session,
-                HttpVerbWithPayload.POST,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                relatedObject,
-                String.format("%s/%s/%s", path, primaryId, relatedField),
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                       this.session,
+                                       HttpVerbWithPayload.POST,
+                                       StackMobRequest.EmptyHeaders,
+                                       StackMobRequest.EmptyParams,
+                                       relatedObject,
+                                       String.format("%s/%s/%s", path, primaryId, relatedField),
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -244,20 +233,16 @@ public class StackMobDatastore {
      * @param relatedObject related object to post
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void postRelated(String path,
-                                                 String primaryId,
-                                                 String relatedField,
-                                                 String relatedObject,
-                                                 StackMobRawCallback callback) {
+    public void postRelated(String path, String primaryId, String relatedField, String relatedObject, StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
-                this.session,
-                HttpVerbWithPayload.POST,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                relatedObject,
-                String.format("%s/%s/%s", path, primaryId, relatedField),
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                       this.session,
+                                       HttpVerbWithPayload.POST,
+                                       StackMobRequest.EmptyHeaders,
+                                       StackMobRequest.EmptyParams,
+                                       relatedObject,
+                                       String.format("%s/%s/%s", path, primaryId, relatedField),
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -268,11 +253,7 @@ public class StackMobDatastore {
      * @param relatedObjects list of related objects to post. the list will be serialized with Gson
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public <T> void postRelatedBulk(String path,
-                                                         String primaryId,
-                                                         String relatedField,
-                                                         List<T> relatedObjects,
-                                                         StackMobRawCallback callback) {
+    public <T> void postRelatedBulk(String path, String primaryId, String relatedField, List<T> relatedObjects, StackMobRawCallback callback) {
         postRelated(path, primaryId, relatedField, relatedObjects, callback);
     }
 
@@ -284,19 +265,16 @@ public class StackMobDatastore {
      * @param requestObject the object to serialize and send in the PUT body. this object will be serialized with Gson
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void put(String path,
-                                         String id,
-                                         Object requestObject,
-                                         StackMobRawCallback callback) {
+    public void put(String path, String id, Object requestObject, StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
-                this.session,
-                HttpVerbWithPayload.PUT,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                requestObject,
-                path + "/" + id,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                       this.session,
+                                       HttpVerbWithPayload.PUT,
+                                       StackMobRequest.EmptyHeaders,
+                                       StackMobRequest.EmptyParams,
+                                       requestObject,
+                                       path + "/" + id,
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -306,19 +284,16 @@ public class StackMobDatastore {
      * @param body the json body
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void put(String path,
-                                         String id,
-                                         String body,
-                                         StackMobRawCallback callback) {
+    public void put(String path, String id, String body, StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
-                this.session,
-                HttpVerbWithPayload.PUT,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                body,
-                path + "/" + id,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                       this.session,
+                                       HttpVerbWithPayload.PUT,
+                                       StackMobRequest.EmptyHeaders,
+                                       StackMobRequest.EmptyParams,
+                                       body,
+                                       path + "/" + id,
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -331,10 +306,10 @@ public class StackMobDatastore {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void putAndUpdateAtomicCounters(String path,
-                                                                String id,
-                                                                Object requestObject,
-                                                                List<String> counterFields,
-                                                                StackMobRawCallback callback) {
+                                           String id,
+                                           Object requestObject,
+                                           List<String> counterFields,
+                                           StackMobRawCallback callback) {
         JsonObject obj = new Gson().toJsonTree(requestObject).getAsJsonObject();
         for(Map.Entry<String, JsonElement> field : new HashSet<Map.Entry<String, JsonElement>>(obj.entrySet())) {
             if(counterFields.contains(field.getKey())) {
@@ -354,10 +329,10 @@ public class StackMobDatastore {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void updateAtomicCounter(String path,
-                                                         String id,
-                                                         String field,
-                                                         int value,
-                                                         StackMobRawCallback callback) {
+                                    String id,
+                                    String field,
+                                    int value,
+                                    StackMobRawCallback callback) {
         JsonObject body = new JsonObject();
         body.add(field + "[inc]", new JsonPrimitive(value));
         put(path, id, body.toString(), callback);
@@ -373,19 +348,19 @@ public class StackMobDatastore {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public <T> void putRelated(String path,
-                                                    String primaryId,
-                                                    String relatedField,
-                                                    List<T> relatedIds,
-                                                    StackMobRawCallback callback) {
+                               String primaryId,
+                               String relatedField,
+                               List<T> relatedIds,
+                               StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
-                this.session,
-                HttpVerbWithPayload.PUT,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                relatedIds,
-                String.format("%s/%s/%s", path, primaryId, relatedField),
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                       this.session,
+                                       HttpVerbWithPayload.PUT,
+                                       StackMobRequest.EmptyHeaders,
+                                       StackMobRequest.EmptyParams,
+                                       relatedIds,
+                                       String.format("%s/%s/%s", path, primaryId, relatedField),
+                                       callback,
+                                       this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
 
@@ -395,17 +370,15 @@ public class StackMobDatastore {
      * @param id the id of the object to put
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void delete(String path,
-                                            String id,
-                                            StackMobRawCallback callback) {
+    public void delete(String path, String id, StackMobRawCallback callback) {
         new StackMobRequestWithoutPayload(this.executor,
-                this.session,
-                HttpVerbWithoutPayload.DELETE,
-                StackMobRequest.EmptyHeaders,
-                StackMobRequest.EmptyParams,
-                path + "/" + id,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                          this.session,
+                                          HttpVerbWithoutPayload.DELETE,
+                                          StackMobRequest.EmptyHeaders,
+                                          StackMobRequest.EmptyParams,
+                                          path + "/" + id,
+                                          callback,
+                                          this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -419,11 +392,11 @@ public class StackMobDatastore {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public <T> void deleteIdsFrom(String path,
-                                                       String primaryId,
-                                                       String field,
-                                                       List<T> idsToDelete,
-                                                       boolean cascadeDeletes,
-                                                       StackMobRawCallback callback) {
+                                  String primaryId,
+                                  String field,
+                                  List<T> idsToDelete,
+                                  boolean cascadeDeletes,
+                                  StackMobRawCallback callback) {
         StringBuilder ids = new StringBuilder();
         for (int i = 0; i < idsToDelete.size(); i++) {
             ids.append(idsToDelete.get(i).toString());
@@ -436,13 +409,13 @@ public class StackMobDatastore {
             headers.add(new Pair<String, String>("X-StackMob-CascadeDelete", "true"));
         }
         new StackMobRequestWithoutPayload(this.executor,
-                this.session,
-                HttpVerbWithoutPayload.DELETE,
-                headers,
-                StackMobRequest.EmptyParams,
-                String.format("%s/%s/%s/%s", path, primaryId, field, ids.toString()),
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                          this.session,
+                                          HttpVerbWithoutPayload.DELETE,
+                                          headers,
+                                          StackMobRequest.EmptyParams,
+                                          String.format("%s/%s/%s/%s", path, primaryId, field, ids.toString()),
+                                          callback,
+                                          this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -456,23 +429,23 @@ public class StackMobDatastore {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public <T> void deleteIdFrom(String path,
-                                                      String primaryId,
-                                                      String field,
-                                                      T idToDelete,
-                                                      boolean cascadeDelete,
-                                                      StackMobRawCallback callback) {
+                                 String primaryId,
+                                 String field,
+                                 T idToDelete,
+                                 boolean cascadeDelete,
+                                 StackMobRawCallback callback) {
         List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
         if (cascadeDelete) {
             headers.add(new Pair<String, String>("X-StackMob-CascadeDelete", "true"));
         }
         new StackMobRequestWithoutPayload(this.executor,
-                this.session,
-                HttpVerbWithoutPayload.DELETE,
-                headers,
-                StackMobRequest.EmptyParams,
-                String.format("%s/%s/%s/%s", path, primaryId, field, idToDelete),
-                callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                                          this.session,
+                                          HttpVerbWithoutPayload.DELETE,
+                                          headers,
+                                          StackMobRequest.EmptyParams,
+                                          String.format("%s/%s/%s/%s", path, primaryId, field, idToDelete),
+                                          callback,
+                                          this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -480,8 +453,7 @@ public class StackMobDatastore {
      * @param path the path to get
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void count(String path,
-                                           StackMobRawCallback callback) {
+    public void count(String path, StackMobRawCallback callback) {
         count(new StackMobQuery(path), callback);
     }
 
@@ -490,8 +462,7 @@ public class StackMobDatastore {
      * @param query the query to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void count(StackMobQuery query,
-                                           StackMobRawCallback callback) {
+    public void count(StackMobQuery query, StackMobRawCallback callback) {
         final StackMobRawCallback userCallback = callback;
         get(query.isInRange(0, 0), new StackMobRawCallback() {
             @Override
