@@ -22,17 +22,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * stores the various options that can be passed into a request. At the moment this means select and expand options, as well
+ * as arbitrary headers to be passed along with the request
+ */
 public class StackMobOptions {
     private List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
 
     private static final String SelectHeader = "X-StackMob-Select";
     private static final String ExpandHeader = "X-StackMob-Expand";
 
+    /**
+     * add a single header to a request
+     * @param name the header name
+     * @param value the value of the header
+     * @return options with the new header set
+     */
     public StackMobOptions header(String name, String value) {
         this.headers.add(new Pair<String, String>(name, value));
         return this;
     }
 
+    /**
+     * add a set of headers to a request
+     * @param headerMap the headers to add
+     * @return options with the new headers set
+     */
     public StackMobOptions headers(Map<String, String> headerMap) {
         for(Map.Entry<String, String> header: headerMap.entrySet()) {
             this.headers.add(header);
@@ -40,6 +55,11 @@ public class StackMobOptions {
         return this;
     }
 
+    /**
+     * add a list of headers to a request
+     * @param headers the headers to add
+     * @return options with the new headers set
+     */
     public StackMobOptions headers(List<Map.Entry<String, String>> headers) {
         this.headers.addAll(headers);
         return this;
@@ -47,7 +67,7 @@ public class StackMobOptions {
 
 
     /**
-     * restricts the fields returned in the query
+     * restricts the fields returned by a request. This is only supported on get request, login, and getLoggedInUser
      * @param fields the fields to return
      * @return the new query that resulted from adding this operation
      */
@@ -57,12 +77,12 @@ public class StackMobOptions {
     }
 
     /**
-     * set the expand depth of this query. the expand depth instructs the StackMob platform to detect relationships and automatically replace those
-     * relationship IDs with the values that they point to.
-     * @param i the expand depth. at time of writing, StackMob restricts expand depth to maximum 3
+     * set the expand depth of objects being returned. Objects with relationships will have their related objects returned as child objects
+     * @param i the expand depth, maximum is 3
      * @return the new query that resulted from adding this operation
      */
     public StackMobOptions expandDepthIs(Integer i) {
+        if(i > 3) throw new IllegalArgumentException("Maximum expand depth is 3");
         headers.add(new Pair<String, String>(ExpandHeader, i.toString()));
         return this;
     }

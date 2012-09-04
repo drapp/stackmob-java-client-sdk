@@ -22,6 +22,7 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobFile;
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.api.StackMobQuery;
 import com.stackmob.sdk.callback.*;
 import com.stackmob.sdk.exception.StackMobException;
@@ -747,8 +748,9 @@ public abstract class StackMobModel {
     public void fetchWithDepth(int depth, StackMobCallback callback) {
         Map<String,String> args = new HashMap<String, String>();
         if(depth > 0) args.put("_expand", String.valueOf(depth));
-        Map<String,String> headers = new HashMap<String, String>();
-        StackMob.getStackMob().getDatastore().get(getSchemaName() + "/" + id, args, headers , new StackMobIntermediaryCallback(callback) {
+        StackMobOptions options = new StackMobOptions();
+        if(depth > 0) options = options.expandDepthIs(depth);
+        StackMob.getStackMob().getDatastore().get(getSchemaName() + "/" + id, options, new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;
@@ -796,7 +798,7 @@ public abstract class StackMobModel {
         String json = toJsonWithDepth(depth, mapping);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
         headers.add(new Pair<String,String>("X-StackMob-Relations", mapping.toHeaderString()));
-        StackMob.getStackMob().getDatastore().post(getSchemaName(), json, headers, new StackMobIntermediaryCallback(callback) {
+        StackMob.getStackMob().getDatastore().post(getSchemaName(), json, new StackMobOptions().headers(headers), new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;
