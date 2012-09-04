@@ -17,6 +17,7 @@ package com.stackmob.sdk.model;
 
 import com.google.gson.JsonParser;
 import com.stackmob.sdk.api.StackMob;
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobIntermediaryCallback;
 import com.stackmob.sdk.callback.StackMobQueryCallback;
@@ -110,6 +111,16 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback The callback to invoke with the user model
      */
     public static <T extends StackMobUser> void getLoggedInUser(final Class<T> classOfT, final StackMobQueryCallback<T> callback) {
+        getLoggedInUser(classOfT, new StackMobOptions(), callback);
+    }
+
+    /**
+     * Get the currently logged in user. Use to get the user object in place of login when you're starting your app and you find that you're still logged in (via {@link com.stackmob.sdk.api.StackMob#isLoggedIn()}).
+     * @param classOfT The class of the user model
+     * @param options additional options, such as headers, to modify the request
+     * @param callback The callback to invoke with the user model
+     */
+    public static <T extends StackMobUser> void getLoggedInUser(final Class<T> classOfT, StackMobOptions options, final StackMobQueryCallback<T> callback) {
         StackMob.getStackMob().getLoggedInUser(new StackMobCallback(){
             @Override
             public void success(String responseBody) {
@@ -188,9 +199,10 @@ public abstract class StackMobUser extends StackMobModel {
     /**
      * log this user into StackMob with specialized info. This will clear the password from the class.
      * @param args key value pair arguments
+     * @param options additional options, such as headers, to modify the request
      * @param callback invoked on completed login attempt
      */
-    protected void login(Map<String, String> args, StackMobCallback callback) {
+    protected void login(Map<String, String> args, StackMobOptions options, StackMobCallback callback) {
         StackMob.getStackMob().login(args, new StackMobIntermediaryCallback(callback){
             @Override
             public void success(String responseBody) {
@@ -215,7 +227,16 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback invoked on completed login attempt
      */
     public void login(StackMobCallback callback) {
-        login(getLoginArgs(), callback);
+        login(getLoginArgs(), new StackMobOptions(), callback);
+    }
+
+    /**
+     * log this user into StackMob. This will clear the password from the class.
+     * @param options additional options, such as headers, to modify the request
+     * @param callback invoked on completed login attempt
+     */
+    public void login(StackMobOptions options, StackMobCallback callback) {
+        login(getLoginArgs(), options, callback);
     }
 
     /**
@@ -224,9 +245,19 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback invoked on completed login attempt
      */
     public void loginResettingTemporaryPassword(String newPassword, StackMobCallback callback) {
+        loginResettingTemporaryPassword(newPassword, new StackMobOptions(), callback);
+    }
+
+    /**
+     * log this user into StackMob with their temporary password and reset their password. This is
+     * used as part of the <a href="https://stackmob.com/devcenter/docs/User-Authentication-API#a-forgot_password">forgot password flow</a>
+     * @param options additional options, such as headers, to modify the request
+     * @param callback invoked on completed login attempt
+     */
+    public void loginResettingTemporaryPassword(String newPassword, StackMobOptions options, StackMobCallback callback) {
         Map<String, String> args = getLoginArgs();
         args.put("new_password", newPassword);
-        login(args, callback);
+        login(args, options, callback);
     }
 
     /**
@@ -237,6 +268,18 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void loginWithFacebook(String facebookToken, StackMobCallback callback) {
+        loginWithFacebook(facebookToken, new StackMobOptions(), callback);
+    }
+
+    /**
+     * login to StackMob with Facebook credentials. The credentials should match a existing user object that has a linked Facebook
+     * account, via either {@link #createWithFacebook(String, com.stackmob.sdk.callback.StackMobCallback)} or
+     * {@link #linkWithFacebook(String, com.stackmob.sdk.callback.StackMobCallback)}
+     * @param facebookToken the facebook user token
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void loginWithFacebook(String facebookToken, StackMobOptions options, StackMobCallback callback) {
         StackMob.getStackMob().facebookLogin(facebookToken, new StackMobIntermediaryCallback(callback){
             @Override
             public void success(String responseBody) {
@@ -256,6 +299,19 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void loginWithTwitter(String twitterToken, String twitterSecret, StackMobCallback callback) {
+        loginWithTwitter(twitterToken, twitterSecret, new StackMobOptions(), callback);
+    }
+
+    /**
+     * login to StackMob with twitter credentials. The credentials should match a existing user object that has a linked Twitter
+     * account, via either {@link #createWithTwitter(String, String, com.stackmob.sdk.callback.StackMobCallback)} or
+     * {@link #linkWithTwitter(String, String, com.stackmob.sdk.callback.StackMobCallback)}
+     * @param twitterToken the twitter session key (this is a per user key - different from the consumer key)
+     * @param twitterSecret the twitter session secret (this is a per user secret - different from the consumer secret)
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void loginWithTwitter(String twitterToken, String twitterSecret, StackMobOptions options, StackMobCallback callback) {
         StackMob.getStackMob().twitterLogin(twitterToken, twitterSecret, new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {

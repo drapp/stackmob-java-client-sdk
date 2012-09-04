@@ -62,6 +62,7 @@ public class StackMob {
     }
 
     private StackMobSession session;
+    private String userSchema;
     private String userIdName;
     private String passwordField;
     private String apiUrlFormat;
@@ -248,6 +249,7 @@ public class StackMob {
         if(stackmob == null) StackMob.setStackMob(this);
         this.apiUrlFormat = apiHost;
         this.pushUrlFormat = pushHost;
+        this.userSchema = userSchema;
         this.userIdName = userIdName;
         this.passwordField = passwordFieldName;
         this.userRedirectedCallback = redirectedCallback;
@@ -289,24 +291,35 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void login(Map<String, String> params, StackMobRawCallback callback) {
+        login(params, new StackMobOptions(), callback);
+    }
+
+    /**
+     * call the login method on StackMob
+     * @param params parameters to pass to the login method
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void login(Map<String, String> params, StackMobOptions options, StackMobRawCallback callback) {
         StackMobRequest req;
         if(getSession().isOAuth2()) {
             Map<String, String> newParams = new HashMap<String, String>(params);
             newParams.put("token_type", "mac");
             newParams.put("mac_algorithm", "hmac-sha-1");
             req = new StackMobAccessTokenRequest(this.executor,
-                                                 this.session,
-                                                 "accessToken",
-                                                 newParams,
-                                                 callback,
-                                                 this.redirectedCallback);
+                    this.session,
+                    "accessToken",
+                    newParams,
+                    options.getHeaders(),
+                    callback,
+                    this.redirectedCallback);
         } else {
             req = new StackMobUserBasedRequest(this.executor,
-                                               this.session,
-                                               "login",
-                                               params,
-                                               callback,
-                                               this.redirectedCallback);
+                    this.session,
+                    "login",
+                    params,
+                    callback,
+                    this.redirectedCallback);
         }
         req.setUrlFormat(this.apiUrlFormat).sendRequest();
     }
@@ -354,9 +367,20 @@ public class StackMob {
      * @param secret the twitter session secret (this is a per user secret - different from the consumer secret)
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void twitterLogin(String token,
-                                                  String secret,
-                                                  StackMobRawCallback callback) {
+    public void twitterLogin(String token, String secret, StackMobRawCallback callback) {
+        twitterLogin(token, secret, new StackMobOptions(), callback);
+    }
+
+    /**
+     * login to StackMob with twitter credentials. The credentials should match a existing user object that has a linked Twitter
+     * account, via either {@link #registerWithTwitterToken(String, String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
+     * {@link #linkUserWithTwitterToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)}
+     * @param token the twitter session key (this is a per user key - different from the consumer key)
+     * @param secret the twitter session secret (this is a per user secret - different from the consumer secret)
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void twitterLogin(String token, String secret, StackMobOptions options, StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("tw_tk", token);
         params.put("tw_ts", secret);
@@ -367,6 +391,7 @@ public class StackMob {
                     this.session,
                     "twitterAccessToken",
                     params,
+                    options.getHeaders(),
                     callback,
                     this.redirectedCallback);
         } else {
@@ -378,7 +403,6 @@ public class StackMob {
                     this.redirectedCallback);
         }
         req.setUrlFormat(this.apiUrlFormat).sendRequest();
-
     }
 
     /**
@@ -386,8 +410,7 @@ public class StackMob {
      * @param message the message to send. must be <= 140 characters
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void twitterStatusUpdate(String message,
-                                                         StackMobRawCallback callback) {
+    public void twitterStatusUpdate(String message, StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("tw_st", message);
         new StackMobUserBasedRequest(this.executor,
@@ -449,8 +472,19 @@ public class StackMob {
      * @param token the facebook user token
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void facebookLogin(String token,
-                                                   StackMobRawCallback callback) {
+    public void facebookLogin(String token, StackMobRawCallback callback) {
+        facebookLogin(token, new StackMobOptions(), callback);
+    }
+
+    /**
+     * login to StackMob with Facebook credentials. The credentials should match a existing user object that has a linked Facebook
+     * account, via either {@link #registerWithFacebookToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
+     * {@link #linkUserWithFacebookToken(String, com.stackmob.sdk.callback.StackMobRawCallback)}
+     * @param token the facebook user token
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void facebookLogin(String token, StackMobOptions options, StackMobRawCallback callback) {
         Map<String, String> params = new HashMap<String, String>();
         params.put("fb_at", token);
 
@@ -461,6 +495,7 @@ public class StackMob {
                                                  this.session,
                                                  "facebookAccessToken",
                                                  params,
+                                                 options.getHeaders(),
                                                  callback,
                                                  this.redirectedCallback);
         } else {
@@ -606,7 +641,17 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void getLoggedInUser(StackMobCallback callback) {
-        datastore.get("user/loggedInUser", callback);
+        datastore.get(userSchema + "/loggedInUser", callback);
+    }
+
+    /**
+     * Gets the user object for the currently logged in oauth2 user. Invokes the failure callback if there
+     * is no logged in user
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void getLoggedInUser(StackMobOptions options, StackMobCallback callback) {
+        datastore.get(userSchema + "/loggedInUser", options, callback);
     }
 
     /**

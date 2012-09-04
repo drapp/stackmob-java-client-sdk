@@ -42,6 +42,7 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                 session,
                 "refreshLogin",
                 newParams,
+                StackMobRequest.EmptyHeaders,
                 callback,
                 redirectedCallback);
     }
@@ -52,9 +53,10 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                                       StackMobSession session,
                                       String method,
                                       Map<String, String> params,
+                                      List<Map.Entry<String, String>> headers,
                                       StackMobRawCallback cb,
                                       StackMobRedirectedCallback redirCb) {
-        super(executor, session, HttpVerbWithPayload.POST, StackMobRequest.EmptyHeaders, StackMobRequest.EmptyParams, method, getIntermediaryCallback(session, cb), redirCb);
+        super(executor, session, HttpVerbWithPayload.POST, headers, StackMobRequest.EmptyParams, method, getIntermediaryCallback(session, cb), redirCb);
         bodyParams = params;
         isSecure = true;
     }

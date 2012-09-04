@@ -136,6 +136,7 @@ public class StackMobDatastore {
      * do a post request on the StackMob platform for a single object
      * @param path the path to get
      * @param requestObject the object to serialize and send in the POST body. this object will be serialized with Gson
+     * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void post(String path, Object requestObject, StackMobOptions options, StackMobRawCallback callback) {
