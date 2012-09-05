@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * Make calls to StackMob's API directly. This class lets you call CRUD methods, as well as talk to any custom APIs you have.
+ */
 public class StackMobDatastore {
 
 

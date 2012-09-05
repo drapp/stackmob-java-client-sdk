@@ -75,10 +75,8 @@ public class StackMob {
 
 
     private static final String versionKey= "sdk.version";
-    private static String userAgentName = "Java Client";
+
     private static String version = null;
-
-
 
     public static String DEFAULT_API_HOST = "api.stackmob.com";
     public static String DEFAULT_PUSH_HOST = "push.stackmob.com";
@@ -118,19 +116,6 @@ public class StackMob {
         return version;
     }
 
-    public static String getUserAgent() {
-        return String.format("StackMob (%s; %s)", userAgentName,
-                getVersion());
-    }
-
-    /**
-     * Override the name used in the use agent
-     * @param name the name to use in the user agent
-     */
-    public static void setUserAgentName(String name) {
-        userAgentName = name;
-    }
-
     /**
      * The redirected callback set by the user
      */
@@ -166,8 +151,6 @@ public class StackMob {
         return Executors.newCachedThreadPool();
     }
 
-
-    
     private static StackMob stackmob;
 
     /**
@@ -271,10 +254,18 @@ public class StackMob {
 
     private StackMobPush push;
 
+    /**
+     * access push methods
+     * @return a StackMobPush instance with the same credentials
+     */
     public StackMobPush getPush() {
         return push;
     }
 
+    /**
+     * access api methods
+     * @return a StackMobDatastore instance with the same credentials
+     */
     private StackMobDatastore datastore;
 
     public StackMobDatastore getDatastore() {
@@ -738,4 +729,21 @@ public class StackMob {
     public OAuthVersion getOAuthVersion() {
         return session.getOAuthVersion();
     }
+
+    /**
+     * the primary key for the user object
+     * @return the user id name
+     */
+    public String getUserIdName() {
+        return userIdName;
+    }
+
+    /**
+     * the name of the password field in the user object
+     * @return the password field
+     */
+    public String getPasswordField() {
+        return passwordField;
+    }
 }
+

@@ -59,9 +59,6 @@ public abstract class StackMobRequest {
     public static final Map<String, String> EmptyParams = new HashMap<String, String>();
 
     public static final int DEFAULT_RETRY_AFTER_MILLIS = 30000;
-    public static final String DEFAULT_URL_FORMAT = "mob1.stackmob.com";
-    public static final String DEFAULT_API_URL_FORMAT = "api." + DEFAULT_URL_FORMAT;
-    public static final String DEFAULT_PUSH_URL_FORMAT = "push." + DEFAULT_URL_FORMAT;
     protected static final String SECURE_SCHEME = "https";
     protected static final String REGULAR_SCHEME = "http";
     protected static final String API_KEY_HEADER = "X-StackMob-API-Key";
@@ -76,7 +73,7 @@ public abstract class StackMobRequest {
     protected HttpVerb httpVerb;
     protected String methodName;
 
-    protected String urlFormat = DEFAULT_API_URL_FORMAT;
+    protected String urlFormat = StackMob.DEFAULT_API_HOST;
     protected Boolean isSecure = false;
     protected Map<String, String> params = new HashMap<String, String>();
     protected List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
@@ -85,6 +82,9 @@ public abstract class StackMobRequest {
     protected Gson gson;
 
     private OAuthService oAuthService;
+
+
+
 
     protected StackMobRequest(ExecutorService executor,
                               StackMobSession session,
@@ -305,6 +305,8 @@ public abstract class StackMobRequest {
     }
 
 
+
+
     protected OAuthRequest getOAuthRequest(HttpVerb method, String url) {
         Verb verb = Verb.valueOf(method.toString());
         OAuthRequest oReq = new OAuthRequest(verb, url);
@@ -318,7 +320,7 @@ public abstract class StackMobRequest {
             headerList.add(new Pair<String, String>("Content-Type", getContentType()));
         }
         headerList.add(new Pair<String, String>("Accept", accept));
-        headerList.add(new Pair<String, String>("User-Agent", StackMob.getUserAgent()));
+        headerList.add(new Pair<String, String>("User-Agent", session.getUserAgent()));
         String cookieHeader = session.getCookieManager().cookieHeader();
         if(cookieHeader.length() > 0) headerList.add(new Pair<String, String>("Cookie", cookieHeader));
 

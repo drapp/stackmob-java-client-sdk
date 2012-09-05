@@ -191,8 +191,8 @@ public abstract class StackMobUser extends StackMobModel {
 
     private Map<String, String> getLoginArgs() {
         Map<String, String> args = new HashMap<String, String>();
-        args.put("username", getID());
-        args.put("password", password);
+        args.put(StackMob.getStackMob().getUserIdName(), getID());
+        args.put(StackMob.getStackMob().getPasswordField(), password);
         return args;
     }
 

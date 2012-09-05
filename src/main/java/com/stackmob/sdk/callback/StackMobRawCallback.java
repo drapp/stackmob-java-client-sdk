@@ -40,6 +40,10 @@ public abstract class StackMobRawCallback {
     protected int retriesRemaining = 3;
 
 
+    /**
+     * the method that will be called when a call to StackMob cannot even be sent for some reason
+     * @param e an error with the reason why
+     */
     public abstract void unsent(StackMobException e);
 
     /**
@@ -103,15 +107,15 @@ public abstract class StackMobRawCallback {
     }
 
     /**
-     *
-     * @return The number of times the request will be automatically retried if necessary
+     * get the number of times the request will be automatically retried if necessary
+     * @return remaining triest
      */
     public int getRetriesRemaining() {
         return retriesRemaining;
     }
 
     /**
-     *
+     * override the number of times the request should be retried
      * @param remaining the number of times the request should be retried
      */
     public void setRetriesRemaining(int remaining) {

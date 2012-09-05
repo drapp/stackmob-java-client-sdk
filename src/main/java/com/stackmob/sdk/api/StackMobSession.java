@@ -50,6 +50,7 @@ public class StackMobSession {
     private Boolean httpsOverride = null;
     private StackMobCookieManager cookieManager = new StackMobCookieManager();
     private StackMobLogger logger = new StackMobLogger();
+    protected String userAgentName = "Java Client";
 
     public StackMobSession(OAuthVersion oauthVersion, int apiVersionNumber, String key, String secret, String userObjectName, String userIdName) {
         this.oauthVersion = oauthVersion;
@@ -71,7 +72,8 @@ public class StackMobSession {
         this.oauth2MacKey = that.oauth2MacKey;
         this.oauth2TokenExpiration = that.oauth2TokenExpiration;
         this.cookieManager = that.cookieManager;
-        this.logger = logger;
+        this.logger = that.logger;
+        this.userAgentName = userAgentName;
     }
 
     public String getKey() {
@@ -204,6 +206,10 @@ public class StackMobSession {
      */
     public StackMobLogger getLogger() {
         return logger;
+    }
+
+    public String getUserAgent() {
+        return String.format("StackMob (%s; %s)", userAgentName, StackMob.getVersion());
     }
 
     public String generateMacToken(String method, String uri, String host, String port) {

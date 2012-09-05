@@ -19,11 +19,15 @@ package com.stackmob.sdk.api;
 import java.util.List;
 
 /**
- * Represents a query being executed on a specific field. This is meant to be used as part of a chain with {@link StackMobQuery},
- * and will be generated when you use {@link StackMobQuery}. add the constraints you want and the call {@link #getQuery()}
- * to get a query suitable for passing into a query function.
+ * Represents a part of a query being executed on a specific field. This is meant to be used as part of a chain with {@link StackMobQuery},
  * <br />
- *{@code  StackMobQuery query = new StackMobQuery("user").field("age").isGreaterThan(20).isLessThanOrEqualTo(40).field("friend").in(Arrays.asList("joe", "bob", "alice").getQuery();}
+ * <pre>
+ * {@code
+ *     StackMobQuery query = new StackMobQuery("user")
+ *                             .field(new StackMobQueryField("age").isGreaterThan(20).isLessThanOrEqualTo(40))
+ *                             .field(new StackMobQueryField("friend").isIn(Arrays.asList("joe", "bob", "alice")));
+ * }
+ * </pre>
  *
  */
 public class StackMobQueryField {

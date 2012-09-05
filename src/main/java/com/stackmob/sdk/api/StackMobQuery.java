@@ -26,26 +26,25 @@ import java.util.Map;
  * A class that builds queries for data access methods like those in {@link StackMob}. Example usage:
  * <pre>
  * {@code
+ *     StackMobQuery query = new StackMobQuery("user")
+ *                             .fieldIsGreaterThan("age", 20)
+ *                             .fieldIsLessThanOrEqualTo("age", 40)
+ *                             .fieldIsIn("friend", Arrays.asList("joe", "bob", "alice");
  *
- *     //this code:
- *     StackMobQuery query = new StackMobQuery("user").field("age").isGreaterThan(20).isLessThanOrEqualTo(40).field("friend").in(Arrays.asList("joe", "bob", "alice").getQuery();
- *     //is identical to this code:
- *     StackMobQuery query = new StackMobQuery("user").fieldIsGreaterThan("user", 20).fieldIsLessThanOrEqualTo("user", 40).fieldIsIn("user", Arrays.asList("joe", "bob", "alice");
+ *     //Of if you have multiple constraints on the same field and you want to type less
+ *     StackMobQuery query = new StackMobQuery("user")
+ *                             .field(new StackMobQueryField("age").isGreaterThan(20).isLessThanOrEqualTo(40))
+ *                             .field(new StackMobQueryField("friend").isIn(Arrays.asList("joe", "bob", "alice")));
  * }
  * </pre>
  *
  * A few helpful notes about this object:
  * <ul>
  *     <li>this class is not thread safe. make sure to synchronize all calls</li>
- *     <li>calling field("field") on a StackMobQuery will return a StackMobQueryWithField object, which helps you build up part of part of your query on a specific field</li>
- *     <li>
- *         you can chain together operators on a StackMobQueryWithField.
- *         when you're done, call field("field") or getQuery() to get a new StackMobQueryWithField object or the resulting StackMobQuery object (respectively)
- *     </li>
- *     <li>you can only operate on one field at a time, but you can call field("field") as many times as you want on either a StackMobQuery or StackMobQueryWithField object</li>
+ *     <li>the {@link #field(StackMobQueryField)} method helps you build up part of your query on a specific field</li>
+ *     <li>you can only operate on one field at a time, but you can call field("field") as many times as you want</li>
  *     <li>
  *         you can call methods like fieldIsGreaterThan("field", "value") or fieldIsLessThanOrEqualTo("field", "value") directly on a StackMobQuery object.
- *         the above code sample shows 2 queries that are equivalent. the first line uses StackMobQueryWithField objects, and the second uses direct calls on StackMobQuery
  *     </li>
  * </ul>
  */
