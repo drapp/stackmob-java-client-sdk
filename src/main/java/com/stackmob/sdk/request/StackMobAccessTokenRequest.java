@@ -40,7 +40,7 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
         newParams.put("mac_algorithm", "hmac-sha-1");
         return new StackMobAccessTokenRequest(executor,
                 session,
-                "refreshLogin",
+                "refreshToken",
                 newParams,
                 StackMobRequest.EmptyHeaders,
                 callback,

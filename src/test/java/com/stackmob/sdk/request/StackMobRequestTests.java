@@ -145,46 +145,6 @@ public class StackMobRequestTests extends StackMobTestCommon {
         request.sendRequest();
         asserter.assertLatchFinished(latch);
     }
-    
-    @Test
-    public void testRequestShouldReturnSendSuccess() throws InterruptedException, StackMobException {
-        final CountDownLatch latch = latchOne();
-        final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, HttpVerbWithoutPayload.GET, "listapi", new StackMobCallback() {
-            @Override
-            public void success(String responseBody) {
-                assertNotNull(responseBody);
-                latch.countDown();
-            }
-
-            @Override
-            public void failure(StackMobException e) {
-                fail(e.getMessage());
-            }
-        }, redirectedCallback);
-        asserter.assertLatchFinished(latch);
-    }
-
-    @Test
-    public void testInvalidHostShouldFail() throws InterruptedException, StackMobException {
-        final CountDownLatch latch = latchOne();
-        final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, HttpVerbWithoutPayload.GET, "listapi", new StackMobCallback() {
-            @Override
-            public void success(String responseBody) {
-                Error err = gson.fromJson(responseBody, Error.class);
-                assertNotNull(err.error);
-                latch.countDown();
-            }
-
-            @Override
-            public void failure(StackMobException e) {
-                assertNotNull(e.getMessage());
-                latch.countDown();
-            }
-        }, redirectedCallback);
-        asserter.assertLatchFinished(latch);
-    }
 
     @Test
     public void testSpecialCharactersInRequest() throws InterruptedException, StackMobException {

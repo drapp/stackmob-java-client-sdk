@@ -305,6 +305,7 @@ public class StackMob {
                     callback,
                     this.redirectedCallback);
         } else {
+            session.setLastUserLoginName(params.get(userIdName));
             req = new StackMobUserBasedRequest(this.executor,
                     this.session,
                     "login",

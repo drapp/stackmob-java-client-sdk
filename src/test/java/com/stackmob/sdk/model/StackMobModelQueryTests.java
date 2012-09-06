@@ -87,7 +87,7 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
     }
 
     @Test public void testCount() throws Exception {
-        Author.count(new StackMobQuery().isInRange(0,10).field(new StackMobQueryField("name").isEqualTo("testqueryauthor")), new StackMobCountCallback() {
+        Author.count(Author.class, new StackMobQuery().isInRange(0,10).field(new StackMobQueryField("name").isEqualTo("testqueryauthor")), new StackMobCountCallback() {
             @Override
             public void success(long count) {
                 asserter.markEquals(3, (int)count);

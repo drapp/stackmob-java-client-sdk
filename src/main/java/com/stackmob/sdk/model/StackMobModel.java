@@ -153,6 +153,7 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, final StackMobQueryCallback<T> callback) {
+        q.setObjectName(theClass.getSimpleName().toLowerCase());
         StackMob.getStackMob().getDatastore().get(q, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
@@ -175,10 +176,12 @@ public abstract class StackMobModel {
 
     /**
      * run a count query on the server to count all the instances of your model within certain constraints
+     * @param theClass The class of your model
      * @param q The query to run
      * @param callback The callback to be invoked upon returning
      */
-    public static void count(StackMobQuery q, StackMobCountCallback callback) {
+    public static <T extends StackMobModel> void count(Class<T> theClass, StackMobQuery q, StackMobCountCallback callback) {
+        q.setObjectName(theClass.getSimpleName().toLowerCase());
         StackMob.getStackMob().getDatastore().count(q, callback);
     }
 
