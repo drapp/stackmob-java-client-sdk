@@ -33,7 +33,7 @@ public class StackMobUserBasedRequest extends StackMobRequest {
     public StackMobUserBasedRequest(ExecutorService executor,
                                     StackMobSession session,
                                     String method,
-                                    Map<String, String> params,
+                                    List<Map.Entry<String, String>> params,
                                     StackMobRawCallback cb,
                                     StackMobRedirectedCallback redirCb) {
         super(executor, session, HttpVerbWithoutPayload.GET, StackMobRequest.EmptyHeaders, params, method, cb, redirCb);
@@ -44,7 +44,7 @@ public class StackMobUserBasedRequest extends StackMobRequest {
                                     StackMobSession session,
                                     HttpVerb verb,
                                     List<Map.Entry<String, String>> headers,
-                                    Map<String, String> params,
+                                    List<Map.Entry<String, String>> params,
                                     Object requestObject,
                                     String method,
                                     StackMobRawCallback cb,

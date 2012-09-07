@@ -20,10 +20,7 @@ import com.stackmob.sdk.StackMobTestCommon;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StackMobQueryTests extends StackMobTestCommon {
     final String object = "user";
@@ -61,7 +58,11 @@ public class StackMobQueryTests extends StackMobTestCommon {
                           .fieldIsGreaterThanOrEqualTo(field, value);
 
         assertEquals(object, q.getObjectName());
-        Map<String, String> args = q.getArguments();
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
         assertEquals(4, args.size());
         ArrayList<String> expectedKeys = getExpectedRelationalKeys();
         assertKeysAndValuesMatch(args, expectedKeys, value);
@@ -70,7 +71,11 @@ public class StackMobQueryTests extends StackMobTestCommon {
     @Test public void inQuery() {
         StackMobQuery q = new StackMobQuery(object).fieldIsIn(field, valueArr);
         assertEquals(object, q.getObjectName());
-        Map<String, String> args = q.getArguments();
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
         assertEquals(1, args.size());
         assertTrue(args.containsKey(field+StackMobQuery.Operator.IN.getOperatorForURL()));
         String val = args.get(field+StackMobQuery.Operator.IN.getOperatorForURL());
@@ -81,7 +86,11 @@ public class StackMobQueryTests extends StackMobTestCommon {
     @Test public void notEqualQuery() {
         StackMobQuery q = new StackMobQuery(object).fieldIsNotEqual(field, "foo");
         assertEquals(object, q.getObjectName());
-        Map<String, String> args = q.getArguments();
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
         assertEquals(1, args.size());
         assertTrue(args.containsKey(field+StackMobQuery.Operator.NE.getOperatorForURL()));
         String val = args.get(field+StackMobQuery.Operator.NE.getOperatorForURL());
@@ -92,7 +101,11 @@ public class StackMobQueryTests extends StackMobTestCommon {
     @Test public void isNullQuery() {
         StackMobQuery q = new StackMobQuery(object).fieldIsNull(field);
         assertEquals(object, q.getObjectName());
-        Map<String, String> args = q.getArguments();
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
         assertEquals(1, args.size());
         assertTrue(args.containsKey(field+StackMobQuery.Operator.NULL.getOperatorForURL()));
         String val = args.get(field+StackMobQuery.Operator.NULL.getOperatorForURL());
@@ -103,7 +116,11 @@ public class StackMobQueryTests extends StackMobTestCommon {
     @Test public void isNotNullQuery() {
         StackMobQuery q = new StackMobQuery(object).fieldIsNotNull(field);
         assertEquals(object, q.getObjectName());
-        Map<String, String> args = q.getArguments();
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
         assertEquals(1, args.size());
         assertTrue(args.containsKey(field+StackMobQuery.Operator.NULL.getOperatorForURL()));
         String val = args.get(field+StackMobQuery.Operator.NULL.getOperatorForURL());
@@ -114,7 +131,11 @@ public class StackMobQueryTests extends StackMobTestCommon {
     @Test public void nearQuery() {
         StackMobQuery q = new StackMobQuery(object).fieldIsNearWithinMi(field, origin, 1d);
         assertEquals(object, q.getObjectName());
-        Map<String, String> args = q.getArguments();
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
         assertEquals(1, args.size());
         assertTrue(args.containsKey(field + StackMobQuery.Operator.NEAR.getOperatorForURL()));
         String val = args.get(field + StackMobQuery.Operator.NEAR.getOperatorForURL());
@@ -125,7 +146,11 @@ public class StackMobQueryTests extends StackMobTestCommon {
     @Test public void withinRadiusQuery() {
         StackMobQuery q = new StackMobQuery(object).fieldIsWithinRadiusInMi(field, origin, 1d);
         assertEquals(object, q.getObjectName());
-        Map<String, String> args = q.getArguments();
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
         assertEquals(1, args.size());
         assertTrue(args.containsKey(field+StackMobQuery.Operator.WITHIN.getOperatorForURL()));
         String val = args.get(field+StackMobQuery.Operator.WITHIN.getOperatorForURL());
@@ -136,7 +161,11 @@ public class StackMobQueryTests extends StackMobTestCommon {
     @Test public void withinBoxQuery() {
         StackMobQuery q = new StackMobQuery(object).fieldIsWithinBox(field, origin, new StackMobGeoPoint(1d, 1d));
         assertEquals(object, q.getObjectName());
-        Map<String, String> args = q.getArguments();
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
         assertEquals(1, args.size());
         assertTrue(args.containsKey(field+StackMobQuery.Operator.WITHIN.getOperatorForURL()));
         String val = args.get(field+StackMobQuery.Operator.WITHIN.getOperatorForURL());
@@ -150,6 +179,11 @@ public class StackMobQueryTests extends StackMobTestCommon {
         ArrayList<String> expectedKeys = new ArrayList<String>(Arrays.asList(
                                                                             field+StackMobQuery.Operator.LT.getOperatorForURL(),
                                                                             otherField+StackMobQuery.Operator.GT.getOperatorForURL()));
-        assertKeysAndValuesMatch(q.getArguments(), expectedKeys, value);
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
+        assertKeysAndValuesMatch(args, expectedKeys, value);
     }
 }

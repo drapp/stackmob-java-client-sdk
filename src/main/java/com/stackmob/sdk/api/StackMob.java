@@ -21,6 +21,7 @@ import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.push.StackMobPush;
 import com.stackmob.sdk.request.*;
+import com.stackmob.sdk.util.Pair;
 import com.stackmob.sdk.util.StackMobLogger;
 
 import java.io.IOException;
@@ -292,16 +293,14 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void login(Map<String, String> params, StackMobOptions options, StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>(params.entrySet());
         StackMobRequest req;
         if(getSession().isOAuth2()) {
-            Map<String, String> newParams = new HashMap<String, String>(params);
-            newParams.put("token_type", "mac");
-            newParams.put("mac_algorithm", "hmac-sha-1");
             req = new StackMobAccessTokenRequest(this.executor,
                     this.session,
                     "accessToken",
-                    newParams,
                     options.getHeaders(),
+                    paramList,
                     callback,
                     this.redirectedCallback);
         } else {
@@ -309,7 +308,7 @@ public class StackMob {
             req = new StackMobUserBasedRequest(this.executor,
                     this.session,
                     "login",
-                    params,
+                    paramList,
                     callback,
                     this.redirectedCallback);
         }
@@ -373,16 +372,16 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void twitterLogin(String token, String secret, StackMobOptions options, StackMobRawCallback callback) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("tw_tk", token);
-        params.put("tw_ts", secret);
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair("tw_tk", token));
+        paramList.add(new Pair("tw_ts", secret));
 
         StackMobRequest req;
         if(getSession().isOAuth2()) {
             req = new StackMobAccessTokenRequest(this.executor,
                     this.session,
                     "twitterAccessToken",
-                    params,
+                    paramList,
                     options.getHeaders(),
                     callback,
                     this.redirectedCallback);
@@ -390,7 +389,7 @@ public class StackMob {
             req = new StackMobUserBasedRequest(this.executor,
                     this.session,
                     "twitterlogin",
-                    params,
+                    paramList,
                     callback,
                     this.redirectedCallback);
         }
@@ -403,14 +402,14 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void twitterStatusUpdate(String message, StackMobRawCallback callback) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("tw_st", message);
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair("tw_st", message));
         new StackMobUserBasedRequest(this.executor,
-                                            this.session,
-                                            "twitterStatusUpdate",
-                                            params,
-                                            callback,
-                                            this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+                                     this.session,
+                                     "twitterStatusUpdate",
+                                     paramList,
+                                     callback,
+                                     this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -421,19 +420,19 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void registerWithTwitterToken(String token,
-                                                              String secret,
-                                                              String username,
-                                                              StackMobRawCallback callback) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("tw_tk", token);
-        params.put("tw_ts", secret);
-        params.put("username", username);
+                                         String secret,
+                                         String username,
+                                         StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair("tw_tk", token));
+        paramList.add(new Pair("tw_ts", secret));
+        paramList.add(new Pair("username", username));
         new StackMobUserBasedRequest(this.executor,
-                                            this.session,
-                                            "createUserWithTwitter",
-                                            params,
-                                            callback,
-                                            this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+                                     this.session,
+                                     "createUserWithTwitter",
+                                     paramList,
+                                     callback,
+                                     this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -445,14 +444,14 @@ public class StackMob {
     public void linkUserWithTwitterToken(String token,
                                          String secret,
                                          StackMobRawCallback callback) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("tw_tk", token);
-        params.put("tw_ts", secret);
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair("tw_tk", token));
+        paramList.add(new Pair("tw_ts", secret));
 
         new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "linkUserWithTwitter",
-                                            params,
+                                            paramList,
                                             callback,
                                             this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
@@ -477,16 +476,15 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void facebookLogin(String token, StackMobOptions options, StackMobRawCallback callback) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("fb_at", token);
-
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair("fb_at", token));
 
         StackMobRequest req;
         if(getSession().isOAuth2()) {
             req = new StackMobAccessTokenRequest(this.executor,
                                                  this.session,
                                                  "facebookAccessToken",
-                                                 params,
+                                                 paramList,
                                                  options.getHeaders(),
                                                  callback,
                                                  this.redirectedCallback);
@@ -494,7 +492,7 @@ public class StackMob {
             req = new StackMobUserBasedRequest(this.executor,
                                                this.session,
                                                "facebookLogin",
-                                               params,
+                                               paramList,
                                                callback,
                                                this.redirectedCallback);
         }
@@ -507,17 +505,15 @@ public class StackMob {
      * @param username the StackMob username that the new user should have
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void registerWithFacebookToken(String token,
-                                                               String username,
-                                                               StackMobRawCallback callback) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("fb_at", token);
-        params.put("username", username);
+    public void registerWithFacebookToken(String token, String username, StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair("fb_at", token));
+        paramList.add(new Pair("username", username));
 
         new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "createUserWithFacebook",
-                                            params,
+                                            paramList,
                                             callback,
                                             this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
@@ -527,17 +523,16 @@ public class StackMob {
      * @param token the Facebook user token
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void linkUserWithFacebookToken(String token,
-                                                               StackMobRawCallback callback) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("fb_at", token);
+    public void linkUserWithFacebookToken(String token, StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair("fb_at", token));
 
         new StackMobUserBasedRequest(this.executor,
-                                            this.session,
-                                            "linkUserWithFacebook",
-                                            params,
-                                            callback,
-                                            this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+                                     this.session,
+                                     "linkUserWithFacebook",
+                                     paramList,
+                                     callback,
+                                     this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -545,15 +540,14 @@ public class StackMob {
      * @param msg the message to post
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void facebookPostMessage(String msg,
-                                                         StackMobRawCallback callback) {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("message", msg);
+    public void facebookPostMessage(String msg, StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair("message", msg));
 
         new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             "postFacebookMessage",
-                                            params,
+                                            paramList,
                                             callback,
                                             this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
@@ -563,7 +557,7 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void getFacebookUserInfo(StackMobRawCallback callback) {
-        new StackMobUserBasedRequest(this.executor, this.session, "getFacebookUserInfo", new HashMap<String, String>(), callback, this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+        new StackMobUserBasedRequest(this.executor, this.session, "getFacebookUserInfo", StackMobRequest.EmptyParams, callback, this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -571,7 +565,7 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void getTwitterUserInfo(StackMobRawCallback callback) {
-        new StackMobUserBasedRequest(this.executor, this.session, "getTwitterUserInfo", new HashMap<String, String>(), callback, this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+        new StackMobUserBasedRequest(this.executor, this.session, "getTwitterUserInfo", StackMobRequest.EmptyParams, callback, this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     //Forgot/reset password

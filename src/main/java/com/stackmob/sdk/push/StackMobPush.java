@@ -22,8 +22,10 @@ import com.stackmob.sdk.net.HttpVerbWithoutPayload;
 import com.stackmob.sdk.request.StackMobPushRequest;
 import com.stackmob.sdk.request.StackMobRequest;
 import com.stackmob.sdk.request.StackMobRequestWithoutPayload;
+import com.stackmob.sdk.util.Pair;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -140,8 +142,8 @@ public class StackMobPush {
             first = false;
             userIds.append(username);
         }
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("userIds", userIds.toString());
+        List<Map.Entry<String, String>> params = new LinkedList<Map.Entry<String, String>>();
+        params.add(new Pair("userIds", userIds.toString()));
         getPush("get_tokens_for_users_universal", params, callback);
     }
 
@@ -184,7 +186,7 @@ public class StackMobPush {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * contains no information about the response - that will be passed to the callback when the response comes back
      */
-    private void getPush(String path, Map<String, String> arguments, StackMobRawCallback callback) {
+    private void getPush(String path, List<Map.Entry<String, String>> arguments, StackMobRawCallback callback) {
         new StackMobRequestWithoutPayload(this.executor,
                 this.session,
                 HttpVerbWithoutPayload.GET,

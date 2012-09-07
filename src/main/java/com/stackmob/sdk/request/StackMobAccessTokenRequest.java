@@ -23,8 +23,10 @@ import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
+import com.stackmob.sdk.util.Pair;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -33,27 +35,27 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
 
     public static StackMobAccessTokenRequest newRefreshTokenRequest(ExecutorService executor, StackMobSession session, StackMobRedirectedCallback redirectedCallback, StackMobRawCallback callback) {
 
-        Map<String, String> newParams = new HashMap<String, String>();
-        newParams.put("grant_type", "refresh_token");
-        newParams.put("refresh_token", session.getOAuth2RefreshToken());
-        newParams.put("token_type", "mac");
-        newParams.put("mac_algorithm", "hmac-sha-1");
+        List<Map.Entry<String, String>> newParams = new LinkedList<Map.Entry<String, String>>();
+        newParams.add(new Pair("grant_type", "refresh_token"));
+        newParams.add(new Pair("refresh_token", session.getOAuth2RefreshToken()));
+        newParams.add(new Pair("token_type", "mac"));
+        newParams.add(new Pair("mac_algorithm", "hmac-sha-1"));
         return new StackMobAccessTokenRequest(executor,
                 session,
                 "refreshToken",
-                newParams,
                 StackMobRequest.EmptyHeaders,
+                newParams,
                 callback,
                 redirectedCallback);
     }
 
-    Map<String, String> bodyParams;
+    List<Map.Entry<String, String>> bodyParams;
 
     public StackMobAccessTokenRequest(ExecutorService executor,
                                       StackMobSession session,
                                       String method,
-                                      Map<String, String> params,
                                       List<Map.Entry<String, String>> headers,
+                                      List<Map.Entry<String, String>> params,
                                       StackMobRawCallback cb,
                                       StackMobRedirectedCallback redirCb) {
         super(executor, session, HttpVerbWithPayload.POST, headers, StackMobRequest.EmptyParams, method, getIntermediaryCallback(session, cb), redirCb);

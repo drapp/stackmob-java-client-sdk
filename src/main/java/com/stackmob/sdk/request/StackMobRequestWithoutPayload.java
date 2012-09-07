@@ -30,7 +30,7 @@ public class StackMobRequestWithoutPayload extends StackMobRequest {
                                          StackMobSession session,
                                          HttpVerbWithoutPayload verb,
                                          List<Map.Entry<String, String>> headers,
-                                         Map<String, String> params,
+                                         List<Map.Entry<String, String>>  params,
                                          String method,
                                          StackMobRawCallback cb,
                                          StackMobRedirectedCallback redirCb) {

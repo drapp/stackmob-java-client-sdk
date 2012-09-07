@@ -27,10 +27,7 @@ import com.stackmob.sdk.net.*;
 import com.stackmob.sdk.push.StackMobPushToken;
 import com.stackmob.sdk.push.StackMobPushTokenDeserializer;
 import com.stackmob.sdk.push.StackMobPushTokenSerializer;
-import com.stackmob.sdk.util.Http;
-import com.stackmob.sdk.util.Pair;
-import com.stackmob.sdk.util.StackMobLogger;
-import com.stackmob.sdk.util.StackMobNull;
+import com.stackmob.sdk.util.*;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
@@ -56,7 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class StackMobRequest {
     
     public static final List<Map.Entry<String, String>> EmptyHeaders = new ArrayList<Map.Entry<String, String>>();
-    public static final Map<String, String> EmptyParams = new HashMap<String, String>();
+    public static final List<Map.Entry<String, String>> EmptyParams = new ArrayList<Map.Entry<String, String>>();
 
     public static final int DEFAULT_RETRY_AFTER_MILLIS = 30000;
     protected static final String SECURE_SCHEME = "https";
@@ -75,7 +72,7 @@ public abstract class StackMobRequest {
 
     protected String urlFormat = StackMob.DEFAULT_API_HOST;
     protected Boolean isSecure = false;
-    protected Map<String, String> params = new HashMap<String, String>();
+    protected List<Map.Entry<String, String>> params = new ArrayList<Map.Entry<String, String>>();
     protected List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
     private AtomicBoolean triedRefreshToken = new AtomicBoolean(false);
 
@@ -90,7 +87,7 @@ public abstract class StackMobRequest {
                               StackMobSession session,
                               HttpVerb verb,
                               List<Map.Entry<String, String>> headers,
-                              Map<String, String> params,
+                              List<Map.Entry<String, String>> params,
                               String method,
                               StackMobRawCallback cb,
                               StackMobRedirectedCallback redirCb) {
@@ -276,23 +273,19 @@ public abstract class StackMobRequest {
         return URLEncoder.encode(s, "UTF-8").replace("+", "%20");
     }
 
-    protected static String formatQueryString(Map<String, String> params) {
-        StringBuilder formatBuilder = new StringBuilder();
-        boolean first = true;
-        for(String key : params.keySet()) {
-            if(!first) {
-                formatBuilder.append("&");
-            }
-            first = false;
-            String value = params.get(key);
+    protected static String formatQueryString(List<Map.Entry<String, String>> params) {
+        List<String> paramList = new LinkedList<String>();
+        for(Map.Entry<String, String> pair : params) {
+            String key = pair.getKey();
+            String value = pair.getValue();
             try {
-                formatBuilder.append(percentEncode(key)).append("=").append(percentEncode(value));
+                paramList.add(String.format("%s=%s", percentEncode(key), percentEncode(value)));
             }
             catch(UnsupportedEncodingException e) {
                 //do nothing
             }
         }
-        return formatBuilder.toString();
+        return ListHelpers.join(paramList, "&");
     }
 
 

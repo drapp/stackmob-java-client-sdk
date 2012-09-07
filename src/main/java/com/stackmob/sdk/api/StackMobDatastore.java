@@ -85,7 +85,7 @@ public class StackMobDatastore {
      * @param headers any additional headers to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    private void get(String path, Map<String, String> arguments, List<Map.Entry<String, String>> headers, StackMobRawCallback callback) {
+    private void get(String path, List<Map.Entry<String, String>> arguments, List<Map.Entry<String, String>> headers, StackMobRawCallback callback) {
         new StackMobRequestWithoutPayload(this.executor,
                                           this.session,
                                           HttpVerbWithoutPayload.GET,
