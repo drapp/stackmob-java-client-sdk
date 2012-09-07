@@ -19,7 +19,7 @@ package com.stackmob.sdk.push;
 /**
  * A push token identifies a specific device for push on a particular platform. The token can then be registered with StackMob and pushed to.
  *
- * @see com.stackmob.sdk.push.StackMobPush#registerForPushWithUser(String, StackMobPushToken, boolean, com.stackmob.sdk.callback.StackMobRawCallback)
+ * @see com.stackmob.sdk.push.StackMobPush#registerForPushWithUser(StackMobPushToken, String, boolean, com.stackmob.sdk.callback.StackMobRawCallback)
  * @see com.stackmob.sdk.push.StackMobPush#pushToTokens(java.util.Map, java.util.List, com.stackmob.sdk.callback.StackMobRawCallback)
  */
 public class StackMobPushToken {
@@ -42,9 +42,27 @@ public class StackMobPushToken {
         }
     }
 
+    private static StackMobPushToken.TokenType defaultPushType = StackMobPushToken.TokenType.Android;
+
+    /**
+     * Sets the type of push this StackMob instance will do. The default is
+     * GCM. Use this to switch back to C2DM if you need to
+     * @param type C2DM or GCM
+     */
+    public static void setPushType(StackMobPushToken.TokenType type) {
+        defaultPushType = type;
+    }
+
     private String tokenString;
-    private Long registeredMilliseconds;
     private TokenType type;
+
+    /**
+     * create a token with a string and the default platform
+     * @param token the token string
+     */
+    public StackMobPushToken(String token) {
+        this(token, defaultPushType);
+    }
 
     /**
      * create a token with a string and type
@@ -53,19 +71,7 @@ public class StackMobPushToken {
      */
     public StackMobPushToken(String token, TokenType type) {
         this.tokenString = token;
-        this.registeredMilliseconds = System.currentTimeMillis();
         this.type = type;
-    }
-
-    /**
-     * create a token with a string and type
-     * @param token the token string
-     * @param type the platform you're using
-     * @param registeredMS when the token was registered
-     */
-    public StackMobPushToken(String token, TokenType type, Long registeredMS) {
-        this(token, type);
-        this.registeredMilliseconds = registeredMS;
     }
 
     /**
@@ -92,11 +98,4 @@ public class StackMobPushToken {
         this.type = type;
     }
 
-    /**
-     * get when the token was registered
-     * @return the registration time
-     */
-    public Long getRegisteredMilliseconds() {
-        return registeredMilliseconds;
-    }
 }

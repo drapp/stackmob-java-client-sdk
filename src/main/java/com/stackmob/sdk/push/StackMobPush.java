@@ -36,35 +36,24 @@ public class StackMobPush {
         public Map<String, String> token = new HashMap<String, String>();
         public Boolean overwrite = null;
 
-        public RegistrationIDAndUser(String registrationID, String user) {
-            this(registrationID, user, StackMobPushToken.TokenType.Android);
-        }
-
-        public RegistrationIDAndUser(String registrationID, String user, StackMobPushToken.TokenType platform) {
+        public RegistrationIDAndUser(StackMobPushToken token, String user) {
             userId = user;
-            token.put("token", registrationID);
-            token.put("type", platform.toString());
+            this.token.put("token", token.getToken());
+            this.token.put("type", token.getTokenType().toString());
         }
-        public RegistrationIDAndUser(String registrationID, String user, StackMobPushToken.TokenType platform, boolean overwrite) {
-            this(registrationID, user, platform);
+        public RegistrationIDAndUser(StackMobPushToken token, String user, boolean overwrite) {
+            this(token, user);
             this.overwrite = overwrite;
         }
-
-        public RegistrationIDAndUser(String registrationID, String user, boolean overwrite) {
-            this(registrationID, user, defaultPushType, overwrite);
-        }
     }
-
-
-    private StackMobPushToken.TokenType defaultPushType = StackMobPushToken.TokenType.Android;
 
     /**
      * Sets the type of push this StackMob instance will do. The default is
      * GCM. Use this to switch back to C2DM if you need to
      * @param type C2DM or GCM
      */
-    public void setPushType(StackMobPushToken.TokenType type) {
-        this.defaultPushType = type;
+    public static void setPushType(StackMobPushToken.TokenType type) {
+        StackMobPushToken.setPushType(type);
     }
 
     private ExecutorService executor;
@@ -89,9 +78,7 @@ public class StackMobPush {
      * @param tokens the tokens to which to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void pushToTokens(Map<String, String> payload,
-                                                  List<StackMobPushToken> tokens,
-                                                  StackMobRawCallback callback) {
+    public void pushToTokens(Map<String, String> payload, List<StackMobPushToken> tokens, StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
         Map<String, Object> payloadMap = new HashMap<String, Object>();
 
@@ -108,9 +95,7 @@ public class StackMobPush {
      * @param userIds the IDs of the users to which to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void pushToUsers(Map<String, String> payload,
-                                                 List<String> userIds,
-                                                 StackMobRawCallback callback) {
+    public void pushToUsers(Map<String, String> payload, List<String> userIds, StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
         finalPayload.put("kvPairs", payload);
         finalPayload.put("userIds", userIds);
@@ -119,43 +104,23 @@ public class StackMobPush {
 
     /**
      * register a user for Android Push notifications. This uses GCM unless specified otherwise.
+     * @param token a token containing a registration id and platform
      * @param username the StackMob username to associate with this token
-     * @param registrationID the GCM registration ID obtained from GCM see http://developer.android.com/guide/google/gcm/gcm.html#registering for detail on how to get this ID
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void registerForPushWithUser(String username,
-                                                             String registrationID,
-                                                             StackMobRawCallback callback) {
-        registerForPushWithUser(username, registrationID, false, callback);
-    }
-
-    /**
-     * register a user for Android Push notifications. This uses GCM unless specified otherwise.
-     * @param username the StackMob username to associate with this token
-     * @param registrationID the GCM registration ID obtained from GCM see http://developer.android.com/guide/google/gcm/gcm.html#registering for detail on how to get this ID
-     * @param overwrite whether to overwrite existing entries
-     * @param callback callback to be called when the server returns. may execute in a separate thread
-     */
-    public void registerForPushWithUser(String username,
-                                                             String registrationID,
-                                                             boolean overwrite,
-                                                             StackMobRawCallback callback) {
-        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(registrationID, username, defaultPushType, overwrite);
-        postPush("register_device_token_universal", tokenAndUser, callback);
+    public void registerForPushWithUser(StackMobPushToken token, String username, StackMobRawCallback callback) {
+        registerForPushWithUser(token, username, false, callback);
     }
 
     /**
      * register a user for Android Push notifications.
-     * @param username the StackMob username to associate with this token
      * @param token a token containing a registration id and platform
+     * @param username the StackMob username to associate with this token
      * @param overwrite whether to overwrite existing entries
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void registerForPushWithUser(String username,
-                                                             StackMobPushToken token,
-                                                             boolean overwrite,
-                                                             StackMobRawCallback callback) {
-        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(token.getToken(), username, token.getTokenType(), overwrite);
+    public void registerForPushWithUser(StackMobPushToken token, String username, boolean overwrite, StackMobRawCallback callback) {
+        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(token, username, overwrite);
         postPush("register_device_token_universal", tokenAndUser, callback);
     }
 
@@ -165,8 +130,7 @@ public class StackMobPush {
      * @param usernames the users whose tokens to get
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void getTokensForUsers(List<String> usernames,
-                                                       StackMobRawCallback callback) {
+    public void getTokensForUsers(List<String> usernames, StackMobRawCallback callback) {
         final StringBuilder userIds = new StringBuilder();
         boolean first = true;
         for(String username : usernames) {
@@ -186,8 +150,7 @@ public class StackMobPush {
      * @param payload the payload to broadcast
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void broadcastPushNotification(Map<String, String> payload,
-                                                               StackMobRawCallback callback) {
+    public void broadcastPushNotification(Map<String, String> payload, StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
         finalPayload.put("kvPairs", payload);
         postPush("push_broadcast", finalPayload, callback);

@@ -97,7 +97,7 @@ public abstract class StackMobUser extends StackMobModel {
      * @param payload the payload to send
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public <T extends StackMobUser> void pushToMultiple(Map<String, String> payload, List<T> users, StackMobRawCallback callback) {
+    public static <T extends StackMobUser> void pushToMultiple(Map<String, String> payload, List<T> users, StackMobRawCallback callback) {
         List<String> userIds = new ArrayList<String>();
         for(T user : users) {
             userIds.add(user.getID());
@@ -485,11 +485,29 @@ public abstract class StackMobUser extends StackMobModel {
 
     /**
      * register this user for push
-     * @param registrationID the Android registration id to associate with this user
+     * @param token the Android registration id to associate with this user
      * @param callback invoked when the operation is complete
      */
-    public void registerForPush(String registrationID, StackMobRawCallback callback) {
-        StackMob.getStackMob().getPush().registerForPushWithUser(getID(), registrationID, callback);
+    public void registerForPush(StackMobPushToken token, StackMobRawCallback callback) {
+        StackMob.getStackMob().getPush().registerForPushWithUser(token, getID(), callback);
+    }
+
+    /**
+     * send a push message to this user
+     * @param payload the message to send
+     * @param callback invoked when the operation is complete
+     */
+    public void sendPush(Map<String, String> payload, StackMobRawCallback callback) {
+        StackMob.getStackMob().getPush().pushToUsers(payload, Arrays.asList(getID()), callback);
+    }
+
+    /**
+     * remove this token from push
+     * @param token the token to remove
+     * @param callback invoked when the operation is complete
+     */
+    public void removeFromPush(StackMobPushToken token, StackMobRawCallback callback) {
+        StackMob.getStackMob().getPush().removePushToken(token, callback);
     }
 
     /**
