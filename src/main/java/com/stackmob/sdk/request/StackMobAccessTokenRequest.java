@@ -38,8 +38,7 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
         List<Map.Entry<String, String>> newParams = new LinkedList<Map.Entry<String, String>>();
         newParams.add(new Pair("grant_type", "refresh_token"));
         newParams.add(new Pair("refresh_token", session.getOAuth2RefreshToken()));
-        newParams.add(new Pair("token_type", "mac"));
-        newParams.add(new Pair("mac_algorithm", "hmac-sha-1"));
+
         return new StackMobAccessTokenRequest(executor,
                 session,
                 "refreshToken",
@@ -58,10 +57,17 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                                       List<Map.Entry<String, String>> params,
                                       StackMobRawCallback cb,
                                       StackMobRedirectedCallback redirCb) {
-        super(executor, session, HttpVerbWithPayload.POST, headers, StackMobRequest.EmptyParams, method, getIntermediaryCallback(session, cb), redirCb);
+        super(executor, session, HttpVerbWithPayload.POST, headers, addAuthConfig(params), method, getIntermediaryCallback(session, cb), redirCb);
         bodyParams = params;
         isSecure = true;
     }
+
+    private static List<Map.Entry<String, String>> addAuthConfig(List<Map.Entry<String, String>> params) {
+        params.add(new Pair("token_type", "mac"));
+        params.add(new Pair("mac_algorithm", "hmac-sha-1"));
+        return params;
+    }
+
 
     private static StackMobRawCallback getIntermediaryCallback(final StackMobSession session, final StackMobRawCallback callback) {
         return new StackMobRawCallback() {
