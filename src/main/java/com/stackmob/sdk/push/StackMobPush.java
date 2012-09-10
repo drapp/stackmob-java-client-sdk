@@ -15,6 +15,7 @@
  */
 package com.stackmob.sdk.push;
 
+import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
@@ -29,8 +30,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class StackMobPush {
+
+    public static String DEFAULT_PUSH_HOST = "push.stackmob.com";
 
     private class RegistrationIDAndUser {
 
@@ -63,11 +67,84 @@ public class StackMobPush {
     private String host;
     private StackMobRedirectedCallback redirectedCallback;
 
-    public StackMobPush(ExecutorService executor, StackMobSession session, String host, StackMobRedirectedCallback redirectedCallback) {
-        this.executor = executor;
-        this.session = session;
+    private static StackMobPush push;
+
+    /**
+     * get the singleton StackMobPush object
+     * @return the singleton
+     */
+    public static StackMobPush getPush() {
+        return push;
+    }
+
+    /**
+     * set the singletone StackMobPush
+     * @param push the new singleton
+     */
+    public static void setPush(StackMobPush push) {
+        StackMobPush.push = push;
+    }
+
+    /**
+     * a minimal constructor, using defaults for everything else
+     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
+     * @param apiKey the api key for your app
+     * @param apiSecret the api secret for your app. Can be null if you're using OAuth2
+     */
+    public StackMobPush(int apiVersionNumber, String apiKey, String apiSecret) {
+        this(apiVersionNumber, apiKey, apiSecret, DEFAULT_PUSH_HOST, StackMob.DEFAULT_REDIRECTED_CALLBACK);
+    }
+
+    /**
+     * the most complete constructor
+     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
+     * @param apiKey the api key for your app
+     * @param apiSecret the api secret for your app. Can be null if you're using OAuth2
+     * @param host the base url for requests
+     * @param redirectedCallback callback to be called if the StackMob platform issues a redirect. you should use this callback to cache the new URLs. here is a sample callback:
+     * <code>
+     * new StackMobRedirectedCallback() {
+     *   public void redirected(HttpRequest origRequest, HttpResponse response, HttpRequest newRequest) {
+     *       try {
+     *           URI uri = new URI(newRequest.getRequestLine().getUri());
+     *           cache(uri.getHost);
+     *       }
+     *        catch (URISyntaxException e) {
+     *           handleException(e);
+     *       }
+     *   }
+     * }
+     * }
+     * </code>
+     * note that this callback may be called in a background thread
+     */
+    public StackMobPush(int apiVersionNumber, String apiKey, String apiSecret, String host, StackMobRedirectedCallback redirectedCallback) {
+        this.executor = Executors.newCachedThreadPool();
+        this.session = new StackMobSession(StackMob.OAuthVersion.One, apiVersionNumber, apiKey, apiSecret, StackMob.DEFAULT_USER_SCHEMA_NAME, StackMob.DEFAULT_USER_ID);
         this.host = host;
         this.redirectedCallback = redirectedCallback;
+        if(push == null) push = this;
+    }
+
+    /**
+     * create a StackMobPush based on a {@link StackMob} object and defaults elsewhere.
+     * @param stackmob the StackMob object to get values from
+     */
+    public StackMobPush(StackMob stackmob) {
+        this(stackmob, DEFAULT_PUSH_HOST);
+    }
+
+    /**
+     * create a StackMobPush based on a {@link StackMob} object and the given host
+     * @param stackmob the StackMob object to get values from
+     * @param host the base url for requests
+     */
+    public StackMobPush(StackMob stackmob, String host) {
+        this.executor = stackmob.getExecutor();
+        this.session = stackmob.getSession();
+        this.host = host;
+        this.redirectedCallback = stackmob.getRedirectedCallback();
+        if(push == null) push = this;
     }
 
     ////////////////////

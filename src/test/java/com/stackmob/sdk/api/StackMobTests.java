@@ -24,6 +24,7 @@ import com.stackmob.sdk.callback.StackMobCountCallback;
 import com.stackmob.sdk.concurrencyutils.CountDownLatchUtils;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
+import com.stackmob.sdk.push.StackMobPush;
 import com.stackmob.sdk.push.StackMobPushToken;
 import com.stackmob.sdk.testobjects.*;
 import org.junit.Ignore;
@@ -876,7 +877,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.getPush().registerForPushWithUser(new StackMobPushToken(token), objectId, new StackMobCallback() {
+        StackMobPush.getPush().registerForPushWithUser(new StackMobPushToken(token), objectId, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -905,12 +906,12 @@ public class StackMobTests extends StackMobTestCommon {
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
         final StackMobPushToken pushToken = new StackMobPushToken("0000000000000000000000000000000000000000000000000000000000000000", StackMobPushToken.TokenType.iOS);
-        stackmob.getPush().registerForPushWithUser(pushToken, "bodie", true, new StackMobCallback() {
+        StackMobPush.getPush().registerForPushWithUser(pushToken, "bodie", true, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
 
-                stackmob.getPush().removePushToken(pushToken, new StackMobCallback() {
+                StackMobPush.getPush().removePushToken(pushToken, new StackMobCallback() {
                     @Override
                     public void success(String responseBody) {
                         asserter.markNotJsonError(responseBody);
@@ -937,7 +938,7 @@ public class StackMobTests extends StackMobTestCommon {
         StackMobPushToken t = new StackMobPushToken(token, StackMobPushToken.TokenType.Android);
         Map<String, String> payload = new HashMap<String, String>();
         payload.put("foo", "bar");
-        stackmob.getPush().pushToTokens(payload, Arrays.asList(t), new StackMobCallback() {
+        StackMobPush.getPush().pushToTokens(payload, Arrays.asList(t), new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
@@ -958,7 +959,7 @@ public class StackMobTests extends StackMobTestCommon {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.getPush().getTokensForUsers(usernames, new StackMobCallback() {
+        StackMobPush.getPush().getTokensForUsers(usernames, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);

@@ -23,6 +23,7 @@ import com.stackmob.sdk.callback.StackMobIntermediaryCallback;
 import com.stackmob.sdk.callback.StackMobQueryCallback;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.exception.StackMobException;
+import com.stackmob.sdk.push.StackMobPush;
 import com.stackmob.sdk.push.StackMobPushToken;
 
 import java.util.*;
@@ -102,7 +103,7 @@ public abstract class StackMobUser extends StackMobModel {
         for(T user : users) {
             userIds.add(user.getID());
         }
-        StackMob.getStackMob().getPush().pushToUsers(payload, userIds, callback);
+        StackMobPush.getPush().pushToUsers(payload, userIds, callback);
     }
 
     /**
@@ -489,7 +490,7 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback invoked when the operation is complete
      */
     public void registerForPush(StackMobPushToken token, StackMobRawCallback callback) {
-        StackMob.getStackMob().getPush().registerForPushWithUser(token, getID(), callback);
+        StackMobPush.getPush().registerForPushWithUser(token, getID(), callback);
     }
 
     /**
@@ -498,7 +499,7 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback invoked when the operation is complete
      */
     public void sendPush(Map<String, String> payload, StackMobRawCallback callback) {
-        StackMob.getStackMob().getPush().pushToUsers(payload, Arrays.asList(getID()), callback);
+        StackMobPush.getPush().pushToUsers(payload, Arrays.asList(getID()), callback);
     }
 
     /**
@@ -507,7 +508,7 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback invoked when the operation is complete
      */
     public void removeFromPush(StackMobPushToken token, StackMobRawCallback callback) {
-        StackMob.getStackMob().getPush().removePushToken(token, callback);
+        StackMobPush.getPush().removePushToken(token, callback);
     }
 
     /**
@@ -515,7 +516,7 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback invoked when the operation is complete
      */
     public void getPushToken(StackMobRawCallback callback) {
-        StackMob.getStackMob().getPush().getTokensForUsers(Arrays.asList(getID()), callback);
+        StackMobPush.getPush().getTokensForUsers(Arrays.asList(getID()), callback);
     }
 
 }

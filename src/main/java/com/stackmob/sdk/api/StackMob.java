@@ -80,7 +80,6 @@ public class StackMob {
     private static String version = null;
 
     public static String DEFAULT_API_HOST = "api.stackmob.com";
-    public static String DEFAULT_PUSH_HOST = "push.stackmob.com";
     public static String DEFAULT_USER_SCHEMA_NAME = "user";
     public static String DEFAULT_USER_ID = "username";
     public static String DEFAULT_PASSWORD_FIELD = "password";
@@ -187,7 +186,7 @@ public class StackMob {
      * @param apiSecret the api secret for your app
      */
     public StackMob(OAuthVersion oauthVersion, Integer apiVersionNumber, String apiKey, String apiSecret) {
-        this(oauthVersion, apiVersionNumber, apiKey, apiSecret, DEFAULT_API_HOST, DEFAULT_PUSH_HOST, DEFAULT_USER_SCHEMA_NAME, DEFAULT_USER_ID, DEFAULT_PASSWORD_FIELD, DEFAULT_REDIRECTED_CALLBACK);
+        this(oauthVersion, apiVersionNumber, apiKey, apiSecret, DEFAULT_API_HOST, DEFAULT_USER_SCHEMA_NAME, DEFAULT_USER_ID, DEFAULT_PASSWORD_FIELD, DEFAULT_REDIRECTED_CALLBACK);
     }
 
     /**
@@ -197,7 +196,6 @@ public class StackMob {
      * @param apiKey the api key for your app
      * @param apiSecret the api secret for your app. Can be null if you're using OAuth2
      * @param apiHost the base of the url for api requests
-     * @param pushHost the base of the url for push requests
      * @param userSchema the name of your app's user object. if you do not have a user object, pass the empty strinrg here and do not use the login, logout, facebook or twitter methods, as they will fail
      * @param userIdName the name of your app's user object primary key
      * @param passwordFieldName the name of your app's user object primary key
@@ -223,7 +221,6 @@ public class StackMob {
                     String apiKey,
                     String apiSecret,
                     String apiHost,
-                    String pushHost,
                     String userSchema,
                     String userIdName,
                     String passwordFieldName,
@@ -232,12 +229,10 @@ public class StackMob {
         this.executor = createNewExecutor();
         if(stackmob == null) StackMob.setStackMob(this);
         this.apiUrlFormat = apiHost;
-        this.pushUrlFormat = pushHost;
         this.userSchema = userSchema;
         this.userIdName = userIdName;
         this.passwordField = passwordFieldName;
         this.userRedirectedCallback = redirectedCallback;
-        this.push = new StackMobPush(executor, session, pushHost, redirectedCallback);
         this.datastore = new StackMobDatastore(executor, session, apiHost, redirectedCallback);
     }
 
@@ -251,16 +246,6 @@ public class StackMob {
         this.apiUrlFormat = other.apiUrlFormat;
         this.pushUrlFormat = other.pushUrlFormat;
         this.executor = other.executor;
-    }
-
-    private StackMobPush push;
-
-    /**
-     * access push methods
-     * @return a StackMobPush instance with the same credentials
-     */
-    public StackMobPush getPush() {
-        return push;
     }
 
     /**
@@ -715,6 +700,23 @@ public class StackMob {
      */
     public void setSession(StackMobSession session) {
         this.session = session;
+    }
+
+
+    /**
+     * get the executor used for requests
+     * @return the executor
+     */
+    public ExecutorService getExecutor() {
+        return executor;
+    }
+
+    /**
+     * get the callback used for redirected requests
+     * @return the redirected callback
+     */
+    public StackMobRedirectedCallback getRedirectedCallback() {
+        return userRedirectedCallback;
     }
 
     /**
