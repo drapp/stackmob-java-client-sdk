@@ -68,7 +68,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         assertEquals("simple", simple.getSchemaName());
         assertEquals("simple_id", simple.getIDFieldName());
         RelationMapping mapping = new RelationMapping();
-        JsonObject obj = new JsonParser().parse(simple.toJsonWithDepth(0, mapping)).getAsJsonObject();
+        JsonObject obj = new JsonParser().parse(simple.toJson(StackMobOptions.none(), mapping)).getAsJsonObject();
         assertEquals("test", obj.get("foo").getAsString());
         assertEquals(5, obj.get("bar").getAsInt());
         assertNotNull(obj.get("simple_id").getAsString());
@@ -89,7 +89,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     
     @Test public void testComplicatedTypes() throws Exception {
         RelationMapping mapping = new RelationMapping();
-        String json = new Complicated().toJsonWithDepth(0, mapping);
+        String json = new Complicated().toJson(StackMobOptions.none(), mapping);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("foo").getAsJsonPrimitive().isString());
         assertTrue(object.get("bar").getAsJsonPrimitive().isNumber());
@@ -111,7 +111,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     
     @Test public void testSubobject() throws Exception {
         try {
-            new Subobject().toJsonWithDepth(0, new RelationMapping());
+            new Subobject().toJson(StackMobOptions.none(), new RelationMapping());
             assertTrue(false);
         } catch(Exception e) {
             assertTrue(e instanceof IllegalStateException);
@@ -176,7 +176,7 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testBadSchemaName() throws Exception {
         try {
-            new Bad_Schema_Name().toJsonWithDepth(0, new RelationMapping());
+            new Bad_Schema_Name().toJson(StackMobOptions.none(), new RelationMapping());
             assertTrue(false);
         } catch(Exception e) { }
     }
@@ -190,7 +190,7 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testBadFieldName() throws Exception {
         try {
-            new BadFieldName().toJsonWithDepth(0, new RelationMapping());
+            new BadFieldName().toJson(StackMobOptions.none(), new RelationMapping());
             assertTrue(false);
         } catch(Exception e) { }
     }
@@ -200,7 +200,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         a.setID("pratchett");
         Book b = new Book("Mort", "Harper Collins", a);
         RelationMapping mapping = new RelationMapping();
-        String json = b.toJsonWithDepth(0, mapping);
+        String json = ((StackMobModel)b).toJson(StackMobOptions.none(), mapping);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("title").getAsJsonPrimitive().getAsString().equals("Mort"));
         assertTrue(object.get("publisher").getAsJsonPrimitive().getAsString().equals("Harper Collins"));
@@ -219,7 +219,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         b2.setID("foo2bar2");
         lib.books = new Book[] {b1, b2};
         RelationMapping mapping = new RelationMapping();
-        JsonElement json = new JsonParser().parse(lib.toJsonWithDepth(2, mapping));
+        JsonElement json = new JsonParser().parse(((StackMobModel)lib).toJson(StackMobOptions.depthOf(2), mapping));
         assertNotNull(json);
         assertTrue(json.isJsonObject());
         JsonObject jsonObject = json.getAsJsonObject();
@@ -270,7 +270,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     
     @Test public void noIDChildrenToJSON() throws Exception {
         Book b = new Book("Oliver","Penguin",new Author("Dickens"));
-        JsonElement json = new JsonParser().parse(b.toJsonWithDepth(1, new RelationMapping()));
+        JsonElement json = new JsonParser().parse(((StackMobModel)b).toJson(StackMobOptions.depthOf(1), new RelationMapping()));
         JsonObject authorObject =  json.getAsJsonObject().get("author").getAsJsonObject();
         assertEquals("Dickens",authorObject.get("name").getAsString());
         assertNotNull(authorObject.get("author_id"));

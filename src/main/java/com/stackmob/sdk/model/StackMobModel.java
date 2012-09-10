@@ -70,7 +70,6 @@ import java.util.*;
  * myTask.fetch(new StackMobModelCallback() {
  *     public void success() {
  *         // The blogPostTask object is now filled in with data.
- *         // You can ignore the responseBody argument.
  *     }
  *
  *     public void failure(StackMobException e) {
@@ -116,7 +115,7 @@ import java.util.*;
  * Task javadocsTask = new Task("Write javadocs");
  * Task proofreadTask = new Task("Proofread");
  * TaskList blogTasks = new TaskList("Blog Tasks", Arrays.asList(blogPostTask, proofreadTask));
- * blogTasks.saveWithDepth(1);
+ * blogTasks.save(StackMobOptions.depthOf(1));
  * }
  * </pre>
  *
@@ -706,24 +705,20 @@ public abstract class StackMobModel {
      * @return a json representation of the object
      */
     public String toJson() {
-        return toJsonWithDepth(0);
+        return toJson(StackMobOptions.none());
     }
 
     /**
      * Converts the model into its Json representation, expanding any sub-objects to the given depth. Be sure to use the right depth, or you'll end up with empty sub-objects.
-     * @param depth the depth to expand to
+     * @param options options, such and select and expand, to apply to the request
      * @return a json representation of the object and its children to the depth
      */
-    public String toJsonWithDepth(int depth) {
-        return toJsonWithDepth(depth, new RelationMapping());
+    public String toJson(StackMobOptions options) {
+        return toJson(options, new RelationMapping());
     }
 
-    /**
-     * Converts the object to JSON turning all Models into their ids
-     * @return the json representation of this model
-     */
-    protected String toJsonWithDepth(int depth, RelationMapping mapping) {
-        return toJsonElement(depth, mapping).toString();
+    String toJson(StackMobOptions options, RelationMapping mapping) {
+        return toJsonElement(options.getExpandDepth(), mapping).toString();
     }
 
     /**
@@ -787,7 +782,7 @@ public abstract class StackMobModel {
      */
     public void save(StackMobOptions options, StackMobCallback callback) {
         RelationMapping mapping = new RelationMapping();
-        String json = toJsonWithDepth(options.getExpandDepth(), mapping);
+        String json = toJson(options, mapping);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
         headers.add(new Pair<String,String>("X-StackMob-Relations", mapping.toHeaderString()));
         StackMob.getStackMob().getDatastore().post(getSchemaName(), json, options.headers(headers), new StackMobIntermediaryCallback(callback) {
