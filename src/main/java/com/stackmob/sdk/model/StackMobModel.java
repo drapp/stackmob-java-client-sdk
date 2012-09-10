@@ -785,7 +785,7 @@ public abstract class StackMobModel {
         String json = toJson(options, mapping);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
         headers.add(new Pair<String,String>("X-StackMob-Relations", mapping.toHeaderString()));
-        StackMob.getStackMob().getDatastore().post(getSchemaName(), json, options.headers(headers), new StackMobIntermediaryCallback(callback) {
+        StackMob.getStackMob().getDatastore().post(getSchemaName(), json, options.withHeaders(headers), new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;
