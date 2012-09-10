@@ -102,7 +102,7 @@ public class StackMobDatastore {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void get(StackMobQuery query, StackMobRawCallback callback) {
-        StackMobOptions options = new StackMobOptions().headers(query.getHeaders());
+        StackMobOptions options = StackMobOptions.headers(query.getHeaders());
         this.get("/"+query.getObjectName(), query.getArguments(), options.getHeaders(), callback);
     }
 
@@ -113,7 +113,7 @@ public class StackMobDatastore {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void get(StackMobQuery query, StackMobOptions options, StackMobRawCallback callback) {
-        this.get("/"+query.getObjectName(), query.getArguments(), options.headers(query.getHeaders()).getHeaders(), callback);
+        this.get("/"+query.getObjectName(), query.getArguments(), options.withHeaders(query.getHeaders()).getHeaders(), callback);
     }
 
 

@@ -20,6 +20,7 @@ import com.google.gson.*;
 import com.stackmob.sdk.StackMobTestCommon;
 import com.stackmob.sdk.api.StackMobFile;
 import com.stackmob.sdk.api.StackMobGeoPoint;
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobModelCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
@@ -494,7 +495,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         Book b1 = new Book("War and Peace","foo", a);
         Book b2 = new Book("Anna Karenina", "bar", a);
         lib.books = new Book[] {b1, b2};
-        lib.saveWithDepth(2, new AssertErrorCallback() {
+        lib.save(StackMobOptions.depthOf(2), new AssertErrorCallback() {
             @Override
             public void success(String responseBody) {
                 
@@ -547,7 +548,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     public void fetchBookWithExpand() {
         final Book book = new Book();
         book.setID("camelbook");
-        book.fetchWithDepth(2, new AssertErrorCallback() {
+        book.fetch(StackMobOptions.depthOf(2), new AssertErrorCallback() {
             @Override
             public void success(String responseBody) {
                 updateBook(book);
@@ -614,7 +615,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         final List<Task> oldTaskList = tl.tasks;
         tl.tasks.add(t);
         tl.tasks.add(t2);
-        tl.saveWithDepth(1,new StackMobCallback() {
+        tl.save(StackMobOptions.depthOf(1), new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotNull(tl.getID());
@@ -834,7 +835,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         final Library myLib = new Library();
         myLib.bookList = new ArrayList<Book>();
         myLib.bookList.add(bleakHouse);
-        myLib.saveWithDepth(1, new StackMobModelCallback() {
+        myLib.save(StackMobOptions.depthOf(1), new StackMobModelCallback() {
             @Override
             public void success() {
                 myLib.appendAndSave("bookList", Arrays.asList(ulysses, oliverTwist), new StackMobModelCallback() {

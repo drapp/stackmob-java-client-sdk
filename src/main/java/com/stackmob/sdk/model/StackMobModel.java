@@ -153,8 +153,18 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, final StackMobQueryCallback<T> callback) {
+        query(theClass, q, new StackMobOptions(), callback);
+    }
+    /**
+     * run a query on the server to get all the instances of your model within certain constraints
+     * @param theClass The class of your model
+     * @param q The query to run
+     * @param options options, such as select and expand, to apply to the request
+     * @param callback The callback to be invoked upon returning
+     */
+    public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, StackMobOptions options, final StackMobQueryCallback<T> callback) {
         q.setObjectName(theClass.getSimpleName().toLowerCase());
-        StackMob.getStackMob().getDatastore().get(q, new StackMobCallback() {
+        StackMob.getStackMob().getDatastore().get(q, options, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 JsonArray array = new JsonParser().parse(responseBody).getAsJsonArray();
@@ -727,10 +737,10 @@ public abstract class StackMobModel {
     /**
      * Reload the object from the server to the given depth. This version is not recommended since it gives no indication of when the load is complete. This is not thread safe, make
      * sure the object isn't disturbed during the load.
-     * @param depth the depth to expand to
+     * @param options options, such and select and expand, to apply to the request
      */
-    public void fetch(int depth) {
-        fetchWithDepth(depth, new StackMobNoopCallback());
+    public void fetch(StackMobOptions options) {
+        fetch(options, new StackMobNoopCallback());
     }
 
     /**
@@ -739,20 +749,16 @@ public abstract class StackMobModel {
      * @param callback invoked when the load is complete
      */
     public void fetch(StackMobCallback callback) {
-        fetchWithDepth(0, callback);
+        fetch(StackMobOptions.none(), callback);
     }
 
     /**
      * Reload the object from the server to the given depth. This is not thread safe, make
      * sure the object isn't disturbed during the load.
-     * @param depth the depth to expand to
+     * @param options options, such and select and expand, to apply to the request
      * @param callback invoked when the load is complete
      */
-    public void fetchWithDepth(int depth, StackMobCallback callback) {
-        Map<String,String> args = new HashMap<String, String>();
-        if(depth > 0) args.put("_expand", String.valueOf(depth));
-        StackMobOptions options = new StackMobOptions();
-        if(depth > 0) options = options.expandDepthIs(depth);
+    public void fetch(StackMobOptions options, StackMobCallback callback) {
         StackMob.getStackMob().getDatastore().get(getSchemaName() + "/" + id, options, new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
@@ -777,10 +783,10 @@ public abstract class StackMobModel {
 
     /**
      * Save the object and its children to the server to the given depth.
-     * @param depth the depth to expand to
+     * @param options options, such and select and expand, to apply to the request
      */
-    public void saveWithDepth(int depth) {
-        saveWithDepth(depth, new StackMobNoopCallback());
+    public void save(StackMobOptions options) {
+        save(options, new StackMobNoopCallback());
     }
 
     /**
@@ -788,20 +794,20 @@ public abstract class StackMobModel {
      * @param callback invoked when the save is complete
      */
     public void save(StackMobCallback callback) {
-        saveWithDepth(0, callback);
+        save(StackMobOptions.none(), callback);
     }
 
     /**
      * Save the object and its children to the server to the given depth.
-     * @param depth the depth to expand to
+     * @param options options, such and select and expand, to apply to the request
      * @param callback invoked when the save is complete
      */
-    public void saveWithDepth(int depth, StackMobCallback callback) {
+    public void save(StackMobOptions options, StackMobCallback callback) {
         RelationMapping mapping = new RelationMapping();
-        String json = toJsonWithDepth(depth, mapping);
+        String json = toJsonWithDepth(options.getExpandDepth(), mapping);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
         headers.add(new Pair<String,String>("X-StackMob-Relations", mapping.toHeaderString()));
-        StackMob.getStackMob().getDatastore().post(getSchemaName(), json, new StackMobOptions().headers(headers), new StackMobIntermediaryCallback(callback) {
+        StackMob.getStackMob().getDatastore().post(getSchemaName(), json, options.headers(headers), new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;

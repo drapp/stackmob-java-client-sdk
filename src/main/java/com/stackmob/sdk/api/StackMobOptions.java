@@ -28,9 +28,19 @@ import java.util.Map;
  */
 public class StackMobOptions {
     private List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
+    private int expandDepth = 0;
 
     private static final String SelectHeader = "X-StackMob-Select";
     private static final String ExpandHeader = "X-StackMob-Expand";
+
+
+    /**
+     * empty options that do nothing
+     * @return options with nothing set.
+     */
+    public static StackMobOptions none() {
+        return new StackMobOptions();
+    }
 
     /**
      * add a single header to a request
@@ -38,7 +48,54 @@ public class StackMobOptions {
      * @param value the value of the header
      * @return options with the new header set
      */
-    public StackMobOptions header(String name, String value) {
+    public static StackMobOptions header(String name, String value) {
+        return none().withHeader(name, value);
+    }
+
+    /**
+     * add a set of headers to a request
+     * @param headerMap the headers to add
+     * @return options with the new headers set
+     */
+    public static StackMobOptions headers(Map<String, String> headerMap) {
+        return none().withHeaders(headerMap);
+    }
+
+    /**
+     * add a list of headers to a request
+     * @param headers the headers to add
+     * @return options with the new headers set
+     */
+    public static StackMobOptions headers(List<Map.Entry<String, String>> headers) {
+        return none().headers(headers);
+    }
+
+
+    /**
+     * restricts the fields returned by a request. This is only supported on get request, login, and getLoggedInUser
+     * @param fields the fields to return
+     * @return the new query that resulted from adding this operation
+     */
+    public static StackMobOptions selectedFields(List<String> fields) {
+        return none().withSelectedFields(fields);
+    }
+
+    /**
+     * set the expand depth of objects being returned. Objects with relationships will have their related objects returned as child objects
+     * @param depth the expand depth, maximum is 3
+     * @return the new query that resulted from adding this operation
+     */
+    public static StackMobOptions depthOf(int depth) {
+        return none().withDepthOf(depth);
+    }
+
+    /**
+     * add a single header to a request
+     * @param name the header name
+     * @param value the value of the header
+     * @return options with the new header set
+     */
+    public StackMobOptions withHeader(String name, String value) {
         this.headers.add(new Pair<String, String>(name, value));
         return this;
     }
@@ -48,7 +105,7 @@ public class StackMobOptions {
      * @param headerMap the headers to add
      * @return options with the new headers set
      */
-    public StackMobOptions headers(Map<String, String> headerMap) {
+    public StackMobOptions withHeaders(Map<String, String> headerMap) {
         for(Map.Entry<String, String> header: headerMap.entrySet()) {
             this.headers.add(header);
         }
@@ -60,7 +117,7 @@ public class StackMobOptions {
      * @param headers the headers to add
      * @return options with the new headers set
      */
-    public StackMobOptions headers(List<Map.Entry<String, String>> headers) {
+    public StackMobOptions withHeaders(List<Map.Entry<String, String>> headers) {
         this.headers.addAll(headers);
         return this;
     }
@@ -71,7 +128,7 @@ public class StackMobOptions {
      * @param fields the fields to return
      * @return the new query that resulted from adding this operation
      */
-    public StackMobOptions select(List<String> fields) {
+    public StackMobOptions withSelectedFields(List<String> fields) {
         headers.add(new Pair<String, String>(SelectHeader, ListHelpers.join(fields, ",")));
         return this;
     }
@@ -81,7 +138,7 @@ public class StackMobOptions {
      * @param i the expand depth, maximum is 3
      * @return the new query that resulted from adding this operation
      */
-    public StackMobOptions expandDepthIs(Integer i) {
+    public StackMobOptions withDepthOf(Integer i) {
         if(i > 3) throw new IllegalArgumentException("Maximum expand depth is 3");
         headers.add(new Pair<String, String>(ExpandHeader, i.toString()));
         return this;
@@ -90,5 +147,14 @@ public class StackMobOptions {
 
     List<Map.Entry<String, String>> getHeaders() {
         return headers;
+    }
+
+
+    /**
+     * get the expand depth as set by {@link #withDepthOf(Integer)}
+     * @return the expand depth
+     */
+    public int getExpandDepth() {
+        return expandDepth;
     }
 }

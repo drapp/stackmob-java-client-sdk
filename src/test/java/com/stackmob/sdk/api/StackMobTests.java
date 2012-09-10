@@ -263,7 +263,7 @@ public class StackMobTests extends StackMobTestCommon {
 
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        stackmob.getDatastore().get("account", new StackMobOptions().expandDepthIs(1), new StackMobCallback() {
+        stackmob.getDatastore().get("account", StackMobOptions.depthOf(1), new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 JsonElement elt = new JsonParser().parse(responseBody);
