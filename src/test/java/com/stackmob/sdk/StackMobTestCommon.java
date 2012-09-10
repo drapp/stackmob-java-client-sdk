@@ -22,6 +22,7 @@ import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.concurrencyutils.MultiThreadAsserter;
 import com.stackmob.sdk.exception.StackMobException;
+import com.stackmob.sdk.push.StackMobPush;
 import com.stackmob.sdk.testobjects.Error;
 
 import java.util.Map;
@@ -64,9 +65,10 @@ public class StackMobTestCommon {
             apiSecret = vmSecret;
         }
 
-        StackMob.setStackMob(new StackMob(StackMob.OAuthVersion.One, apiVersion, apiKey, apiSecret));
-            StackMob.getStackMob().getSession().setEnableHTTPS(false);
+        new StackMob(StackMob.OAuthVersion.One, apiVersion, apiKey, apiSecret);
+        StackMob.getStackMob().getSession().setEnableHTTPS(false);
         StackMob.getStackMob().getSession().getLogger().setLogging(true);
+        new StackMobPush(StackMob.getStackMob());
         stackmob = StackMob.getStackMob();
     }
 
