@@ -727,23 +727,6 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Reload the object from the server. This version is not recommended since it gives no indication of when the load is complete. This is not thread safe, make
-     * sure the object isn't disturbed during the load.
-     */
-    public void fetch() {
-        fetch(new StackMobNoopCallback());
-    }
-
-    /**
-     * Reload the object from the server to the given depth. This version is not recommended since it gives no indication of when the load is complete. This is not thread safe, make
-     * sure the object isn't disturbed during the load.
-     * @param options options, such and select and expand, to apply to the request
-     */
-    public void fetch(StackMobOptions options) {
-        fetch(options, new StackMobNoopCallback());
-    }
-
-    /**
      * Reload the object from the server. This is not thread safe, make
      * sure the object isn't disturbed during the load.
      * @param callback invoked when the load is complete
@@ -753,8 +736,8 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Reload the object from the server to the given depth. This is not thread safe, make
-     * sure the object isn't disturbed during the load.
+     * Reload the object from the server. Use {@link StackMobOptions#depthOf(int)} to also save its children to the given depth.
+     * This is not thread safe, make sure the object isn't disturbed during the load.
      * @param options options, such and select and expand, to apply to the request
      * @param callback invoked when the load is complete
      */
@@ -782,7 +765,7 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Save the object and its children to the server to the given depth.
+     * Save the object to the server with options. Use {@link StackMobOptions#depthOf(int)} to also save its children to the given depth.
      * @param options options, such and select and expand, to apply to the request
      */
     public void save(StackMobOptions options) {
@@ -798,7 +781,7 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Save the object and its children to the server to the given depth.
+     * Save the object to the server with options. Use {@link StackMobOptions#depthOf(int)} to also save its children to the given depth.
      * @param options options, such and select and expand, to apply to the request
      * @param callback invoked when the save is complete
      */
