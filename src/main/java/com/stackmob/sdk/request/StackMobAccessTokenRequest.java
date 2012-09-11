@@ -76,6 +76,11 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                 callback.unsent(e);
             }
 
+            @Override
+            public void temporaryPasswordResetRequired(StackMobException e) {
+                callback.temporaryPasswordResetRequired(e);
+            }
+
 
             @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {

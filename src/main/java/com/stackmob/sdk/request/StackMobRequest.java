@@ -397,6 +397,11 @@ public abstract class StackMobRequest {
             }
 
             @Override
+            public void temporaryPasswordResetRequired(StackMobException e) {
+                sendRequest();
+            }
+
+            @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
                 sendRequest();
             }

@@ -46,6 +46,16 @@ public abstract class StackMobRawCallback {
      */
     public abstract void unsent(StackMobException e);
 
+
+    /**
+     * the method that will be called in the very specific case where a user has done a login with
+     * a temporary password, and now they need to reset their password to continue. Respond to this
+     * by putting up a reset password screen and then calling {@link com.stackmob.sdk.model.StackMobUser#loginResettingTemporaryPassword(String, StackMobCallback)}
+     * with the new password
+     * @param e an error with the reason why
+     */
+    public abstract void temporaryPasswordResetRequired(StackMobException e);
+
     /**
      * the method that will be called when the call to StackMob is complete. may be executed in a background thread
      * @param requestVerb the HTTP verb that was requested

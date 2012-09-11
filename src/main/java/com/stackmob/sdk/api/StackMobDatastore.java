@@ -473,6 +473,12 @@ public class StackMobDatastore {
             public void unsent(StackMobException e) {
                 userCallback.unsent(e);
             }
+
+            @Override
+            public void temporaryPasswordResetRequired(StackMobException e) {
+                userCallback.temporaryPasswordResetRequired(e);
+            }
+
             @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
                 if(Http.isSuccess(responseStatusCode)) {

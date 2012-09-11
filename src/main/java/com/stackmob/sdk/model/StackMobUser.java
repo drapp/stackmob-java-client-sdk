@@ -241,8 +241,9 @@ public abstract class StackMobUser extends StackMobModel {
     }
 
     /**
-     * log this user into StackMob with their temporary password and reset their password. This is
-     * used as part of the <a href="https://stackmob.com/devcenter/docs/User-Authentication-API#a-forgot_password">forgot password flow</a>
+     * log this user into StackMob with their temporary password and reset their password. This should be used
+     * when the {@link com.stackmob.sdk.callback.StackMobRawCallback#temporaryPasswordResetRequired(com.stackmob.sdk.exception.StackMobException)}
+     * callback is called. This is used as part of the <a href="https://www.stackmob.com/devcenter/docs/StackMob/StackMob-Forgot-Password-Tutorial">forgot password flow</a>
      * @param callback invoked on completed login attempt
      */
     public void loginResettingTemporaryPassword(String newPassword, StackMobCallback callback) {
@@ -250,8 +251,9 @@ public abstract class StackMobUser extends StackMobModel {
     }
 
     /**
-     * log this user into StackMob with their temporary password and reset their password. This is
-     * used as part of the <a href="https://stackmob.com/devcenter/docs/User-Authentication-API#a-forgot_password">forgot password flow</a>
+     * log this user into StackMob with their temporary password and reset their password. This should be used
+     * when the {@link com.stackmob.sdk.callback.StackMobRawCallback#temporaryPasswordResetRequired(com.stackmob.sdk.exception.StackMobException)}
+     * callback is called. This is used as part of the <a href="https://www.stackmob.com/devcenter/docs/StackMob/StackMob-Forgot-Password-Tutorial">forgot password flow</a>
      * @param options additional options, such as headers, to modify the request
      * @param callback invoked on completed login attempt
      */

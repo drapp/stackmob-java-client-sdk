@@ -16,6 +16,8 @@
 
 package com.stackmob.sdk.callback;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.exception.StackMobHTTPResponseException;
 import com.stackmob.sdk.net.HttpVerb;
@@ -50,6 +52,10 @@ public abstract class StackMobCallback extends StackMobRawCallback {
         failure(e);
     }
 
+    @Override public void temporaryPasswordResetRequired(StackMobException e) {
+        failure(e);
+    }
+
     @Override
     public void done(HttpVerb requestVerb,
                      String requestURL,
@@ -62,7 +68,16 @@ public abstract class StackMobCallback extends StackMobRawCallback {
             success(new String(responseBody));
         }
         else {
-            failure(new StackMobHTTPResponseException(responseStatusCode, responseHeaders, responseBody));
+            StackMobException e = new StackMobHTTPResponseException(responseStatusCode, responseHeaders, responseBody);
+            JsonElement errorDescription = new JsonParser().parse(new String(responseBody)).getAsJsonObject().get("error_description");
+            if(errorDescription != null &&
+               errorDescription.isJsonPrimitive() &&
+               errorDescription.getAsJsonPrimitive().isString() &&
+               errorDescription.getAsString().startsWith("Temporary password reset required.")) {
+                temporaryPasswordResetRequired(e);
+            } else {
+                failure(e);
+            }
         }
     }
 
