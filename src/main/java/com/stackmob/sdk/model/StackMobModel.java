@@ -146,15 +146,6 @@ import java.util.*;
 public abstract class StackMobModel {
 
     /**
-     * run a query on the server to get all instances of your model
-     * @param theClass The class of your model
-     * @param callback The callback to be invoked upon returning
-     */
-    public static <T extends StackMobModel> void query(final Class<T> theClass, final StackMobQueryCallback<T> callback) {
-        query(theClass, new StackMobQuery(), new StackMobOptions(), callback);
-    }
-
-    /**
      * run a query on the server to get all the instances of your model within certain constraints
      * @param theClass The class of your model
      * @param q The query to run
