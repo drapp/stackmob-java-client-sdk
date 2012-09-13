@@ -22,11 +22,13 @@ import java.util.List;
  * Represents a longitude/latitude pair that can be stored and queried against in StackMob
  */
 public class StackMobGeoPoint {
+
     private static final double EarthRadiusInMi = 3956.6;
     private static final double EarthRadiusInKm = 6367.5;
 
     private Double lon = Double.NaN;
     private Double lat = Double.NaN;
+    private Double distance = Double.NaN;
 
     /**
      * create a geopoint in terms of longitude and latitude radian
@@ -55,6 +57,16 @@ public class StackMobGeoPoint {
      */
     public Double getLatitude() {
         return lat;
+    }
+
+
+    /**
+     * if this GeoPoint came from a "fieldIsNear" query, this will return
+     * the distance between this point and the reference point from the query
+     * @return the distance between this and the reference point
+     */
+    public Double getQueryDistanceRadians() {
+        return distance;
     }
 
     /**
