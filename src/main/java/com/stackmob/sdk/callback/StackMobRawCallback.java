@@ -111,7 +111,7 @@ public abstract class StackMobRawCallback {
      */
     public boolean retry(int afterMilliseconds) {
         try {
-            Thread.currentThread().wait(afterMilliseconds);
+            Thread.sleep(afterMilliseconds);
         } catch (InterruptedException ignore) { }
         return true;
     }
