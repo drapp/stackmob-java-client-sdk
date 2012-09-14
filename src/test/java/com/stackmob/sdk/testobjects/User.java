@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 StackMob
+ * Copyright 2012 StackMob
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,45 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.stackmob.sdk.testobjects;
 
-public class User extends StackMobObject {
 
-    public String username;
-    public String password;
-    public String email;
-    public Long createddate;
-    public Long lastmoddate;
+import java.util.ArrayList;
+import java.util.List;
 
-    //this ctor is used for gson deserialization
-    public User(String username, String password, String email, long createddate, long lastmoddate) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.createddate = createddate;
-        this.lastmoddate = lastmoddate;
+import com.stackmob.sdk.model.StackMobUser;
+
+public class User extends StackMobUser {
+
+    public User(String username) {
+        super(User.class, username);
     }
-
-    public User(String username, String password, long createddate, long lastmoddate) {
-        this.username = username;
-        this.password = password;
-        this.createddate = createddate;
-        this.lastmoddate = lastmoddate;
-    }
-
     public User(String username, String password) {
-        this.username = username;
-        this.password = password;
+        super(User.class, username, password);
     }
-
-    public User(String username, String password, String email) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-    }
-
-    @Override public String getIdField() { return username; }
-    @Override public String getIdFieldName() { return "username"; }
-    @Override public String getName() { return "user"; }
 }

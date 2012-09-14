@@ -64,13 +64,13 @@ public class StackMobTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
     }
 
-    public StackMobObjectOnServer<User> doLoginLogout(StackMob.OAuthVersion version, final boolean logout) throws Exception {
+    public StackMobObjectOnServer<UserOnServer> doLoginLogout(StackMob.OAuthVersion version, final boolean logout) throws Exception {
         StackMob.getStackMob().getSession().setOAuthVersion(version);
         final String username = getRandomString();
         final String password = getRandomString();
 
-        final User user = new User(username, password);
-        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
+        final UserOnServer user = new UserOnServer(username, password);
+        final StackMobObjectOnServer<UserOnServer> objectOnServer = createOnServer(user, UserOnServer.class);
 
         Map<String, String> params = new HashMap<String, String>();
         params.put("username", user.username);
@@ -168,7 +168,7 @@ public class StackMobTests extends StackMobTestCommon {
     }
 
     @Test public void oauth2LoginLogout() throws Exception {
-        StackMobObjectOnServer<User> user = doLoginLogout(StackMob.OAuthVersion.Two, false);
+        StackMobObjectOnServer<UserOnServer> user = doLoginLogout(StackMob.OAuthVersion.Two, false);
         final CountDownLatch localLatch = latchOne();
         final MultiThreadAsserter localAsserter = new MultiThreadAsserter();
         StackMob.getStackMob().getDatastore().get("restricted", new StackMobCallback() {
@@ -187,7 +187,7 @@ public class StackMobTests extends StackMobTestCommon {
     }
 
     @Test public void oauth2RefreshToken() throws Exception {
-        StackMobObjectOnServer<User> user = doLoginLogout(StackMob.OAuthVersion.Two, false);
+        StackMobObjectOnServer<UserOnServer> user = doLoginLogout(StackMob.OAuthVersion.Two, false);
         final CountDownLatch localLatch = latchOne();
         final MultiThreadAsserter localAsserter = new MultiThreadAsserter();
         StackMob.getStackMob().refreshLogin(new StackMobCallback() {
@@ -755,7 +755,7 @@ public class StackMobTests extends StackMobTestCommon {
         final String username = getRandomString();
         final String password = getRandomString();
         
-        User user = new User(username, password);
+        UserOnServer user = new UserOnServer(username, password);
         List<Object> users = new ArrayList<Object>();
         users.add(user);
 
@@ -786,7 +786,7 @@ public class StackMobTests extends StackMobTestCommon {
         final String username = getRandomString();
         final String password = getRandomString();
   
-        User user = new User(username, password);
+        UserOnServer user = new UserOnServer(username, password);
 
         final Game game = new Game(new ArrayList<String>(), "gamepostrelated");
         final StackMobObjectOnServer<Game> gameOnServer = createOnServer(game, Game.class);
@@ -870,8 +870,8 @@ public class StackMobTests extends StackMobTestCommon {
         final String password = getRandomString();
         final String token = getRandomString();
 
-        User user = new User(username, password);
-        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
+        UserOnServer user = new UserOnServer(username, password);
+        final StackMobObjectOnServer<UserOnServer> objectOnServer = createOnServer(user, UserOnServer.class);
         final String objectId = objectOnServer.getObjectId();
 
         final CountDownLatch latch = latchOne();
@@ -898,20 +898,22 @@ public class StackMobTests extends StackMobTestCommon {
         final String password = getRandomString();
         final String token = getRandomString();
 
-        User user = new User(username, password);
-        final StackMobObjectOnServer<User> objectOnServer = createOnServer(user, User.class);
+        UserOnServer user = new UserOnServer(username, password);
+        final StackMobObjectOnServer<UserOnServer> objectOnServer = createOnServer(user, UserOnServer.class);
         final String objectId = objectOnServer.getObjectId();
 
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
+
+        final User bodie = new User("bodie");
         final StackMobPushToken pushToken = new StackMobPushToken("0000000000000000000000000000000000000000000000000000000000000000", StackMobPushToken.TokenType.iOS);
-        StackMobPush.getPush().registerForPushWithUser(pushToken, "bodie", true, new StackMobCallback() {
+        bodie.registerForPush(pushToken, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);
 
-                StackMobPush.getPush().removePushToken(pushToken, new StackMobCallback() {
+                bodie.removeFromPush(pushToken, new StackMobCallback() {
                     @Override
                     public void success(String responseBody) {
                         asserter.markNotJsonError(responseBody);
@@ -978,8 +980,8 @@ public class StackMobTests extends StackMobTestCommon {
         final String username = getRandomString();
         final String password = getRandomString();
         final String email = getRandomString();
-        final User user = new User(username, password, email);
-        createOnServer(user, User.class);
+        final UserOnServer user = new UserOnServer(username, password, email);
+        createOnServer(user, UserOnServer.class);
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
         stackmob.forgotPassword(username, new StackMobCallback() {
@@ -1001,8 +1003,8 @@ public class StackMobTests extends StackMobTestCommon {
         final String username = getRandomString();
         final String password = getRandomString();
         final String email = getRandomString();
-        final User user = new User(username, password, email);
-        createOnServer(user, User.class);
+        final UserOnServer user = new UserOnServer(username, password, email);
+        createOnServer(user, UserOnServer.class);
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
         stackmob.forgotPassword(username, new StackMobCallback() {
@@ -1039,8 +1041,8 @@ public class StackMobTests extends StackMobTestCommon {
         final String username = getRandomString();
         final String password = getRandomString();
         final String email = getRandomString();
-        final User user = new User(username, password, email);
-        createOnServer(user, User.class);
+        final UserOnServer user = new UserOnServer(username, password, email);
+        createOnServer(user, UserOnServer.class);
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
