@@ -66,6 +66,7 @@ public class StackMobSession {
         this.key = that.key;
         this.secret = that.secret;
         this.userObjectName = that.userObjectName;
+        this.userIdName = that.userIdName;
         this.apiVersionNumber = that.apiVersionNumber;
         this.serverTimeDiff = that.serverTimeDiff;
         this.oauth2Token = that.oauth2Token;

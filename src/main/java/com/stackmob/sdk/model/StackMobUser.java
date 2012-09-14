@@ -522,10 +522,10 @@ public abstract class StackMobUser extends StackMobModel {
     }
 
     /**
-     * retrieve the push token associated with this user
+     * retrieve the push tokens associated with this user
      * @param callback invoked when the operation is complete
      */
-    public void getPushToken(StackMobRawCallback callback) {
+    public void getPushTokens(StackMobRawCallback callback) {
         StackMobPush.getPush().getTokensForUsers(Arrays.asList(getID()), callback);
     }
 
