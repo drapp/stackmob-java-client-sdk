@@ -122,7 +122,7 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback The callback to invoke with the user model
      */
     public static <T extends StackMobUser> void getLoggedInUser(final Class<T> classOfT, StackMobOptions options, final StackMobQueryCallback<T> callback) {
-        StackMob.getStackMob().getLoggedInUser(new StackMobCallback(){
+        StackMob.getStackMob().getLoggedInUser(options, new StackMobCallback(){
             @Override
             public void success(String responseBody) {
                 List<T> list = new ArrayList<T>();

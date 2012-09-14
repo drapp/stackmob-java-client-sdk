@@ -53,6 +53,14 @@ public class StackMobDatastore {
     }
 
     /**
+     * set a specific session
+     * @param session the session to set
+     */
+    public void setSession(StackMobSession session) {
+        this.session = session;
+    }
+
+    /**
      * do a get request on the StackMob platform
      * @param path the path to get
      * @param callback callback to be called when the server returns. may execute in a separate thread

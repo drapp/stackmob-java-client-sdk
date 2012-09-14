@@ -700,6 +700,7 @@ public class StackMob {
      */
     public void setSession(StackMobSession session) {
         this.session = session;
+        this.datastore.setSession(session);
     }
 
 
