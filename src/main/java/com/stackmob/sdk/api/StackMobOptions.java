@@ -141,6 +141,7 @@ public class StackMobOptions {
     public StackMobOptions withDepthOf(Integer i) {
         if(i > 3) throw new IllegalArgumentException("Maximum expand depth is 3");
         headers.add(new Pair<String, String>(ExpandHeader, i.toString()));
+        expandDepth = i;
         return this;
     }
 

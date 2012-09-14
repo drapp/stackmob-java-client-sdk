@@ -227,13 +227,13 @@ public class StackMob {
                     StackMobRedirectedCallback redirectedCallback) {
         this.session = new StackMobSession(oauthVersion, apiVersionNumber, apiKey, apiSecret, userSchema, userIdName);
         this.executor = createNewExecutor();
-        if(stackmob == null) StackMob.setStackMob(this);
         this.apiUrlFormat = apiHost;
         this.userSchema = userSchema;
         this.userIdName = userIdName;
         this.passwordField = passwordFieldName;
         this.userRedirectedCallback = redirectedCallback;
         this.datastore = new StackMobDatastore(executor, session, apiHost, redirectedCallback);
+        if(stackmob == null) StackMob.setStackMob(this);
     }
 
     /**

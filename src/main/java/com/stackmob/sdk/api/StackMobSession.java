@@ -73,7 +73,7 @@ public class StackMobSession {
         this.oauth2TokenExpiration = that.oauth2TokenExpiration;
         this.cookieManager = that.cookieManager;
         this.logger = that.logger;
-        this.userAgentName = userAgentName;
+        this.userAgentName = that.userAgentName;
     }
 
     public String getKey() {

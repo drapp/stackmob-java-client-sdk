@@ -65,10 +65,10 @@ public class StackMobTestCommon {
             apiSecret = vmSecret;
         }
 
-        new StackMob(StackMob.OAuthVersion.One, apiVersion, apiKey, apiSecret);
+        StackMob.setStackMob(new StackMob(StackMob.OAuthVersion.One, apiVersion, apiKey, apiSecret));
         StackMob.getStackMob().getSession().setEnableHTTPS(false);
         StackMob.getStackMob().getSession().getLogger().setLogging(true);
-        new StackMobPush(StackMob.getStackMob());
+        StackMobPush.setPush(new StackMobPush(StackMob.getStackMob()));
         stackmob = StackMob.getStackMob();
     }
 
