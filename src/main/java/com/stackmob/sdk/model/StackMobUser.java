@@ -140,7 +140,15 @@ public abstract class StackMobUser extends StackMobModel {
             }
         });
     }
-    
+
+    /**
+     * get the username for the logged in user, if one exists
+     * @return the logged in user's username
+     */
+    public static String getLoggedInUsername() {
+        return StackMob.getStackMob().getLoggedInUsername();
+    }
+
     String password;
 
     /**
