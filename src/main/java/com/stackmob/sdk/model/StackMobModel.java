@@ -22,6 +22,7 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobFile;
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.api.StackMobQuery;
 import com.stackmob.sdk.callback.*;
 import com.stackmob.sdk.exception.StackMobException;
@@ -69,7 +70,6 @@ import java.util.*;
  * myTask.fetch(new StackMobModelCallback() {
  *     public void success() {
  *         // The blogPostTask object is now filled in with data.
- *         // You can ignore the responseBody argument.
  *     }
  *
  *     public void failure(StackMobException e) {
@@ -115,7 +115,7 @@ import java.util.*;
  * Task javadocsTask = new Task("Write javadocs");
  * Task proofreadTask = new Task("Proofread");
  * TaskList blogTasks = new TaskList("Blog Tasks", Arrays.asList(blogPostTask, proofreadTask));
- * blogTasks.saveWithDepth(1);
+ * blogTasks.save(StackMobOptions.depthOf(1));
  * }
  * </pre>
  *
@@ -147,33 +147,51 @@ public abstract class StackMobModel {
 
     /**
      * run a query on the server to get all the instances of your model within certain constraints
-     * @param q The query to run
-     * @param callback The callback to be invoked upon returning
-     */
-    public static <T extends StackMobModel> void query(StackMobModelQuery<T> q, StackMobQueryCallback<T> callback) {
-        q.send(callback);
-    }
-
-    /**
-     * run a count query on the server to count all the instances of your model within certain constraints
-     * @param q The query to run
-     * @param callback The callback to be invoked upon returning
-     */
-    public static <T extends StackMobModel> void count(StackMobModelQuery<T> q, StackMobCountCallback callback) {
-        q.count(callback);
-    }
-
-    /**
-     * run a query on the server to get all the instances of your model within certain constraints
      * @param theClass The class of your model
      * @param q The query to run
      * @param callback The callback to be invoked upon returning
      */
-    public static <T extends StackMobModel> void query(Class<T> theClass, StackMobQuery q, StackMobQueryCallback<T> callback) {
-        StackMobModelQuery<T> query = new StackMobModelQuery<T>(theClass);
+    public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, final StackMobQueryCallback<T> callback) {
+        query(theClass, q, new StackMobOptions(), callback);
+    }
+    /**
+     * run a query on the server to get all the instances of your model within certain constraints
+     * @param theClass The class of your model
+     * @param q The query to run
+     * @param options options, such as select and expand, to apply to the request
+     * @param callback The callback to be invoked upon returning
+     */
+    public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, StackMobOptions options, final StackMobQueryCallback<T> callback) {
         q.setObjectName(theClass.getSimpleName().toLowerCase());
-        query.query = q;
-        query.send(callback);
+        StackMob.getStackMob().getDatastore().get(q, options, new StackMobCallback() {
+            @Override
+            public void success(String responseBody) {
+                JsonArray array = new JsonParser().parse(responseBody).getAsJsonArray();
+                List<T> resultList = new ArrayList<T>();
+                for(JsonElement elt : array) {
+                    try {
+                        resultList.add(StackMobModel.newFromJson(theClass, elt.toString()));
+                    } catch (StackMobException ignore) { }
+                }
+                callback.success(resultList);
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                callback.failure(e);
+            }
+        });
+    }
+
+    /**
+     * run a count query on the server to count all the instances of your model within certain constraints
+     * @param theClass The class of your model
+     * @param q The query to run
+     * @param callback The callback to be invoked upon returning
+     */
+    public static <T extends StackMobModel> void count(Class<T> theClass, StackMobQuery q, StackMobCountCallback callback) {
+        q.setObjectName(theClass.getSimpleName().toLowerCase());
+        StackMob.getStackMob().getDatastore().count(q, callback);
     }
 
     /**
@@ -205,7 +223,7 @@ public abstract class StackMobModel {
      */
     public static <T extends StackMobModel> void saveMultiple(List<T> models, StackMobCallback callback) {
         if(models.size() == 0) throw new IllegalArgumentException("Empty list");
-        StackMob.getStackMob().post(models.get(0).getSchemaName(), toJsonArray(models), callback);
+        StackMob.getStackMob().getDatastore().post(models.get(0).getSchemaName(), toJsonArray(models), callback);
 
     }
 
@@ -422,9 +440,9 @@ public abstract class StackMobModel {
                 }
             }
         } catch(NoSuchFieldException e) {
-            StackMob.getLogger().logDebug(String.format("Ignoring extraneous json field:\nfield: %s\ndata: %s", jsonName, json.toString()));
+            StackMob.getStackMob().getSession().getLogger().logDebug(String.format("Ignoring extraneous json field:\nfield: %s\ndata: %s", jsonName, json.toString()));
         } catch(JsonSyntaxException e) {
-            StackMob.getLogger().logWarning(String.format("Incoming data does not match data model:\nfield: %s\ndata: %s", jsonName, json.toString()));
+            StackMob.getStackMob().getSession().getLogger().logWarning(String.format("Incoming data does not match data model:\nfield: %s\ndata: %s", jsonName, json.toString()));
         } catch(IllegalAccessException e) {
             throw new StackMobException(e.getMessage());
         } catch (InstantiationException e) {
@@ -687,41 +705,20 @@ public abstract class StackMobModel {
      * @return a json representation of the object
      */
     public String toJson() {
-        return toJsonWithDepth(0);
+        return toJson(StackMobOptions.none());
     }
 
     /**
      * Converts the model into its Json representation, expanding any sub-objects to the given depth. Be sure to use the right depth, or you'll end up with empty sub-objects.
-     * @param depth the depth to expand to
+     * @param options options, such and select and expand, to apply to the request
      * @return a json representation of the object and its children to the depth
      */
-    public String toJsonWithDepth(int depth) {
-        return toJsonWithDepth(depth, new RelationMapping());
+    public String toJson(StackMobOptions options) {
+        return toJson(options, new RelationMapping());
     }
 
-    /**
-     * Converts the object to JSON turning all Models into their ids
-     * @return the json representation of this model
-     */
-    protected String toJsonWithDepth(int depth, RelationMapping mapping) {
-        return toJsonElement(depth, mapping).toString();
-    }
-
-    /**
-     * Reload the object from the server. This version is not recommended since it gives no indication of when the load is complete. This is not thread safe, make
-     * sure the object isn't disturbed during the load.
-     */
-    public void fetch() {
-        fetch(new StackMobNoopCallback());
-    }
-
-    /**
-     * Reload the object from the server to the given depth. This version is not recommended since it gives no indication of when the load is complete. This is not thread safe, make
-     * sure the object isn't disturbed during the load.
-     * @param depth the depth to expand to
-     */
-    public void fetch(int depth) {
-        fetchWithDepth(depth, new StackMobNoopCallback());
+    String toJson(StackMobOptions options, RelationMapping mapping) {
+        return toJsonElement(options.getExpandDepth(), mapping).toString();
     }
 
     /**
@@ -730,20 +727,17 @@ public abstract class StackMobModel {
      * @param callback invoked when the load is complete
      */
     public void fetch(StackMobCallback callback) {
-        fetchWithDepth(0, callback);
+        fetch(StackMobOptions.none(), callback);
     }
 
     /**
-     * Reload the object from the server to the given depth. This is not thread safe, make
-     * sure the object isn't disturbed during the load.
-     * @param depth the depth to expand to
+     * Reload the object from the server. Use {@link StackMobOptions#depthOf(int)} to also save its children to the given depth.
+     * This is not thread safe, make sure the object isn't disturbed during the load.
+     * @param options options, such and select and expand, to apply to the request
      * @param callback invoked when the load is complete
      */
-    public void fetchWithDepth(int depth, StackMobCallback callback) {
-        Map<String,String> args = new HashMap<String, String>();
-        if(depth > 0) args.put("_expand", String.valueOf(depth));
-        Map<String,String> headers = new HashMap<String, String>();
-        StackMob.getStackMob().get(getSchemaName() + "/" + id, args, headers , new StackMobIntermediaryCallback(callback) {
+    public void fetch(StackMobOptions options, StackMobCallback callback) {
+        StackMob.getStackMob().getDatastore().get(getSchemaName() + "/" + id, options, new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;
@@ -766,11 +760,11 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Save the object and its children to the server to the given depth.
-     * @param depth the depth to expand to
+     * Save the object to the server with options. Use {@link StackMobOptions#depthOf(int)} to also save its children to the given depth.
+     * @param options options, such and select and expand, to apply to the request
      */
-    public void saveWithDepth(int depth) {
-        saveWithDepth(depth, new StackMobNoopCallback());
+    public void save(StackMobOptions options) {
+        save(options, new StackMobNoopCallback());
     }
 
     /**
@@ -778,20 +772,20 @@ public abstract class StackMobModel {
      * @param callback invoked when the save is complete
      */
     public void save(StackMobCallback callback) {
-        saveWithDepth(0, callback);
+        save(StackMobOptions.none(), callback);
     }
 
     /**
-     * Save the object and its children to the server to the given depth.
-     * @param depth the depth to expand to
+     * Save the object to the server with options. Use {@link StackMobOptions#depthOf(int)} to also save its children to the given depth.
+     * @param options options, such and select and expand, to apply to the request
      * @param callback invoked when the save is complete
      */
-    public void saveWithDepth(int depth, StackMobCallback callback) {
+    public void save(StackMobOptions options, StackMobCallback callback) {
         RelationMapping mapping = new RelationMapping();
-        String json = toJsonWithDepth(depth, mapping);
+        String json = toJson(options, mapping);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
         headers.add(new Pair<String,String>("X-StackMob-Relations", mapping.toHeaderString()));
-        StackMob.getStackMob().post(getSchemaName(), json, headers, new StackMobIntermediaryCallback(callback) {
+        StackMob.getStackMob().getDatastore().post(getSchemaName(), json, options.withHeaders(headers), new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;
@@ -818,7 +812,7 @@ public abstract class StackMobModel {
      * @param callback invoked when the delete is complete
      */
     public void destroy(StackMobCallback callback) {
-        StackMob.getStackMob().delete(getSchemaName(), id, callback);
+        StackMob.getStackMob().getDatastore().delete(getSchemaName(), id, callback);
     }
 
 
@@ -851,7 +845,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().putRelated(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), callback);
+        StackMob.getStackMob().getDatastore().putRelated(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), callback);
     }
 
     /**
@@ -874,7 +868,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().postRelated(schemaName, id, field.toLowerCase(), toJsonArray(objs), callback);
+        StackMob.getStackMob().getDatastore().postRelated(schemaName, id, field.toLowerCase(), toJsonArray(objs), callback);
     }
 
     /**
@@ -896,7 +890,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), false, callback);
+        StackMob.getStackMob().getDatastore().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), false, callback);
 
     }
 
@@ -919,6 +913,6 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), true, callback);
+        StackMob.getStackMob().getDatastore().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), true, callback);
     }
 }

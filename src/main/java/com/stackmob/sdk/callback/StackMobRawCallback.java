@@ -16,6 +16,7 @@
 
 package com.stackmob.sdk.callback;
 
+import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerb;
 
 import java.util.Arrays;
@@ -38,6 +39,22 @@ public abstract class StackMobRawCallback {
     protected byte[] responseBody;
     protected int retriesRemaining = 3;
 
+
+    /**
+     * the method that will be called when a call to StackMob cannot even be sent for some reason
+     * @param e an error with the reason why
+     */
+    public abstract void unsent(StackMobException e);
+
+
+    /**
+     * the method that will be called in the very specific case where a user has done a login with
+     * a temporary password, and now they need to reset their password to continue. Respond to this
+     * by putting up a reset password screen and then calling {@link com.stackmob.sdk.model.StackMobUser#loginResettingTemporaryPassword(String, StackMobCallback)}
+     * with the new password
+     * @param e an error with the reason why
+     */
+    public abstract void temporaryPasswordResetRequired(StackMobException e);
 
     /**
      * the method that will be called when the call to StackMob is complete. may be executed in a background thread
@@ -94,21 +111,21 @@ public abstract class StackMobRawCallback {
      */
     public boolean retry(int afterMilliseconds) {
         try {
-            Thread.currentThread().wait(afterMilliseconds);
+            Thread.sleep(afterMilliseconds);
         } catch (InterruptedException ignore) { }
         return true;
     }
 
     /**
-     *
-     * @return The number of times the request will be automatically retried if necessary
+     * get the number of times the request will be automatically retried if necessary
+     * @return remaining triest
      */
     public int getRetriesRemaining() {
         return retriesRemaining;
     }
 
     /**
-     *
+     * override the number of times the request should be retried
      * @param remaining the number of times the request should be retried
      */
     public void setRetriesRemaining(int remaining) {

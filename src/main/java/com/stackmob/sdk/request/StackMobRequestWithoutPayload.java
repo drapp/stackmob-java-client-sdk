@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.request;
 
+import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
@@ -24,12 +25,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.Map;
 import java.util.List;
 
-class StackMobRequestWithoutPayload extends StackMobRequest {
+public class StackMobRequestWithoutPayload extends StackMobRequest {
     public StackMobRequestWithoutPayload(ExecutorService executor,
                                          StackMobSession session,
                                          HttpVerbWithoutPayload verb,
                                          List<Map.Entry<String, String>> headers,
-                                         Map<String, String> params,
+                                         List<Map.Entry<String, String>>  params,
                                          String method,
                                          StackMobRawCallback cb,
                                          StackMobRedirectedCallback redirCb) {
@@ -42,7 +43,7 @@ class StackMobRequestWithoutPayload extends StackMobRequest {
                                          String method,
                                          StackMobRawCallback cb,
                                          StackMobRedirectedCallback redirCb) {
-        this(executor, session, verb, StackMobRequest.EmptyHeaders, StackMobRequest.EmptyParams, method, cb, redirCb);
+        this(executor, session, verb, EmptyHeaders, EmptyParams, method, cb, redirCb);
     }
 
     @Override protected String getRequestBody() {

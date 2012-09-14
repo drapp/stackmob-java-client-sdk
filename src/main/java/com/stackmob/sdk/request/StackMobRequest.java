@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.request;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.stackmob.sdk.api.*;
 import com.stackmob.sdk.api.StackMob.OAuthVersion;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.exception.StackMobException;
-import com.stackmob.sdk.model.StackMobModel;
 import com.stackmob.sdk.net.*;
 import com.stackmob.sdk.push.StackMobPushToken;
 import com.stackmob.sdk.push.StackMobPushTokenDeserializer;
 import com.stackmob.sdk.push.StackMobPushTokenSerializer;
-import com.stackmob.sdk.util.Http;
-import com.stackmob.sdk.util.Pair;
-import com.stackmob.sdk.util.StackMobNull;
+import com.stackmob.sdk.util.*;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
@@ -55,25 +53,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class StackMobRequest {
     
     public static final List<Map.Entry<String, String>> EmptyHeaders = new ArrayList<Map.Entry<String, String>>();
-    public static final Map<String, String> EmptyParams = new HashMap<String, String>();
+    public static final List<Map.Entry<String, String>> EmptyParams = new ArrayList<Map.Entry<String, String>>();
 
     public static final int DEFAULT_RETRY_AFTER_MILLIS = 30000;
-    public static final String DEFAULT_URL_FORMAT = "mob1.stackmob.com";
-    public static final String DEFAULT_API_URL_FORMAT = "api." + DEFAULT_URL_FORMAT;
-    public static final String DEFAULT_PUSH_URL_FORMAT = "push." + DEFAULT_URL_FORMAT;
     protected static final String SECURE_SCHEME = "https";
     protected static final String REGULAR_SCHEME = "http";
     protected static final String API_KEY_HEADER = "X-StackMob-API-Key";
     protected static final String AUTHORIZATION_HEADER = "Authorization";
-    private static StackMobCookieStore cookieStore = new StackMobCookieStore();
 
-    public static void setCookieStore(StackMobCookieStore store) {
-        cookieStore = store;
-    }
-
-    public static StackMobCookieStore getCookieStore() {
-        return cookieStore;
-    }
 
     protected final ExecutorService executor;
     protected final StackMobSession session;
@@ -83,9 +70,9 @@ public abstract class StackMobRequest {
     protected HttpVerb httpVerb;
     protected String methodName;
 
-    protected String urlFormat = DEFAULT_API_URL_FORMAT;
+    protected String urlFormat = StackMob.DEFAULT_API_HOST;
     protected Boolean isSecure = false;
-    protected Map<String, String> params = new HashMap<String, String>();
+    protected List<Map.Entry<String, String>> params = new ArrayList<Map.Entry<String, String>>();
     protected List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
     private AtomicBoolean triedRefreshToken = new AtomicBoolean(false);
 
@@ -93,11 +80,14 @@ public abstract class StackMobRequest {
 
     private OAuthService oAuthService;
 
+
+
+
     protected StackMobRequest(ExecutorService executor,
                               StackMobSession session,
                               HttpVerb verb,
                               List<Map.Entry<String, String>> headers,
-                              Map<String, String> params,
+                              List<Map.Entry<String, String>> params,
                               String method,
                               StackMobRawCallback cb,
                               StackMobRedirectedCallback redirCb) {
@@ -128,7 +118,7 @@ public abstract class StackMobRequest {
 
     protected abstract String getRequestBody();
 
-    public StackMobRequestSendResult sendRequest() {
+    public void sendRequest() {
         try {
             if(HttpVerbWithoutPayload.GET == httpVerb) {
                 sendGetRequest();
@@ -144,12 +134,11 @@ public abstract class StackMobRequest {
             }
             else {
                 StackMobException ex = new StackMobException(String.format("The StackMob SDK doesn't support the HTTP verb %s at this time", httpVerb.toString()));
-                return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, ex);
+                callback.unsent(ex);
             }
-            return new StackMobRequestSendResult();
         }
         catch(StackMobException e) {
-            return new StackMobRequestSendResult(StackMobRequestSendResult.RequestSendStatus.FAILED, e);
+            callback.unsent(e);
         }
     }
 
@@ -284,23 +273,19 @@ public abstract class StackMobRequest {
         return URLEncoder.encode(s, "UTF-8").replace("+", "%20");
     }
 
-    protected static String formatQueryString(Map<String, String> params) {
-        StringBuilder formatBuilder = new StringBuilder();
-        boolean first = true;
-        for(String key : params.keySet()) {
-            if(!first) {
-                formatBuilder.append("&");
-            }
-            first = false;
-            String value = params.get(key);
+    protected static String formatQueryString(List<Map.Entry<String, String>> params) {
+        List<String> paramList = new LinkedList<String>();
+        for(Map.Entry<String, String> pair : params) {
+            String key = pair.getKey();
+            String value = pair.getValue();
             try {
-                formatBuilder.append(percentEncode(key)).append("=").append(percentEncode(value));
+                paramList.add(String.format("%s=%s", percentEncode(key), percentEncode(value)));
             }
             catch(UnsupportedEncodingException e) {
                 //do nothing
             }
         }
-        return formatBuilder.toString();
+        return ListHelpers.join(paramList, "&");
     }
 
 
@@ -311,6 +296,8 @@ public abstract class StackMobRequest {
     protected OAuthVersion getOAuthVersion() {
         return session.getOAuthVersion();
     }
+
+
 
 
     protected OAuthRequest getOAuthRequest(HttpVerb method, String url) {
@@ -326,8 +313,8 @@ public abstract class StackMobRequest {
             headerList.add(new Pair<String, String>("Content-Type", getContentType()));
         }
         headerList.add(new Pair<String, String>("Accept", accept));
-        headerList.add(new Pair<String, String>("User-Agent", StackMob.getUserAgent(session.getAppName())));
-        String cookieHeader = cookieStore.cookieHeader();
+        headerList.add(new Pair<String, String>("User-Agent", session.getUserAgent()));
+        String cookieHeader = session.getCookieManager().cookieHeader();
         if(cookieHeader.length() > 0) headerList.add(new Pair<String, String>("Cookie", cookieHeader));
 
         //build user headers
@@ -405,6 +392,16 @@ public abstract class StackMobRequest {
         triedRefreshToken.set(true);
         StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, redirectedCallback, new StackMobRawCallback() {
             @Override
+            public void unsent(StackMobException e) {
+               sendRequest();
+            }
+
+            @Override
+            public void temporaryPasswordResetRequired(StackMobException e) {
+                sendRequest();
+            }
+
+            @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
                 sendRequest();
             }
@@ -421,12 +418,12 @@ public abstract class StackMobRequest {
                 @Override
                 public String call() throws Exception {
                     try {
-                        StackMob.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
+                        session.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
                         Response ret = req.send();
-                        StackMob.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + (ret.getBody().length() < 1000 ? ret.getBody() : (ret.getBody().subSequence(0, 1000) + " (truncated)")));
+                        session.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + (ret.getBody().length() < 1000 ? ret.getBody() : (ret.getBody().subSequence(0, 1000) + " (truncated)")));
                         if(!session.isOAuth2() && ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
                         if(HttpRedirectHelper.isRedirected(ret.getCode())) {
-                            StackMob.getLogger().logInfo("Response was redirected");
+                            session.getLogger().logInfo("Response was redirected");
                             String newLocation = HttpRedirectHelper.getNewLocation(ret.getHeaders());
                             HttpVerb verb = HttpVerbHelper.valueOf(req.getVerb().toString());
                             OAuthRequest newReq = getOAuthRequest(verb, newLocation);
@@ -445,7 +442,7 @@ public abstract class StackMobRequest {
                                 }
                             }
                             if(Http.isSuccess(ret.getCode())) {
-                                cookieStore.storeCookies(ret);
+                                session.getCookieManager().storeCookies(ret);
                             }
                             boolean retried = false;
                             if(Http.isUnavailable(ret.getCode())) {
@@ -480,14 +477,14 @@ public abstract class StackMobRequest {
                                                 ret.getBody().getBytes());
                                     }
                                     catch(Throwable t) {
-                                        StackMob.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
+                                        session.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
                                     }
                                 }
                             }
                         }
                     }
                     catch(Throwable t) {
-                        StackMob.getLogger().logWarning("Invoking callback after unexpected exception %s", StackMobLogger.getStackTrace(t));
+                        session.getLogger().logWarning("Invoking callback after unexpected exception %s", StackMobLogger.getStackTrace(t));
                         cb.setDone(getRequestVerb(req),
                                 req.getUrl(),
                                 getRequestHeaders(req),

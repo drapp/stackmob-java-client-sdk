@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.request;
 
+import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
-import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.net.HttpVerb;
-import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-class StackMobUserBasedRequest extends StackMobRequest {
+public class StackMobUserBasedRequest extends StackMobRequest {
 
     private Object requestObject;
 
     public StackMobUserBasedRequest(ExecutorService executor,
                                     StackMobSession session,
                                     String method,
-                                    Map<String, String> params,
+                                    List<Map.Entry<String, String>> params,
                                     StackMobRawCallback cb,
                                     StackMobRedirectedCallback redirCb) {
         super(executor, session, HttpVerbWithoutPayload.GET, StackMobRequest.EmptyHeaders, params, method, cb, redirCb);
@@ -45,7 +44,7 @@ class StackMobUserBasedRequest extends StackMobRequest {
                                     StackMobSession session,
                                     HttpVerb verb,
                                     List<Map.Entry<String, String>> headers,
-                                    Map<String, String> params,
+                                    List<Map.Entry<String, String>> params,
                                     Object requestObject,
                                     String method,
                                     StackMobRawCallback cb,

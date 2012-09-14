@@ -13,52 +13,75 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.request;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
+import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
+import com.stackmob.sdk.util.Pair;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-class StackMobAccessTokenRequest extends StackMobRequest {
+public class StackMobAccessTokenRequest extends StackMobRequest {
 
     public static StackMobAccessTokenRequest newRefreshTokenRequest(ExecutorService executor, StackMobSession session, StackMobRedirectedCallback redirectedCallback, StackMobRawCallback callback) {
 
-        Map<String, String> newParams = new HashMap<String, String>();
-        newParams.put("grant_type", "refresh_token");
-        newParams.put("refresh_token", session.getOAuth2RefreshToken());
-        newParams.put("token_type", "mac");
-        newParams.put("mac_algorithm", "hmac-sha-1");
+        List<Map.Entry<String, String>> newParams = new LinkedList<Map.Entry<String, String>>();
+        newParams.add(new Pair("grant_type", "refresh_token"));
+        newParams.add(new Pair("refresh_token", session.getOAuth2RefreshToken()));
+
         return new StackMobAccessTokenRequest(executor,
                 session,
                 "refreshToken",
+                StackMobRequest.EmptyHeaders,
                 newParams,
                 callback,
                 redirectedCallback);
     }
 
-    Map<String, String> bodyParams;
+    List<Map.Entry<String, String>> bodyParams;
 
     public StackMobAccessTokenRequest(ExecutorService executor,
                                       StackMobSession session,
                                       String method,
-                                      Map<String, String> params,
+                                      List<Map.Entry<String, String>> headers,
+                                      List<Map.Entry<String, String>> params,
                                       StackMobRawCallback cb,
                                       StackMobRedirectedCallback redirCb) {
-        super(executor, session, HttpVerbWithPayload.POST, StackMobRequest.EmptyHeaders, StackMobRequest.EmptyParams, method, getIntermediaryCallback(session, cb), redirCb);
+        super(executor, session, HttpVerbWithPayload.POST, headers, addAuthConfig(params), method, getIntermediaryCallback(session, cb), redirCb);
         bodyParams = params;
         isSecure = true;
     }
 
+    private static List<Map.Entry<String, String>> addAuthConfig(List<Map.Entry<String, String>> params) {
+        params.add(new Pair("token_type", "mac"));
+        params.add(new Pair("mac_algorithm", "hmac-sha-1"));
+        return params;
+    }
+
+
     private static StackMobRawCallback getIntermediaryCallback(final StackMobSession session, final StackMobRawCallback callback) {
         return new StackMobRawCallback() {
+            @Override
+            public void unsent(StackMobException e) {
+                callback.unsent(e);
+            }
+
+            @Override
+            public void temporaryPasswordResetRequired(StackMobException e) {
+                callback.temporaryPasswordResetRequired(e);
+            }
+
+
             @Override
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
                 JsonElement responseElt = new JsonParser().parse(new String(responseBody));
@@ -80,6 +103,7 @@ class StackMobAccessTokenRequest extends StackMobRequest {
                     if(stackmobElt != null && stackmobElt.isJsonObject()) {
                         // Return only the user to be compatible with the old login
                         JsonElement userElt = stackmobElt.getAsJsonObject().get("user");
+                        session.setLastUserLoginName(userElt.getAsJsonObject().get(session.getUserIdName()).getAsString());
                         finalResponseBody = userElt.toString().getBytes();
                     }
                 }

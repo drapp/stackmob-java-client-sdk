@@ -54,7 +54,7 @@ public class StackMobObjectOnServer<T extends StackMobObject> {
         final AtomicBoolean errorBool = new AtomicBoolean();
         final AtomicReference<StackMobException> exception = new AtomicReference<StackMobException>(null);
 
-        stackmob.delete(objectName, objectId, new StackMobCallback() {
+        stackmob.getDatastore().delete(objectName, objectId, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 if(!"Successfully deleted document".equals(responseBody)) {

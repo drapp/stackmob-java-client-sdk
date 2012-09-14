@@ -32,9 +32,6 @@ public class StackMobPushTokenDeserializer implements JsonDeserializer<StackMobP
         JsonPrimitive tokenTypePrimitive = obj.getAsJsonPrimitive("type");
         StackMobPushToken.TokenType tokenType = StackMobPushToken.TokenType.valueOf(tokenTypePrimitive.getAsString());
 
-        JsonPrimitive registeredMSPrimitive = obj.getAsJsonPrimitive("registered_milliseconds");
-        long registeredMS = registeredMSPrimitive.getAsInt();
-
-        return new StackMobPushToken(tokenString, tokenType, registeredMS);
+        return new StackMobPushToken(tokenString, tokenType);
     }
 }

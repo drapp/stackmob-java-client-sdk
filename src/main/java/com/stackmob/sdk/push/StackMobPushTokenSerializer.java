@@ -31,7 +31,6 @@ public class StackMobPushTokenSerializer implements JsonSerializer<StackMobPushT
         JsonObject object = new JsonObject();
         object.add("type", new JsonPrimitive(token.getTokenType().toString()));
         object.add("token", new JsonPrimitive(token.getToken()));
-        object.add("registered_milliseconds", new JsonPrimitive(token.getRegisteredMilliseconds()));
         return object;
     }
 }

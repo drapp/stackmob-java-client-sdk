@@ -15,7 +15,7 @@
  */
 
 
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.util;
 
 import com.stackmob.sdk.util.Pair;
 import org.scribe.model.Response;
@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Used internally by the sdk to manage OAuth1 cookies.
  */
-public class StackMobCookieStore {
+public class StackMobCookieManager {
 
     protected static final String SetCookieHeaderKey = "Set-Cookie";
     protected static final String EXPIRES = "Expires";

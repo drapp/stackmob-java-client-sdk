@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.stackmob.sdk.api;
+package com.stackmob.sdk.request;
 
+import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
@@ -24,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-class StackMobRequestWithPayload extends StackMobRequest {
+public class StackMobRequestWithPayload extends StackMobRequest {
     private String body;
     private Object requestObject;
 
@@ -32,7 +33,7 @@ class StackMobRequestWithPayload extends StackMobRequest {
                                       StackMobSession session,
                                       HttpVerbWithPayload verb,
                                       List<Map.Entry<String, String>> headers,
-                                      Map<String, String> params,
+                                      List<Map.Entry<String, String>> params,
                                       String body,
                                       String method,
                                       StackMobRawCallback cb,
@@ -45,7 +46,7 @@ class StackMobRequestWithPayload extends StackMobRequest {
                                       StackMobSession session,
                                       HttpVerbWithPayload verb,
                                       List<Map.Entry<String, String>> headers,
-                                      Map<String, String> params,
+                                      List<Map.Entry<String, String>> params,
                                       Object requestObject,
                                       String method,
                                       StackMobRawCallback cb,
@@ -55,7 +56,7 @@ class StackMobRequestWithPayload extends StackMobRequest {
     }
 
     public StackMobRequestWithPayload(ExecutorService executor, StackMobSession session, HttpVerbWithPayload verb, String method, StackMobRawCallback cb, StackMobRedirectedCallback redirCb) {
-        this(executor, session, verb, StackMobRequest.EmptyHeaders, StackMobRequest.EmptyParams, null, method, cb, redirCb);
+        this(executor, session, verb, EmptyHeaders, EmptyParams, null, method, cb, redirCb);
     }
 
     @Override protected String getRequestBody() {
