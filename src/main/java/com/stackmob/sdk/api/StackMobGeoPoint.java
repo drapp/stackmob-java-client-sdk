@@ -28,7 +28,7 @@ public class StackMobGeoPoint {
 
     private Double lon = Double.NaN;
     private Double lat = Double.NaN;
-    private Double distance = Double.NaN;
+    private Double distance = null;
 
     /**
      * create a geopoint in terms of longitude and latitude radian
