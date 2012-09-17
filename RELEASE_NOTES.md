@@ -1,5 +1,10 @@
 # Stackmob Java SDK (Release Notes)
 
+### 1.0.0 (09/17/2012)
+* Refactor for simplicity and parity with the iOS SDK
+* GeoPoint and Binary File support for StackMobModel
+* Auth and push methods for StackMobUser
+
 ### 0.5.6 (08/22/2012)
 * Retry callback for 503 errors
 * Bugfixes
