@@ -450,7 +450,7 @@ public abstract class StackMobRequest {
                                 for(Map.Entry<String, String> headerPair : headers) {
                                     if(Http.isRetryAfterHeader(headerPair.getKey())) {
                                         try {
-                                            int candidateMilliseconds = Integer.parseInt(headerPair.getValue());
+                                            int candidateMilliseconds = Integer.parseInt(headerPair.getValue()) * 1000;
                                             if(candidateMilliseconds > 0) {
                                                 afterMilliseconds = candidateMilliseconds;
                                             }
