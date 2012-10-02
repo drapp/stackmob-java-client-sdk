@@ -366,8 +366,8 @@ public class StackMob {
             req = new StackMobAccessTokenRequest(this.executor,
                     this.session,
                     "twitterAccessToken",
-                    paramList,
                     options.getHeaders(),
+                    paramList,
                     callback,
                     this.redirectedCallback);
         } else {
@@ -469,8 +469,8 @@ public class StackMob {
             req = new StackMobAccessTokenRequest(this.executor,
                                                  this.session,
                                                  "facebookAccessToken",
-                                                 paramList,
                                                  options.getHeaders(),
+                                                 paramList,
                                                  callback,
                                                  this.redirectedCallback);
         } else {
