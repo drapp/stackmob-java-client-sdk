@@ -1,5 +1,8 @@
 ## Stackmob Java SDK Change Log
 
+### v1.0.1 --- Oct 2, 2012
+* Bugfixes
+
 ### v1.0.0 --- Sept 17, 2012
 * Refactor for simplicity and parity with the iOS SDK
 * GeoPoint and Binary File support for StackMobModel
