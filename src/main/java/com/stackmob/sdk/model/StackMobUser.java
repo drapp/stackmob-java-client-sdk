@@ -212,7 +212,7 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback invoked on completed login attempt
      */
     protected void login(Map<String, String> args, StackMobOptions options, StackMobCallback callback) {
-        StackMob.getStackMob().login(args, new StackMobIntermediaryCallback(callback){
+        StackMob.getStackMob().login(args, options, new StackMobIntermediaryCallback(callback){
             @Override
             public void success(String responseBody) {
                 // Don't keep the password around after login
