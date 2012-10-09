@@ -679,26 +679,18 @@ public abstract class StackMobModel {
 
                 } catch (Exception ignore) { } //Should never happen
             } else if(getMetadata(fieldName) == BINARY) {
-                StackMob.getStackMob().getSession().getLogger().logError("Serializing binary file at " + fieldName);
                 json.remove(fieldName);
-                StackMob.getStackMob().getSession().getLogger().logError("Removed it from old json");
                 try {
-                    StackMob.getStackMob().getSession().getLogger().logError("Getting file");
                     StackMobFile file = (StackMobFile) getField(fieldName).get(this);
-                    StackMob.getStackMob().getSession().getLogger().logError("Got file " + file);
-                    StackMob.getStackMob().getSession().getLogger().logError("S3 url is" + file.getS3Url());
                     if(file.getBinaryString() != null) {
-                        StackMob.getStackMob().getSession().getLogger().logError("adding binary string " + file.getBinaryString());
                         json.add(fieldName, new JsonPrimitive(file.getBinaryString()));
-                        StackMob.getStackMob().getSession().getLogger().logError("set binary file and now it's " + json.get(fieldName));
                     } else {
-                        StackMob.getStackMob().getSession().getLogger().logError("ignoring because it's an S3 url");
                         //don't post the url
                         newFieldName = null;
                     }
 
                 } catch(Exception e) {
-                    StackMob.getStackMob().getSession().getLogger().logError("Got exception while serializing binary file " + e);
+                    StackMob.getStackMob().getSession().getLogger().logWarning("Got exception while serializing binary file " + e);
                 } //Should never happen
             }
             if(newFieldName != null) outgoing.add(newFieldName.toLowerCase(), json.get(fieldName));
