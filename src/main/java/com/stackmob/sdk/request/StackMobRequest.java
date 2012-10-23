@@ -55,7 +55,6 @@ public abstract class StackMobRequest {
     public static final List<Map.Entry<String, String>> EmptyHeaders = new ArrayList<Map.Entry<String, String>>();
     public static final List<Map.Entry<String, String>> EmptyParams = new ArrayList<Map.Entry<String, String>>();
 
-    public static final int DEFAULT_RETRY_AFTER_MILLIS = 30000;
     protected static final String SECURE_SCHEME = "https";
     protected static final String REGULAR_SCHEME = "http";
     protected static final String API_KEY_HEADER = "X-StackMob-API-Key";
@@ -446,7 +445,7 @@ public abstract class StackMobRequest {
                             }
                             boolean retried = false;
                             if(Http.isUnavailable(ret.getCode())) {
-                                int afterMilliseconds = DEFAULT_RETRY_AFTER_MILLIS;
+                                int afterMilliseconds = -1;
                                 for(Map.Entry<String, String> headerPair : headers) {
                                     if(Http.isRetryAfterHeader(headerPair.getKey())) {
                                         try {
@@ -457,7 +456,7 @@ public abstract class StackMobRequest {
                                         } catch(Throwable ignore) { }
                                     }
                                 }
-                                if(cb.getRetriesRemaining() > 0 && cb.retry(afterMilliseconds)) {
+                                if(afterMilliseconds != -1 && cb.getRetriesRemaining() > 0 && cb.retry(afterMilliseconds)) {
                                     cb.setRetriesRemaining(cb.getRetriesRemaining() - 1);
                                     sendRequest();
                                     retried = true;
