@@ -419,7 +419,15 @@ public abstract class StackMobRequest {
                     try {
                         session.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
                         Response ret = req.send();
-                        session.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + (ret.getBody().length() < 1000 ? ret.getBody() : (ret.getBody().subSequence(0, 1000) + " (truncated)")));
+                        String body;
+                        try {
+                           // Apparently sometime this just NPEs
+                           body = ret.getBody();
+                        } catch(Exception e) {
+                           body = "";
+                        }
+                        String trimmedBody = body.length() < 1000 ? body : (body.subSequence(0, 1000) + " (truncated)");
+                        session.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + trimmedBody);
                         if(!session.isOAuth2() && ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
                         if(HttpRedirectHelper.isRedirected(ret.getCode())) {
                             session.getLogger().logInfo("Response was redirected");
@@ -430,7 +438,7 @@ public abstract class StackMobRequest {
                                 newReq = getOAuthRequest(verb, newLocation, req.getBodyContents());
                             }
                             //does NOT protect against circular redirects
-                            redirectedCallback.redirected(req.getUrl(), ret.getHeaders(), ret.getBody(), newReq.getUrl());
+                            redirectedCallback.redirected(req.getUrl(), ret.getHeaders(), body, newReq.getUrl());
                             sendRequest(newReq);
                         }
                         else {
@@ -473,7 +481,7 @@ public abstract class StackMobRequest {
                                                 req.getBodyContents(),
                                                 ret.getCode(),
                                                 headers,
-                                                ret.getBody().getBytes());
+                                                body.getBytes());
                                     }
                                     catch(Throwable t) {
                                         session.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
