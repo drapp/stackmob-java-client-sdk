@@ -424,7 +424,7 @@ public abstract class StackMobRequest {
                            // Apparently sometime this just NPEs
                            body = ret.getBody();
                         } catch(Exception e) {
-                           body = "";
+                           body = "{}";
                         }
                         String trimmedBody = body.length() < 1000 ? body : (body.subSequence(0, 1000) + " (truncated)");
                         session.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + trimmedBody);
