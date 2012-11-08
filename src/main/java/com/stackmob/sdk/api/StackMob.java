@@ -322,13 +322,13 @@ public class StackMob {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void logout(StackMobRawCallback callback) {
-        session.setOAuth2TokensAndExpiration(null, null, null, 0);
         new StackMobUserBasedRequest(this.executor,
                                      this.session,
                                      "logout",
                                      StackMobRequest.EmptyParams,
                                      callback,
                                      this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+        session.setOAuth2TokensAndExpiration(null, null, null, 0);
     }
 
     ////////////////////
