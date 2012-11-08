@@ -411,7 +411,7 @@ public class StackMob {
         List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
         paramList.add(new Pair("tw_tk", token));
         paramList.add(new Pair("tw_ts", secret));
-        paramList.add(new Pair("username", username));
+        if(username != null) paramList.add(new Pair("username", username));
         new StackMobUserBasedRequest(this.executor,
                                      this.session,
                                      "createUserWithTwitter",
