@@ -89,7 +89,7 @@ public class StackMobPush {
      * a minimal constructor, using defaults for everything else
      * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
      * @param apiKey the api key for your app
-     * @param apiSecret the api secret for your app. Can be null if you're using OAuth2
+     * @param apiSecret the api secret for your app
      */
     public StackMobPush(int apiVersionNumber, String apiKey, String apiSecret) {
         this(apiVersionNumber, apiKey, apiSecret, DEFAULT_PUSH_HOST, StackMob.DEFAULT_REDIRECTED_CALLBACK);
@@ -99,7 +99,7 @@ public class StackMobPush {
      * the most complete constructor
      * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
      * @param apiKey the api key for your app
-     * @param apiSecret the api secret for your app. Can be null if you're using OAuth2
+     * @param apiSecret the api secret for your app
      * @param host the base url for requests
      * @param redirectedCallback callback to be called if the StackMob platform issues a redirect. you should use this callback to cache the new URLs. here is a sample callback:
      * <code>
