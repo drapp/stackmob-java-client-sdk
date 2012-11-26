@@ -68,19 +68,19 @@ public abstract class StackMobCallback extends StackMobRawCallback {
         if(Http.isSuccess(responseStatusCode)) {
             success(new String(responseBody));
         } else {
-            StackMobException e = new StackMobHTTPResponseException(responseStatusCode, responseHeaders, responseBody);
+            StackMobException smException = new StackMobHTTPResponseException(responseStatusCode, responseHeaders, responseBody);
             try {
-                JsonElement errorDescription = new JsonParser().parse(new String(responseBody)).getAsJsonObject().get("error_description");
+                JsonElement errorDescription = new JsonParser().parse(new String(responseBody, "UTF-8")).getAsJsonObject().get("error_description");
                 if(errorDescription != null &&
                         errorDescription.isJsonPrimitive() &&
                         errorDescription.getAsJsonPrimitive().isString() &&
                         errorDescription.getAsString().startsWith("Temporary password reset required.")) {
-                    temporaryPasswordResetRequired(e);
+                    temporaryPasswordResetRequired(smException);
                 } else {
-                    failure(e);
+                    failure(smException);
                 }
-            } catch(JsonSyntaxException jse) {
-                failure(e);
+            } catch(Exception e) {
+                failure(smException);
             }
         }
     }
