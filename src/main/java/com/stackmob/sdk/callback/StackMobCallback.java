@@ -18,6 +18,7 @@ package com.stackmob.sdk.callback;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.exception.StackMobHTTPResponseException;
 import com.stackmob.sdk.net.HttpVerb;
@@ -66,16 +67,19 @@ public abstract class StackMobCallback extends StackMobRawCallback {
                      byte[] responseBody) {
         if(Http.isSuccess(responseStatusCode)) {
             success(new String(responseBody));
-        }
-        else {
+        } else {
             StackMobException e = new StackMobHTTPResponseException(responseStatusCode, responseHeaders, responseBody);
-            JsonElement errorDescription = new JsonParser().parse(new String(responseBody)).getAsJsonObject().get("error_description");
-            if(errorDescription != null &&
-               errorDescription.isJsonPrimitive() &&
-               errorDescription.getAsJsonPrimitive().isString() &&
-               errorDescription.getAsString().startsWith("Temporary password reset required.")) {
-                temporaryPasswordResetRequired(e);
-            } else {
+            try {
+                JsonElement errorDescription = new JsonParser().parse(new String(responseBody)).getAsJsonObject().get("error_description");
+                if(errorDescription != null &&
+                        errorDescription.isJsonPrimitive() &&
+                        errorDescription.getAsJsonPrimitive().isString() &&
+                        errorDescription.getAsString().startsWith("Temporary password reset required.")) {
+                    temporaryPasswordResetRequired(e);
+                } else {
+                    failure(e);
+                }
+            } catch(JsonSyntaxException jse) {
                 failure(e);
             }
         }
