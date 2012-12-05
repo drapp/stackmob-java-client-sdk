@@ -310,8 +310,8 @@ public abstract class StackMobModel {
 
     private static void ensureValidName(String name, String thing) {
         //The three character minimum isn't actually enforced for fields
-        if(name.matches(".*(\\W).*") || name.length() > 25 || name.length() < 3) {
-            throw new IllegalStateException(String.format("Invalid name for a %s: %s. Must be 3-25 alphanumeric characters", thing, name));
+        if(name.matches(".*(\\W).*") || name.length() > 25) {
+            throw new IllegalStateException(String.format("Invalid name for a %s: %s. Must be less than 25 alphanumeric characters", thing, name));
         }
     }
 
