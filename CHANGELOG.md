@@ -1,5 +1,11 @@
 ## Stackmob Java SDK Change Log
 
+### v1.0.2 --- Dec 5, 2012
+* Fix private StackMobFile objects
+* Handle random nulls from scribe
+* Ensure failure callbacks are called
+* Other bugfixes
+
 ### v1.0.1 --- Oct 2, 2012
 * Bugfixes
 
