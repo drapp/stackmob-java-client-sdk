@@ -309,12 +309,11 @@ public class StackMob {
     public void refreshLogin(StackMobRawCallback callback) {
         if(!getSession().isOAuth2()) {
             callback.unsent(new StackMobException("This method is only available with oauth2"));
-        }
-
-        if(!getSession().oauth2RefreshTokenValid()) {
+        } else if(!getSession().oauth2RefreshTokenValid()) {
             callback.unsent(new StackMobException("Refresh token invalid"));
+        } else {
+            StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, this.redirectedCallback, callback).setUrlFormat(this.apiUrlFormat).sendRequest();
         }
-        StackMobAccessTokenRequest.newRefreshTokenRequest(executor, session, this.redirectedCallback, callback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
