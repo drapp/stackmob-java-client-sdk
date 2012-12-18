@@ -28,8 +28,10 @@ import java.util.Map;
  */
 public class StackMobOptions {
     private List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
+    private List<String> selection = null;
     private int expandDepth = 0;
 
+    private boolean https = false;
     private static final String SelectHeader = "X-StackMob-Select";
     private static final String ExpandHeader = "X-StackMob-Expand";
 
@@ -40,6 +42,10 @@ public class StackMobOptions {
      */
     public static StackMobOptions none() {
         return new StackMobOptions();
+    }
+
+    public static StackMobOptions https(boolean https) {
+        return new StackMobOptions().withHTTPS(https);
     }
 
     /**
@@ -89,6 +95,11 @@ public class StackMobOptions {
         return none().withDepthOf(depth);
     }
 
+    public StackMobOptions withHTTPS(boolean https) {
+        this.https = https;
+        return this;
+    }
+
     /**
      * add a single header to a request
      * @param name the header name
@@ -129,6 +140,7 @@ public class StackMobOptions {
      * @return the new query that resulted from adding this operation
      */
     public StackMobOptions withSelectedFields(List<String> fields) {
+        selection = fields;
         headers.add(new Pair<String, String>(SelectHeader, ListHelpers.join(fields, ",")));
         return this;
     }
@@ -146,6 +158,10 @@ public class StackMobOptions {
     }
 
 
+    public boolean isHTTPS() {
+        return https;
+    }
+
     List<Map.Entry<String, String>> getHeaders() {
         return headers;
     }
@@ -157,5 +173,15 @@ public class StackMobOptions {
      */
     public int getExpandDepth() {
         return expandDepth;
+    }
+
+    /**
+     * get the list of selected fields as specified by {@link #selectedFields(java.util.List)}
+     * or {@link #withSelectedFields(java.util.List)}, or null if none specified (meaning all fields
+     * are selected).
+     * @return the selected fields
+     */
+    public List<String> getSelection() {
+        return selection;
     }
 }

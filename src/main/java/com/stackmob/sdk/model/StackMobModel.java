@@ -231,7 +231,7 @@ public abstract class StackMobModel {
     private static <T extends StackMobModel> String toJsonArray(List<T> models) {
         JsonArray array = new JsonArray();
         for(T model : models) {
-            array.add(model.toJsonElement(0, new RelationMapping()));
+            array.add(model.toJsonElement(0, new Selection(null), new RelationMapping()));
         }
         return array.toString();
     }
@@ -606,19 +606,19 @@ public abstract class StackMobModel {
         return list;
     }
 
-    private void replaceModelJson(JsonObject json, String fieldName, RelationMapping mapping, int depth) {
+    private void replaceModelJson(JsonObject json, String fieldName, Selection selection, RelationMapping mapping, int depth) {
         json.remove(fieldName);
         try {
             Field relationField = getField(fieldName);
             StackMobModel relatedModel = (StackMobModel) relationField.get(this);
             mapping.add(fieldName,relatedModel.getSchemaName());
-            JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, mapping);
+            JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, selection.subSelection(fieldName), mapping);
             mapping.leave();
             if(relatedJson != null) json.add(fieldName, relatedJson);
         } catch (Exception ignore) { } //Should never happen
     }
 
-    private void replaceModelArrayJson(JsonObject json, String fieldName, RelationMapping mapping, int depth) {
+    private void replaceModelArrayJson(JsonObject json, String fieldName, Selection selection, RelationMapping mapping, int depth) {
         json.remove(fieldName);
         try {
             Field relationField = getField(fieldName);
@@ -635,7 +635,7 @@ public abstract class StackMobModel {
                     mapping.add(fieldName,relatedModel.getSchemaName());
                     first = false;
                 }
-                JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, mapping);
+                JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, selection.subSelection(fieldName), mapping);
                 if(relatedJson != null) array.add(relatedJson);
             }
             if(!first) mapping.leave();
@@ -643,20 +643,21 @@ public abstract class StackMobModel {
         } catch (Exception ignore) { } //Should never happen
     }
 
-    private JsonElement toJsonElement(int depth, RelationMapping mapping) {
+    private JsonElement toJsonElement(int depth, Selection selection, RelationMapping mapping) {
         // Set the id here as opposed to on the server to avoid a race condition
         if(getID() == null) setID(UUID.randomUUID().toString().replace("-",""));
         if(depth < 0) return new JsonPrimitive(getID());
         JsonObject json = gson.toJsonTree(this).getAsJsonObject();
         JsonObject outgoing = new JsonObject();
         for(String fieldName : getFieldNames(json)) {
+            if(!selection.isSelected(fieldName)) continue;
             String newFieldName = fieldName;
             ensureValidFieldName(fieldName);
             JsonElement value = json.get(fieldName);
             if(getMetadata(fieldName) == MODEL) {
-                replaceModelJson(json, fieldName, mapping, depth);
+                replaceModelJson(json, fieldName, selection, mapping, depth);
             } else if(getMetadata(fieldName) == MODEL_ARRAY) {
-                replaceModelArrayJson(json, fieldName, mapping, depth);
+                replaceModelArrayJson(json, fieldName, selection, mapping, depth);
             } else if(getMetadata(fieldName) == OBJECT) {
                 //We don't support subobjects. Gson automatically converts a few types like
                 //Date and BigInteger to primitive types, but anything else has to be an error.
@@ -719,7 +720,7 @@ public abstract class StackMobModel {
     }
 
     String toJson(StackMobOptions options, RelationMapping mapping) {
-        return toJsonElement(options.getExpandDepth(), mapping).toString();
+        return toJsonElement(options.getExpandDepth(), new Selection(options.getSelection()), mapping).toString();
     }
 
     /**
@@ -915,5 +916,33 @@ public abstract class StackMobModel {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
         StackMob.getStackMob().getDatastore().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), true, callback);
+    }
+
+    /*
+     * Handles selection logic for outgoing requests. The logic mirrors that of the server
+     */
+    private static class Selection {
+
+        private List<String> fields;
+
+        public Selection(List<String> fields) {
+            this.fields = fields;
+        }
+
+        public boolean isSelected(String field) {
+            return fields == null || fields.contains(field);
+        }
+
+        public Selection subSelection(String field) {
+            if(fields == null) return new Selection(null);
+            String prefix = field + ".";
+            List<String> newSelection = new ArrayList<String>();
+            for(String selection : fields) {
+                if(selection.startsWith(prefix)) {
+                    newSelection.add(selection.substring(prefix.length()));
+                }
+            }
+            return new Selection(newSelection);
+        }
     }
 }
