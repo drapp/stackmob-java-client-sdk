@@ -75,6 +75,18 @@ public class StackMobModelTests extends StackMobTestCommon {
         assertEquals("",mapping.toHeaderString());
     }
 
+    @Test public void testSelectedFields() throws Exception {
+        Simple simple = new Simple("foo");
+        assertEquals("simple", simple.getSchemaName());
+        assertEquals("simple_id", simple.getIDFieldName());
+        RelationMapping mapping = new RelationMapping();
+        JsonObject obj = new JsonParser().parse(simple.toJson(StackMobOptions.selectedFields(Arrays.asList("foo")), mapping)).getAsJsonObject();
+        assertEquals("test", obj.get("foo").getAsString());
+        assertEquals(null, obj.get("bar"));
+        assertNotNull(obj.get("simple_id").getAsString());
+        assertEquals("",mapping.toHeaderString());
+    }
+
     private class Complicated extends Simple {
         public Complicated() {
             super(Complicated.class);
@@ -194,11 +206,15 @@ public class StackMobModelTests extends StackMobTestCommon {
             assertTrue(false);
         } catch(Exception e) { }
     }
-    
-    @Test public void testNestedModels() throws Exception {
+
+    private Book testBook() {
         Author a = new Author("Terry Pratchett");
         a.setID("pratchett");
-        Book b = new Book("Mort", "Harper Collins", a);
+        return new Book("Mort", "Harper Collins", a);
+    }
+
+    @Test public void testNestedModels() throws Exception {
+        Book b = testBook();
         RelationMapping mapping = new RelationMapping();
         String json = ((StackMobModel)b).toJson(StackMobOptions.none(), mapping);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
@@ -207,7 +223,28 @@ public class StackMobModelTests extends StackMobTestCommon {
         assertTrue(object.get("author").getAsJsonPrimitive().getAsString().equals("pratchett"));
         assertEquals("author=author", mapping.toHeaderString());
     }
-    
+
+    @Test public void testNestedModelsSelection() throws Exception {
+        Book b = testBook();
+        RelationMapping mapping = new RelationMapping();
+        String json = ((StackMobModel)b).toJson(StackMobOptions.selectedFields(Arrays.asList("title", "author")), mapping);
+        JsonObject object = new JsonParser().parse(json).getAsJsonObject();
+        assertTrue(object.get("title").getAsJsonPrimitive().getAsString().equals("Mort"));
+        assertNull(object.get("publisher"));
+        assertTrue(object.get("author").getAsJsonPrimitive().getAsString().equals("pratchett"));
+        assertEquals("author=author", mapping.toHeaderString());
+    }
+
+    @Test public void testNestedModelsSelectionNoObject() throws Exception {
+        Book b = testBook();
+        RelationMapping mapping = new RelationMapping();
+        String json = ((StackMobModel)b).toJson(StackMobOptions.selectedFields(Arrays.asList("title")), mapping);
+        JsonObject object = new JsonParser().parse(json).getAsJsonObject();
+        assertTrue(object.get("title").getAsJsonPrimitive().getAsString().equals("Mort"));
+        assertNull(object.get("publisher"));
+        assertNull(object.get("author"));
+    }
+
     @Test public void testModelArrayToJSON() throws Exception {
         Library lib = new Library();
         lib.name = "SF Public Library";
