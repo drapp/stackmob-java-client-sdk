@@ -179,16 +179,16 @@ public class StackMobModelTests extends StackMobTestCommon {
         assertEquals(new Date(0), c.date);
     }
     
-    private class Bad_Schema_Name extends StackMobModel {
-        public Bad_Schema_Name() {
-            super(Bad_Schema_Name.class);
+    private class REALLY_SUPER_LONG_NAME_THAT_IS_SIMPLY_TOO_LONG extends StackMobModel {
+        public REALLY_SUPER_LONG_NAME_THAT_IS_SIMPLY_TOO_LONG() {
+            super(REALLY_SUPER_LONG_NAME_THAT_IS_SIMPLY_TOO_LONG.class);
         }    
         String foo = "fail";
     }
 
     @Test public void testBadSchemaName() throws Exception {
         try {
-            new Bad_Schema_Name().toJson(StackMobOptions.none(), new RelationMapping());
+            new REALLY_SUPER_LONG_NAME_THAT_IS_SIMPLY_TOO_LONG().toJson(StackMobOptions.none(), new RelationMapping());
             assertTrue(false);
         } catch(Exception e) { }
     }

@@ -292,7 +292,7 @@ public abstract class StackMobModel {
     private void init(Class<? extends StackMobModel> actualClass) {
         this.actualClass = actualClass;
         schemaName = actualClass.getSimpleName().toLowerCase();
-        ensureValidModelName(schemaName);
+        ensureValidName(schemaName, "model");
         ensureMetadata(actualClass);
     }
 
@@ -303,14 +303,8 @@ public abstract class StackMobModel {
         ensureValidName(name, "field");
     }
 
-    private static void ensureValidModelName(String name) {
-        if(name.contains("_")) throw new IllegalStateException("Model names may not contain underscore");
-        ensureValidName(name,"model");
-    }
-
     private static void ensureValidName(String name, String thing) {
-        //The three character minimum isn't actually enforced for fields
-        if(name.matches(".*(\\W).*") || name.length() > 25) {
+        if(name.length() > 25) {
             throw new IllegalStateException(String.format("Invalid name for a %s: %s. Must be less than 25 alphanumeric characters", thing, name));
         }
     }
