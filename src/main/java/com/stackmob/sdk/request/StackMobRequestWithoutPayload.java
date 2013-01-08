@@ -16,6 +16,7 @@
 
 package com.stackmob.sdk.request;
 
+import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
@@ -34,16 +35,29 @@ public class StackMobRequestWithoutPayload extends StackMobRequest {
                                          String method,
                                          StackMobRawCallback cb,
                                          StackMobRedirectedCallback redirCb) {
-        super(executor, session, verb, headers, params, method, cb, redirCb);
+        this(executor, session, null, verb, headers, params, method, cb, redirCb);
     }
 
     public StackMobRequestWithoutPayload(ExecutorService executor,
                                          StackMobSession session,
+                                         StackMob.OAuthVersion oauthVersionOverride,
+                                         HttpVerbWithoutPayload verb,
+                                         List<Map.Entry<String, String>> headers,
+                                         List<Map.Entry<String, String>>  params,
+                                         String method,
+                                         StackMobRawCallback cb,
+                                         StackMobRedirectedCallback redirCb) {
+        super(executor, session, oauthVersionOverride, verb, headers, params, method, cb, redirCb);
+    }
+
+    public StackMobRequestWithoutPayload(ExecutorService executor,
+                                         StackMobSession session,
+                                         StackMob.OAuthVersion oauthVersionOverride,
                                          HttpVerbWithoutPayload verb,
                                          String method,
                                          StackMobRawCallback cb,
                                          StackMobRedirectedCallback redirCb) {
-        this(executor, session, verb, EmptyHeaders, EmptyParams, method, cb, redirCb);
+        this(executor, session, oauthVersionOverride, verb, EmptyHeaders, EmptyParams, method, cb, redirCb);
     }
 
     @Override protected String getRequestBody() {

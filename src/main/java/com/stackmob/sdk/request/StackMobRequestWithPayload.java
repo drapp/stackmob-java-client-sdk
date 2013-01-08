@@ -16,6 +16,7 @@
 
 package com.stackmob.sdk.request;
 
+import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
@@ -38,10 +39,22 @@ public class StackMobRequestWithPayload extends StackMobRequest {
                                       String method,
                                       StackMobRawCallback cb,
                                       StackMobRedirectedCallback redirCb) {
-        super(executor, session, verb, headers, params, method, cb, redirCb);
+        this(executor, session, null, verb, headers, params, body, method, cb, redirCb);
+    }
+    public StackMobRequestWithPayload(ExecutorService executor,
+                                      StackMobSession session,
+                                      StackMob.OAuthVersion oauthVersionOverride,
+                                      HttpVerbWithPayload verb,
+                                      List<Map.Entry<String, String>> headers,
+                                      List<Map.Entry<String, String>> params,
+                                      String body,
+                                      String method,
+                                      StackMobRawCallback cb,
+                                      StackMobRedirectedCallback redirCb) {
+        super(executor, session, oauthVersionOverride, verb, headers, params, method, cb, redirCb);
         this.body = body;
     }
-    
+
     public StackMobRequestWithPayload(ExecutorService executor,
                                       StackMobSession session,
                                       HttpVerbWithPayload verb,
@@ -51,12 +64,26 @@ public class StackMobRequestWithPayload extends StackMobRequest {
                                       String method,
                                       StackMobRawCallback cb,
                                       StackMobRedirectedCallback redirCb) {
-        super(executor, session, verb, headers, params, method, cb, redirCb);
+        super(executor, session, null, verb, headers, params, method, cb, redirCb);
         this.requestObject = requestObject;
     }
 
-    public StackMobRequestWithPayload(ExecutorService executor, StackMobSession session, HttpVerbWithPayload verb, String method, StackMobRawCallback cb, StackMobRedirectedCallback redirCb) {
-        this(executor, session, verb, EmptyHeaders, EmptyParams, null, method, cb, redirCb);
+    public StackMobRequestWithPayload(ExecutorService executor,
+                                      StackMobSession session,
+                                      StackMob.OAuthVersion oauthVersionOverride,
+                                      HttpVerbWithPayload verb,
+                                      List<Map.Entry<String, String>> headers,
+                                      List<Map.Entry<String, String>> params,
+                                      Object requestObject,
+                                      String method,
+                                      StackMobRawCallback cb,
+                                      StackMobRedirectedCallback redirCb) {
+        super(executor, session, oauthVersionOverride, verb, headers, params, method, cb, redirCb);
+        this.requestObject = requestObject;
+    }
+
+    public StackMobRequestWithPayload(ExecutorService executor, StackMobSession session, StackMob.OAuthVersion oauthVersionOverride, HttpVerbWithPayload verb, String method, StackMobRawCallback cb, StackMobRedirectedCallback redirCb) {
+        this(executor, session, oauthVersionOverride, verb, EmptyHeaders, EmptyParams, null, method, cb, redirCb);
     }
 
     @Override protected String getRequestBody() {

@@ -84,6 +84,7 @@ public abstract class StackMobRequest {
 
     protected StackMobRequest(ExecutorService executor,
                               StackMobSession session,
+                              OAuthVersion oauthVersionOverride,
                               HttpVerb verb,
                               List<Map.Entry<String, String>> headers,
                               List<Map.Entry<String, String>> params,

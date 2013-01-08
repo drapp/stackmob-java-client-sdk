@@ -19,9 +19,10 @@ import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
+import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.net.HttpVerbWithoutPayload;
-import com.stackmob.sdk.request.StackMobPushRequest;
 import com.stackmob.sdk.request.StackMobRequest;
+import com.stackmob.sdk.request.StackMobRequestWithPayload;
 import com.stackmob.sdk.request.StackMobRequestWithoutPayload;
 import com.stackmob.sdk.util.Pair;
 
@@ -36,20 +37,12 @@ public class StackMobPush {
 
     public static String DEFAULT_PUSH_HOST = "push.stackmob.com";
 
-    private class RegistrationIDAndUser {
+    private class User {
 
-        public String userId;
-        public Map<String, String> token = new HashMap<String, String>();
-        public Boolean overwrite = null;
+        public String user;
 
-        public RegistrationIDAndUser(StackMobPushToken token, String user) {
-            userId = user;
-            this.token.put("token", token.getToken());
-            this.token.put("type", token.getTokenType().toString());
-        }
-        public RegistrationIDAndUser(StackMobPushToken token, String user, boolean overwrite) {
-            this(token, user);
-            this.overwrite = overwrite;
+        public User(String user) {
+            user = user;
         }
     }
 
@@ -151,6 +144,10 @@ public class StackMobPush {
     //Push Notifications
     ////////////////////
 
+    private String tokenPath(StackMobPushToken token) {
+        return String.format("tokens/%s/%s", token.getToken(), token.getTokenType().toString());
+    }
+
     /**
      * send a push notification to a group of tokens
      * @param payload the payload of the push notification to send
@@ -159,13 +156,9 @@ public class StackMobPush {
      */
     public void pushToTokens(Map<String, String> payload, List<StackMobPushToken> tokens, StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
-        Map<String, Object> payloadMap = new HashMap<String, Object>();
-
-        payloadMap.put("kvPairs", payload);
-        finalPayload.put("payload", payloadMap);
+        finalPayload.put("payload", payload);
         finalPayload.put("tokens", tokens);
-
-        postPush("push_tokens_universal", finalPayload, callback);
+        sendWithPayload(HttpVerbWithPayload.POST, "notifications", finalPayload, callback);
     }
 
     /**
@@ -176,9 +169,9 @@ public class StackMobPush {
      */
     public void pushToUsers(Map<String, String> payload, List<String> userIds, StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
-        finalPayload.put("kvPairs", payload);
-        finalPayload.put("userIds", userIds);
-        postPush("push_users_universal", finalPayload, callback);
+        finalPayload.put("payload", payload);
+        finalPayload.put("users", userIds);
+        sendWithPayload(HttpVerbWithPayload.POST, "tokens", finalPayload, callback);
     }
 
     /**
@@ -199,8 +192,9 @@ public class StackMobPush {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void registerForPushWithUser(StackMobPushToken token, String username, boolean overwrite, StackMobRawCallback callback) {
-        RegistrationIDAndUser tokenAndUser = new RegistrationIDAndUser(token, username, overwrite);
-        postPush("register_device_token_universal", tokenAndUser, callback);
+        User tokenAndUser = new User(username);
+        HttpVerbWithPayload verb = overwrite ? HttpVerbWithPayload.PUT : HttpVerbWithPayload.POST;
+        sendWithPayload(verb, tokenPath(token), tokenAndUser, callback);
     }
 
 
@@ -210,18 +204,11 @@ public class StackMobPush {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void getTokensForUsers(List<String> usernames, StackMobRawCallback callback) {
-        final StringBuilder userIds = new StringBuilder();
-        boolean first = true;
-        for(String username : usernames) {
-            if(!first) {
-                userIds.append(",");
-            }
-            first = false;
-            userIds.append(username);
-        }
         List<Map.Entry<String, String>> params = new LinkedList<Map.Entry<String, String>>();
-        params.add(new Pair("userIds", userIds.toString()));
-        getPush("get_tokens_for_users_universal", params, callback);
+        for(String username : usernames) {
+            params.add(new Pair<String, String>("user", username));
+        }
+        sendWithoutPayload(HttpVerbWithoutPayload.GET, "tokens", params, callback);
     }
 
     /**
@@ -231,8 +218,8 @@ public class StackMobPush {
      */
     public void broadcastPushNotification(Map<String, String> payload, StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
-        finalPayload.put("kvPairs", payload);
-        postPush("push_broadcast", finalPayload, callback);
+        finalPayload.put("payload", payload);
+        sendWithPayload(HttpVerbWithPayload.POST, "notifications", finalPayload, callback);
     }
 
     /**
@@ -241,16 +228,18 @@ public class StackMobPush {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void removePushToken(StackMobPushToken token, StackMobRawCallback callback) {
-        Map<String, Object> finalPayload = new HashMap<String, Object>();
-        finalPayload.put("token", token.getToken());
-        finalPayload.put("type", token.getTokenType().toString());
-        postPush("remove_token_universal", finalPayload, callback);
+        List<Map.Entry<String, String>> args = new LinkedList<Map.Entry<String, String>>();
+        sendWithoutPayload(HttpVerbWithoutPayload.DELETE, tokenPath(token), args, callback);
     }
 
 
-    private void postPush(String path, Object requestObject, StackMobRawCallback callback) {
-        new StackMobPushRequest(this.executor,
+    private void sendWithPayload(HttpVerbWithPayload verb, String path, Object requestObject, StackMobRawCallback callback) {
+        new StackMobRequestWithPayload(this.executor,
                 this.session,
+                StackMob.OAuthVersion.One,
+                verb,
+                StackMobRequest.EmptyHeaders,
+                StackMobRequest.EmptyParams,
                 requestObject,
                 path,
                 callback,
@@ -263,10 +252,11 @@ public class StackMobPush {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      * contains no information about the response - that will be passed to the callback when the response comes back
      */
-    private void getPush(String path, List<Map.Entry<String, String>> arguments, StackMobRawCallback callback) {
+    private void sendWithoutPayload(HttpVerbWithoutPayload verb, String path, List<Map.Entry<String, String>> arguments, StackMobRawCallback callback) {
         new StackMobRequestWithoutPayload(this.executor,
                 this.session,
-                HttpVerbWithoutPayload.GET,
+                StackMob.OAuthVersion.One,
+                verb,
                 StackMobRequest.EmptyHeaders,
                 arguments,
                 path,
