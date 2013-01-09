@@ -142,6 +142,16 @@ import java.util.*;
  * Class and field names must be alphanumeric (no underscores) and at least three characters. If your model class has any required initialization it should happen in a zero args constructor. When
  * objects are created during queries and fetches field initialization may not happen, and other constructors may not be called.
  *
+ * By default the name of the schema corresponding to your model on the server is the class name lowercased. To change this,
+ * create the following static method in your subclass:
+ * <pre>
+ * {@code
+ * public static String overrideSchemaName() {
+ *     return "thenameyouwant";
+ * }
+ * }
+ * </pre>
+ *
  *
  */
 public abstract class StackMobModel {
@@ -355,9 +365,18 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Determines the schema connected to this class on the server. By
-     * default it's the name of the class in lower case. Override in
-     * subclasses to change that. Must be 3-25 alphanumeric characters.
+     * The name of the schema this object corresponds to on the server.
+     * To override, create the following static method in your sublcass:
+     *  * <pre>
+     * {@code
+     * public static String overrideSchemaName() {
+     *     return "thenameyouwant";
+     * }
+     * }
+     * </pre>
+     * The static method is necessary for the name to be accessible from
+     * static method By default it's the name of the class in lower case.
+     * Must be less than 25 alphanumeric characters.
      * @return the schema name
      */
     protected String getSchemaName() {
