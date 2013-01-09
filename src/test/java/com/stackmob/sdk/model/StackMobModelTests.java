@@ -130,6 +130,22 @@ public class StackMobModelTests extends StackMobTestCommon {
         }
     }
 
+
+    private static class AlternateName extends StackMobModel {
+
+        public static String overrideSchemaName() {
+            return "somethingelse";
+        }
+
+        public AlternateName() {
+            super(AlternateName.class);
+        }
+    }
+    @Test public void testAlternateSchemaName() throws Exception {
+        AlternateName test = new AlternateName();
+        assertEquals(test.getSchemaName(), "somethingelse");
+    }
+
     String bookName1 = "The C Programming Language";
     String bookPublisher1 = "Prentice Hall";
     

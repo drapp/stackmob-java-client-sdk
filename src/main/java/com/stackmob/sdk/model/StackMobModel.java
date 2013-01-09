@@ -35,6 +35,7 @@ import static com.stackmob.sdk.util.SerializationMetadata.*;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -154,6 +155,17 @@ public abstract class StackMobModel {
     public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, final StackMobQueryCallback<T> callback) {
         query(theClass, q, new StackMobOptions(), callback);
     }
+
+
+    private static <T extends StackMobModel> String getSchemaName(Class<T> theClass) {
+        try {
+            Method getSchemaName = theClass.getDeclaredMethod("overrideSchemaName", new Class[]{});
+            Object result = getSchemaName.invoke(null);
+            return (String) result;
+        } catch (Exception e) {
+            return theClass.getSimpleName().toLowerCase();
+        }
+    }
     /**
      * run a query on the server to get all the instances of your model within certain constraints
      * @param theClass The class of your model
@@ -162,7 +174,7 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, StackMobOptions options, final StackMobQueryCallback<T> callback) {
-        q.setObjectName(theClass.getSimpleName().toLowerCase());
+        q.setObjectName(getSchemaName(theClass));
         StackMob.getStackMob().getDatastore().get(q, options, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
@@ -190,7 +202,7 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void count(Class<T> theClass, StackMobQuery q, StackMobCountCallback callback) {
-        q.setObjectName(theClass.getSimpleName().toLowerCase());
+        q.setObjectName(getSchemaName(theClass));
         StackMob.getStackMob().getDatastore().count(q, callback);
     }
 
@@ -291,7 +303,7 @@ public abstract class StackMobModel {
 
     private void init(Class<? extends StackMobModel> actualClass) {
         this.actualClass = actualClass;
-        schemaName = actualClass.getSimpleName().toLowerCase();
+        schemaName = getSchemaName(actualClass);
         ensureValidName(schemaName, "model");
         ensureMetadata(actualClass);
     }
