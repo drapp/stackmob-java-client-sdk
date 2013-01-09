@@ -1,6 +1,6 @@
 ## Stackmob Java SDK Change Log
 
-### v1.0.3 --- Jan 9, 2013
+### v1.1.0 --- Jan 9, 2013
 * Add support for saving only selected fields
 * Fix overriding model schema names in static method
 * Fix outdated schema name restrictions
