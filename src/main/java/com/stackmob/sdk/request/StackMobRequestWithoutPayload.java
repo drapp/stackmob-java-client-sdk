@@ -16,6 +16,7 @@
 
 package com.stackmob.sdk.request;
 
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
@@ -29,12 +30,12 @@ public class StackMobRequestWithoutPayload extends StackMobRequest {
     public StackMobRequestWithoutPayload(ExecutorService executor,
                                          StackMobSession session,
                                          HttpVerbWithoutPayload verb,
-                                         List<Map.Entry<String, String>> headers,
+                                         StackMobOptions options,
                                          List<Map.Entry<String, String>>  params,
                                          String method,
                                          StackMobRawCallback cb,
                                          StackMobRedirectedCallback redirCb) {
-        super(executor, session, verb, headers, params, method, cb, redirCb);
+        super(executor, session, verb, options, params, method, cb, redirCb);
     }
 
     public StackMobRequestWithoutPayload(ExecutorService executor,
@@ -43,7 +44,7 @@ public class StackMobRequestWithoutPayload extends StackMobRequest {
                                          String method,
                                          StackMobRawCallback cb,
                                          StackMobRedirectedCallback redirCb) {
-        this(executor, session, verb, EmptyHeaders, EmptyParams, method, cb, redirCb);
+        this(executor, session, verb, StackMobOptions.none(), EmptyParams, method, cb, redirCb);
     }
 
     @Override protected String getRequestBody() {

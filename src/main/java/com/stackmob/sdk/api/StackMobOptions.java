@@ -23,15 +23,33 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * stores the various options that can be passed into a request. At the moment this means select and expand options, as well
- * as arbitrary headers to be passed along with the request
+ * Stores the various options that can be passed into a request. Calls can be chained for ease of use
+ *
+ *
+ * <pre>
+ * {@code
+ * StackMobOptions.https(true).withSelectedFields(Arrays.asList("name", "age").withDepthOf(2)
+ * }
+ * </pre>
+ *
+ * Be careful not to call the static methods, which create new options, from non-static context. Java
+ * allows this for no good reason with a warning. The object methods are all prefixed with "with".
+ * The following code would not do what you want:
+ *
+ * <pre>
+ * {@code
+ * // This is wrong! You'll only get the depthOf in the resulting options
+ * StackMobOptions.https(true).selectedFields(Arrays.asList("name", "age").depthOf(2)
+ * }
+ * </pre>
+ *
  */
 public class StackMobOptions {
     private List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
     private List<String> selection = null;
     private int expandDepth = 0;
 
-    private boolean https = false;
+    private Boolean https = null;
     private static final String SelectHeader = "X-StackMob-Select";
     private static final String ExpandHeader = "X-StackMob-Expand";
 
@@ -44,6 +62,11 @@ public class StackMobOptions {
         return new StackMobOptions();
     }
 
+    /**
+     * Force a method to be either http or https, overriding any defaults
+     * @param https if true, use https, otherwise http
+     * @return the new options with https set
+     */
     public static StackMobOptions https(boolean https) {
         return new StackMobOptions().withHTTPS(https);
     }
@@ -73,7 +96,7 @@ public class StackMobOptions {
      * @return options with the new headers set
      */
     public static StackMobOptions headers(List<Map.Entry<String, String>> headers) {
-        return none().headers(headers);
+        return none().withHeaders(headers);
     }
 
 
@@ -95,8 +118,24 @@ public class StackMobOptions {
         return none().withDepthOf(depth);
     }
 
+    /**
+     * Force a method to be either http or https, overriding any defaults or previous settings
+     * @param https if true, use https, otherwise http
+     * @return the new options with https set
+     */
     public StackMobOptions withHTTPS(boolean https) {
         this.https = https;
+        return this;
+    }
+
+    /**
+     * Force a method to be either http or https, overriding any defaults, unless
+     * https has already been set
+     * @param https if true, use https, otherwise http
+     * @return the new options with https set
+     */
+    public StackMobOptions suggestHTTPS(boolean https) {
+        if(this.https == null) this.https = https;
         return this;
     }
 
@@ -158,11 +197,19 @@ public class StackMobOptions {
     }
 
 
+    /**
+     * whether or not to use https
+     * @return https
+     */
     public boolean isHTTPS() {
-        return https;
+        return https == null ? false : https;
     }
 
-    List<Map.Entry<String, String>> getHeaders() {
+    /**
+     * The headers specified in these options.
+     * @return the headers
+     */
+    public List<Map.Entry<String, String>> getHeaders() {
         return headers;
     }
 

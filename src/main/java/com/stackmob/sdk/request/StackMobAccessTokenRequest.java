@@ -17,6 +17,7 @@ package com.stackmob.sdk.request;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
@@ -25,7 +26,6 @@ import com.stackmob.sdk.net.HttpVerb;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
 import com.stackmob.sdk.util.Pair;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
         return new StackMobAccessTokenRequest(executor,
                 session,
                 "refreshToken",
-                StackMobRequest.EmptyHeaders,
+                StackMobOptions.https(true),
                 newParams,
                 callback,
                 redirectedCallback);
@@ -53,11 +53,11 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
     public StackMobAccessTokenRequest(ExecutorService executor,
                                       StackMobSession session,
                                       String method,
-                                      List<Map.Entry<String, String>> headers,
+                                      StackMobOptions options,
                                       List<Map.Entry<String, String>> params,
                                       StackMobRawCallback cb,
                                       StackMobRedirectedCallback redirCb) {
-        super(executor, session, HttpVerbWithPayload.POST, headers, addAuthConfig(params), method, getIntermediaryCallback(session, cb), redirCb);
+        super(executor, session, HttpVerbWithPayload.POST, options.suggestHTTPS(true), addAuthConfig(params), method, getIntermediaryCallback(session, cb), redirCb);
         bodyParams = params;
         isSecure = true;
     }

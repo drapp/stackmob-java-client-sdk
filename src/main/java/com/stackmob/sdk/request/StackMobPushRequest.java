@@ -16,6 +16,7 @@
 package com.stackmob.sdk.request;
 
 import com.stackmob.sdk.api.StackMob;
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
@@ -27,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 public class StackMobPushRequest extends StackMobRequestWithPayload {
 
     public StackMobPushRequest(ExecutorService executor, StackMobSession session, Object requestObject, String method, StackMobRawCallback cb, StackMobRedirectedCallback redirCb) {
-        super(executor, session, HttpVerbWithPayload.POST, EmptyHeaders, EmptyParams, requestObject, method, cb, redirCb);
+        super(executor, session, HttpVerbWithPayload.POST, StackMobOptions.none(), EmptyParams, requestObject, method, cb, redirCb);
     }
 
     @Override

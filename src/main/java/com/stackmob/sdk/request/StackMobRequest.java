@@ -85,15 +85,16 @@ public abstract class StackMobRequest {
     protected StackMobRequest(ExecutorService executor,
                               StackMobSession session,
                               HttpVerb verb,
-                              List<Map.Entry<String, String>> headers,
+                              StackMobOptions options,
                               List<Map.Entry<String, String>> params,
                               String method,
                               StackMobRawCallback cb,
                               StackMobRedirectedCallback redirCb) {
         this.executor = executor;
         this.session = session;
+        this.isSecure = options.isHTTPS();
         this.httpVerb = verb;
-        this.headers = headers;
+        this.headers = options.getHeaders();
         this.params = params;
         this.methodName = method;
         this.callback = cb;

@@ -16,6 +16,7 @@
 package com.stackmob.sdk.push;
 
 import com.stackmob.sdk.api.StackMob;
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
@@ -269,7 +270,7 @@ public class StackMobPush {
         new StackMobRequestWithoutPayload(this.executor,
                 this.session,
                 HttpVerbWithoutPayload.GET,
-                StackMobRequest.EmptyHeaders,
+                StackMobOptions.none(),
                 arguments,
                 path,
                 callback,
