@@ -16,6 +16,7 @@
 package com.stackmob.sdk.push;
 
 import com.stackmob.sdk.api.StackMob;
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
@@ -86,6 +87,8 @@ public class StackMobPush {
      */
     public StackMobPush(int apiVersionNumber, String apiKey, String apiSecret) {
         this(apiVersionNumber, apiKey, apiSecret, DEFAULT_PUSH_HOST, StackMob.DEFAULT_REDIRECTED_CALLBACK);
+        // Some internal things depend on a stackmob having been created
+        new StackMob(StackMob.OAuthVersion.One, apiVersionNumber, apiKey, apiSecret);
     }
 
     /**
@@ -238,7 +241,7 @@ public class StackMobPush {
                 this.session,
                 StackMob.OAuthVersion.One,
                 verb,
-                StackMobRequest.EmptyHeaders,
+                StackMobOptions.none(),
                 StackMobRequest.EmptyParams,
                 requestObject,
                 path,
@@ -257,7 +260,7 @@ public class StackMobPush {
                 this.session,
                 StackMob.OAuthVersion.One,
                 verb,
-                StackMobRequest.EmptyHeaders,
+                StackMobOptions.none(),
                 arguments,
                 path,
                 callback,

@@ -69,7 +69,7 @@ public class StackMobDatastore {
         new StackMobRequestWithoutPayload(this.executor,
                                           this.session,
                                           HttpVerbWithoutPayload.GET,
-                                          StackMobRequest.EmptyHeaders,
+                                          StackMobOptions.none(),
                                           StackMobRequest.EmptyParams,
                                           path,
                                           callback,
@@ -83,7 +83,7 @@ public class StackMobDatastore {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void get(String path, StackMobOptions options, StackMobRawCallback callback) {
-        get(path, StackMobRequest.EmptyParams, options.getHeaders(), callback);
+        get(path, StackMobRequest.EmptyParams, options, callback);
     }
 
     /**
@@ -97,11 +97,29 @@ public class StackMobDatastore {
         new StackMobRequestWithoutPayload(this.executor,
                                           this.session,
                                           HttpVerbWithoutPayload.GET,
-                                          headers,
+                                          StackMobOptions.headers(headers),
                                           arguments,
                                           path,
                                           callback,
                                           this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+    }
+
+    /**
+     * do a get request on the StackMob platform
+     * @param path the path to get
+     * @param arguments arguments to be encoded into the query string of the get request
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    private void get(String path, List<Map.Entry<String, String>> arguments, StackMobOptions options, StackMobRawCallback callback) {
+        new StackMobRequestWithoutPayload(this.executor,
+                this.session,
+                HttpVerbWithoutPayload.GET,
+                options,
+                arguments,
+                path,
+                callback,
+                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
     /**
@@ -135,7 +153,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.POST,
-                                       StackMobRequest.EmptyHeaders,
+                                       StackMobOptions.none(),
                                        StackMobRequest.EmptyParams,
                                        requestObject,
                                        path,
@@ -154,7 +172,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.POST,
-                                       options.getHeaders(),
+                                       options,
                                        StackMobRequest.EmptyParams,
                                        requestObject,
                                        path,
@@ -172,7 +190,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.POST,
-                                       StackMobRequest.EmptyHeaders,
+                                       StackMobOptions.none(),
                                        StackMobRequest.EmptyParams,
                                        body,
                                        path,
@@ -191,7 +209,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.POST,
-                                       options.getHeaders(),
+                                       options,
                                        StackMobRequest.EmptyParams,
                                        body,
                                        path,
@@ -209,7 +227,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.POST,
-                                       StackMobRequest.EmptyHeaders,
+                                       StackMobOptions.none(),
                                        StackMobRequest.EmptyParams,
                                        requestObjects,
                                        path,
@@ -229,7 +247,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.POST,
-                                       StackMobRequest.EmptyHeaders,
+                                       StackMobOptions.none(),
                                        StackMobRequest.EmptyParams,
                                        relatedObject,
                                        String.format("%s/%s/%s", path, primaryId, relatedField),
@@ -249,7 +267,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.POST,
-                                       StackMobRequest.EmptyHeaders,
+                                       StackMobOptions.none(),
                                        StackMobRequest.EmptyParams,
                                        relatedObject,
                                        String.format("%s/%s/%s", path, primaryId, relatedField),
@@ -281,7 +299,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.PUT,
-                                       StackMobRequest.EmptyHeaders,
+                                       StackMobOptions.none(),
                                        StackMobRequest.EmptyParams,
                                        requestObject,
                                        path + "/" + id,
@@ -300,7 +318,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.PUT,
-                                       StackMobRequest.EmptyHeaders,
+                                       StackMobOptions.none(),
                                        StackMobRequest.EmptyParams,
                                        body,
                                        path + "/" + id,
@@ -367,7 +385,7 @@ public class StackMobDatastore {
         new StackMobRequestWithPayload(this.executor,
                                        this.session,
                                        HttpVerbWithPayload.PUT,
-                                       StackMobRequest.EmptyHeaders,
+                                       StackMobOptions.none(),
                                        StackMobRequest.EmptyParams,
                                        relatedIds,
                                        String.format("%s/%s/%s", path, primaryId, relatedField),
@@ -386,7 +404,7 @@ public class StackMobDatastore {
         new StackMobRequestWithoutPayload(this.executor,
                                           this.session,
                                           HttpVerbWithoutPayload.DELETE,
-                                          StackMobRequest.EmptyHeaders,
+                                          StackMobOptions.none(),
                                           StackMobRequest.EmptyParams,
                                           path + "/" + id,
                                           callback,
@@ -423,7 +441,7 @@ public class StackMobDatastore {
         new StackMobRequestWithoutPayload(this.executor,
                                           this.session,
                                           HttpVerbWithoutPayload.DELETE,
-                                          headers,
+                                          StackMobOptions.headers(headers),
                                           StackMobRequest.EmptyParams,
                                           String.format("%s/%s/%s/%s", path, primaryId, field, ids.toString()),
                                           callback,
@@ -453,7 +471,7 @@ public class StackMobDatastore {
         new StackMobRequestWithoutPayload(this.executor,
                                           this.session,
                                           HttpVerbWithoutPayload.DELETE,
-                                          headers,
+                                          StackMobOptions.headers(headers),
                                           StackMobRequest.EmptyParams,
                                           String.format("%s/%s/%s/%s", path, primaryId, field, idToDelete),
                                           callback,

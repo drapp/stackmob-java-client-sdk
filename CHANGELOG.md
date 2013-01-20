@@ -1,5 +1,13 @@
 ## Stackmob Java SDK Change Log
 
+### v1.1.1 --- Jan 10, 2013
+* Add support for per-request https override
+
+### v1.1.0 --- Jan 9, 2013
+* Add support for saving only selected fields
+* Fix overriding model schema names in static method
+* Fix outdated schema name restrictions
+
 ### v1.0.2 --- Dec 5, 2012
 * Fix private StackMobFile objects
 * Handle random nulls from scribe

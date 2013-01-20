@@ -16,6 +16,7 @@
 
 package com.stackmob.sdk.request;
 
+import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.api.StackMobSession;
 import com.stackmob.sdk.callback.StackMobRawCallback;
 import com.stackmob.sdk.callback.StackMobRedirectedCallback;
@@ -36,21 +37,19 @@ public class StackMobUserBasedRequest extends StackMobRequest {
                                     List<Map.Entry<String, String>> params,
                                     StackMobRawCallback cb,
                                     StackMobRedirectedCallback redirCb) {
-        super(executor, session, null, HttpVerbWithoutPayload.GET, StackMobRequest.EmptyHeaders, params, method, cb, redirCb);
-        isSecure = true;
+        super(executor, session, null, HttpVerbWithoutPayload.GET, StackMobOptions.https(true), params, method, cb, redirCb);
     }
 
     public StackMobUserBasedRequest(ExecutorService executor,
                                     StackMobSession session,
                                     HttpVerb verb,
-                                    List<Map.Entry<String, String>> headers,
+                                    StackMobOptions options,
                                     List<Map.Entry<String, String>> params,
                                     Object requestObject,
                                     String method,
                                     StackMobRawCallback cb,
                                     StackMobRedirectedCallback redirCb) {
-        super(executor, session, null, verb, headers, params, method, cb, redirCb);
-        this.isSecure = true;
+        super(executor, session, null, verb, options.suggestHTTPS(true), params, method, cb, redirCb);
         this.requestObject = requestObject;
     }
 

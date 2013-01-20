@@ -284,7 +284,7 @@ public class StackMob {
             req = new StackMobAccessTokenRequest(this.executor,
                     this.session,
                     "accessToken",
-                    options.getHeaders(),
+                    options,
                     paramList,
                     callback,
                     this.redirectedCallback);
@@ -365,7 +365,7 @@ public class StackMob {
             req = new StackMobAccessTokenRequest(this.executor,
                     this.session,
                     "twitterAccessToken",
-                    options.getHeaders(),
+                    options,
                     paramList,
                     callback,
                     this.redirectedCallback);
@@ -468,7 +468,7 @@ public class StackMob {
             req = new StackMobAccessTokenRequest(this.executor,
                                                  this.session,
                                                  "facebookAccessToken",
-                                                 options.getHeaders(),
+                                                 options,
                                                  paramList,
                                                  callback,
                                                  this.redirectedCallback);
@@ -568,7 +568,7 @@ public class StackMob {
         new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             HttpVerbWithPayload.POST,
-                                            StackMobRequest.EmptyHeaders,
+                                            StackMobOptions.none(),
                                             StackMobRequest.EmptyParams,
                                             params,
                                             "forgotPassword",
@@ -584,8 +584,8 @@ public class StackMob {
      */
 
     public void resetPassword(String oldPassword,
-                                                   String newPassword,
-                                                   StackMobRawCallback callback) {
+                              String newPassword,
+                              StackMobRawCallback callback) {
 
         Map<String, Map<String, String>> params = new HashMap<String, Map<String, String>>();
         Map<String, String> oldPW = new HashMap<String, String>();
@@ -597,7 +597,7 @@ public class StackMob {
         new StackMobUserBasedRequest(this.executor,
                                             this.session,
                                             HttpVerbWithPayload.POST,
-                                            StackMobRequest.EmptyHeaders,
+                                            StackMobOptions.none(),
                                             StackMobRequest.EmptyParams,
                                             params,
                                             "resetPassword",

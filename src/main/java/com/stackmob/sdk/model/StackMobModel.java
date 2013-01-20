@@ -35,6 +35,7 @@ import static com.stackmob.sdk.util.SerializationMetadata.*;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -141,6 +142,16 @@ import java.util.*;
  * Class and field names must be alphanumeric (no underscores) and at least three characters. If your model class has any required initialization it should happen in a zero args constructor. When
  * objects are created during queries and fetches field initialization may not happen, and other constructors may not be called.
  *
+ * By default the name of the schema corresponding to your model on the server is the class name lowercased. To change this,
+ * create the following static method in your subclass:
+ * <pre>
+ * {@code
+ * public static String overrideSchemaName() {
+ *     return "thenameyouwant";
+ * }
+ * }
+ * </pre>
+ *
  *
  */
 public abstract class StackMobModel {
@@ -154,6 +165,17 @@ public abstract class StackMobModel {
     public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, final StackMobQueryCallback<T> callback) {
         query(theClass, q, new StackMobOptions(), callback);
     }
+
+
+    private static <T extends StackMobModel> String getSchemaName(Class<T> theClass) {
+        try {
+            Method getSchemaName = theClass.getDeclaredMethod("overrideSchemaName", new Class[]{});
+            Object result = getSchemaName.invoke(null);
+            return (String) result;
+        } catch (Exception e) {
+            return theClass.getSimpleName().toLowerCase();
+        }
+    }
     /**
      * run a query on the server to get all the instances of your model within certain constraints
      * @param theClass The class of your model
@@ -162,7 +184,7 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, StackMobOptions options, final StackMobQueryCallback<T> callback) {
-        q.setObjectName(theClass.getSimpleName().toLowerCase());
+        q.setObjectName(getSchemaName(theClass));
         StackMob.getStackMob().getDatastore().get(q, options, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
@@ -190,7 +212,7 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void count(Class<T> theClass, StackMobQuery q, StackMobCountCallback callback) {
-        q.setObjectName(theClass.getSimpleName().toLowerCase());
+        q.setObjectName(getSchemaName(theClass));
         StackMob.getStackMob().getDatastore().count(q, callback);
     }
 
@@ -291,7 +313,7 @@ public abstract class StackMobModel {
 
     private void init(Class<? extends StackMobModel> actualClass) {
         this.actualClass = actualClass;
-        schemaName = actualClass.getSimpleName().toLowerCase();
+        schemaName = getSchemaName(actualClass);
         ensureValidName(schemaName, "model");
         ensureMetadata(actualClass);
     }
@@ -343,9 +365,18 @@ public abstract class StackMobModel {
     }
 
     /**
-     * Determines the schema connected to this class on the server. By
-     * default it's the name of the class in lower case. Override in
-     * subclasses to change that. Must be 3-25 alphanumeric characters.
+     * The name of the schema this object corresponds to on the server.
+     * To override, create the following static method in your sublcass:
+     *  * <pre>
+     * {@code
+     * public static String overrideSchemaName() {
+     *     return "thenameyouwant";
+     * }
+     * }
+     * </pre>
+     * The static method is necessary for the name to be accessible from
+     * static method By default it's the name of the class in lower case.
+     * Must be less than 25 alphanumeric characters.
      * @return the schema name
      */
     protected String getSchemaName() {

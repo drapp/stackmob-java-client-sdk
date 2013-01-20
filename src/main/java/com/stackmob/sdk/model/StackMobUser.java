@@ -15,7 +15,6 @@
  */
 package com.stackmob.sdk.model;
 
-import com.google.gson.JsonParser;
 import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.callback.StackMobCallback;
@@ -82,6 +81,12 @@ import java.util.*;
  *
  */
 public abstract class StackMobUser extends StackMobModel {
+
+
+    @Override
+    public void save(StackMobOptions options, StackMobCallback callback) {
+        super.save(password == null ? options : options.suggestHTTPS(true), callback);
+    }
 
 
     /**
