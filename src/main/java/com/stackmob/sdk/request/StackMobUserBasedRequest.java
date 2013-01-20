@@ -37,7 +37,7 @@ public class StackMobUserBasedRequest extends StackMobRequest {
                                     List<Map.Entry<String, String>> params,
                                     StackMobRawCallback cb,
                                     StackMobRedirectedCallback redirCb) {
-        super(executor, session, HttpVerbWithoutPayload.GET, StackMobOptions.https(true), params, method, cb, redirCb);
+        super(executor, session, null, HttpVerbWithoutPayload.GET, StackMobOptions.https(true), params, method, cb, redirCb);
     }
 
     public StackMobUserBasedRequest(ExecutorService executor,
@@ -49,7 +49,7 @@ public class StackMobUserBasedRequest extends StackMobRequest {
                                     String method,
                                     StackMobRawCallback cb,
                                     StackMobRedirectedCallback redirCb) {
-        super(executor, session, verb, options.suggestHTTPS(true), params, method, cb, redirCb);
+        super(executor, session, null, verb, options.suggestHTTPS(true), params, method, cb, redirCb);
         this.requestObject = requestObject;
     }
 

@@ -57,7 +57,7 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                                       List<Map.Entry<String, String>> params,
                                       StackMobRawCallback cb,
                                       StackMobRedirectedCallback redirCb) {
-        super(executor, session, HttpVerbWithPayload.POST, options.suggestHTTPS(true), addAuthConfig(params), method, getIntermediaryCallback(session, cb), redirCb);
+        super(executor, session, null, HttpVerbWithPayload.POST, options.suggestHTTPS(true), addAuthConfig(params), method, getIntermediaryCallback(session, cb), redirCb);
         bodyParams = params;
         isSecure = true;
     }

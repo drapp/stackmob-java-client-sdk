@@ -49,7 +49,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
 
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, HttpVerbWithoutPayload.GET, "listapi", new StackMobCallback() {
+        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, null, HttpVerbWithoutPayload.GET, "listapi", new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 assertNotNull(responseBody);
@@ -68,7 +68,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
     @Test public void testListapiSecurePostRequest() throws InterruptedException, StackMobException {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        StackMobRequest request = new StackMobRequestWithPayload(executor, session, HttpVerbWithPayload.POST, "listapi", new StackMobCallback() {
+        StackMobRequest request = new StackMobRequestWithPayload(executor, session, null, HttpVerbWithPayload.POST, "listapi", new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 assertNotNull(responseBody);
@@ -88,7 +88,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
     public void testListapiRegularGetRequest() throws InterruptedException, StackMobException {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, HttpVerbWithoutPayload.GET, "listapi", new StackMobCallback() {
+        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, null, HttpVerbWithoutPayload.GET, "listapi", new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 assertNotNull(responseBody);
@@ -108,7 +108,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
     public void testListapiRegularPostRequest() throws InterruptedException, StackMobException {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        StackMobRequest request = new StackMobRequestWithPayload(executor, session, HttpVerbWithPayload.POST, "listapi", new StackMobCallback() {
+        StackMobRequest request = new StackMobRequestWithPayload(executor, session, null, HttpVerbWithPayload.POST, "listapi", new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 assertNotNull(responseBody);
@@ -128,7 +128,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
     public void testNonexistentMethodShouldFail() throws InterruptedException, StackMobException {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, HttpVerbWithoutPayload.GET, "nonexistent", new StackMobCallback() {
+        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, null, HttpVerbWithoutPayload.GET, "nonexistent", new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 Error err = gson.fromJson(responseBody, Error.class);

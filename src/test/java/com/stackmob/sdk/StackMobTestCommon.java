@@ -69,6 +69,7 @@ public class StackMobTestCommon {
         StackMob.getStackMob().getSession().setEnableHTTPS(false);
         StackMob.getStackMob().getSession().getLogger().setLogging(true);
         StackMobPush.setPush(new StackMobPush(StackMob.getStackMob()));
+        StackMobPush.getPush().setFake(true);
         stackmob = StackMob.getStackMob();
     }
 
