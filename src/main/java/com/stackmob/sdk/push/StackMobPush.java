@@ -235,7 +235,7 @@ public class StackMobPush {
     public void broadcastPushNotification(Map<String, String> payload, StackMobRawCallback callback) {
         Map<String, Object> finalPayload = new HashMap<String, Object>();
         finalPayload.put("kvPairs", payload);
-        postPush("push_broadcast", finalPayload, callback);
+        postPush("push_broadcast_universal", finalPayload, callback);
     }
 
     /**
