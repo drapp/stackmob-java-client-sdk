@@ -74,6 +74,7 @@ public abstract class StackMobRequest {
     protected List<Map.Entry<String, String>> params = new ArrayList<Map.Entry<String, String>>();
     protected List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
     private AtomicBoolean triedRefreshToken = new AtomicBoolean(false);
+    private OAuthVersion oauthVersionOverride;
 
     protected Gson gson;
 
@@ -100,6 +101,7 @@ public abstract class StackMobRequest {
         this.methodName = method;
         this.callback = cb;
         this.redirectedCallback = redirCb;
+        this.oauthVersionOverride = oauthVersionOverride;
 
         GsonBuilder gsonBuilder = new GsonBuilder()
                                   .registerTypeAdapter(StackMobPushToken.class, new StackMobPushTokenDeserializer())
@@ -108,7 +110,7 @@ public abstract class StackMobRequest {
                                   .excludeFieldsWithModifiers(Modifier.PRIVATE, Modifier.PROTECTED, Modifier.TRANSIENT, Modifier.STATIC);
         gson = gsonBuilder.create();
 
-        if(!session.isOAuth2()) oAuthService = new ServiceBuilder().provider(StackMobApi.class).apiKey(session.getKey()).apiSecret(session.getSecret()).build();
+        if(!isOAuth2()) oAuthService = new ServiceBuilder().provider(StackMobApi.class).apiKey(session.getKey()).apiSecret(session.getSecret()).build();
 
     }
 
@@ -295,11 +297,13 @@ public abstract class StackMobRequest {
     }
 
     protected OAuthVersion getOAuthVersion() {
+        if(this.oauthVersionOverride != null) return oauthVersionOverride;
         return session.getOAuthVersion();
     }
 
-
-
+    protected boolean isOAuth2() {
+        return getOAuthVersion() == OAuthVersion.Two;
+    }
 
     protected OAuthRequest getOAuthRequest(HttpVerb method, String url) {
         Verb verb = Verb.valueOf(method.toString());
@@ -386,7 +390,7 @@ public abstract class StackMobRequest {
     }
 
     private boolean canDoRefreshToken() {
-        return session.isOAuth2() && session.oauth2RefreshTokenValid() && tryRefreshToken() && !triedRefreshToken.get();
+        return isOAuth2() && session.oauth2RefreshTokenValid() && tryRefreshToken() && !triedRefreshToken.get();
     }
 
     protected void refreshTokenAndResend() {
@@ -412,7 +416,7 @@ public abstract class StackMobRequest {
     protected void sendRequest(final OAuthRequest req) throws InterruptedException, ExecutionException {
         final StackMobRawCallback cb = this.callback;
 
-        if(session.isOAuth2() && !session.oauth2TokenValid() && canDoRefreshToken()) {
+        if(isOAuth2() && !session.oauth2TokenValid() && canDoRefreshToken()) {
             refreshTokenAndResend();
         } else {
             executor.submit(new Callable<Object>() {
@@ -430,7 +434,7 @@ public abstract class StackMobRequest {
                         }
                         String trimmedBody = body.length() < 1000 ? body : (body.subSequence(0, 1000) + " (truncated)");
                         session.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + trimmedBody);
-                        if(!session.isOAuth2() && ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
+                        if(!isOAuth2() && ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
                         if(HttpRedirectHelper.isRedirected(ret.getCode())) {
                             session.getLogger().logInfo("Response was redirected");
                             String newLocation = HttpRedirectHelper.getNewLocation(ret.getHeaders());
