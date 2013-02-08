@@ -545,7 +545,7 @@ public class StackMob {
      * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void twitterLogin(String gigyaUid, long timestamp, String sig, StackMobOptions options, StackMobRawCallback callback) {
+    public void gigyaLogin(String gigyaUid, long timestamp, String sig, StackMobOptions options, StackMobRawCallback callback) {
         List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
         paramList.add(new Pair<String, String>("gigya_uid", gigyaUid));
         paramList.add(new Pair<String, String>("gigya_ts", String.valueOf(timestamp)));
