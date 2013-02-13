@@ -29,6 +29,7 @@ import com.stackmob.sdk.push.StackMobPushTokenDeserializer;
 import com.stackmob.sdk.push.StackMobPushTokenSerializer;
 import com.stackmob.sdk.util.*;
 import org.scribe.builder.ServiceBuilder;
+import org.scribe.exceptions.OAuthException;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
@@ -495,8 +496,11 @@ public abstract class StackMobRequest {
                                 }
                             }
                         }
-                    }
-                    catch(Throwable t) {
+                    } catch(OAuthException e) {
+                        session.getLogger().logWarning("Unexpected OAuth exception prevented message from being sent %s", StackMobLogger.getStackTrace(e));
+                        cb.unsent(new StackMobException(e.getMessage()));
+
+                    } catch(Throwable t) {
                         session.getLogger().logWarning("Invoking callback after unexpected exception %s", StackMobLogger.getStackTrace(t));
                         cb.setDone(getRequestVerb(req),
                                 req.getUrl(),
