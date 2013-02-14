@@ -537,6 +537,36 @@ public class StackMob {
     }
 
     /**
+     * login to StackMob with gigya credentials. If a corresponding StackMob user didn't exist before, it will
+     * be created.
+     * @param gigyaUid The parameter UID
+     * @param timestamp The parameter signatureTimestamp
+     * @param sig The parameter UIDSignature
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void gigyaLogin(String gigyaUid, String timestamp, String sig, StackMobOptions options, StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair<String, String>("gigya_uid", gigyaUid));
+        paramList.add(new Pair<String, String>("gigya_ts", timestamp));
+        paramList.add(new Pair<String, String>("gigya_sig", sig));
+
+        StackMobRequest req;
+        if(getSession().isOAuth2()) {
+            req = new StackMobAccessTokenRequest(this.executor,
+                    this.session,
+                    "gigyaAccessToken",
+                    options,
+                    paramList,
+                    callback,
+                    this.redirectedCallback);
+        } else {
+            throw new UnsupportedOperationException("Gigya login is only supported for OAuth2");
+        }
+        req.setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
+    /**
      * get facebook user info for the current user. this method will return nothing if there is no currently logged in FB user
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
