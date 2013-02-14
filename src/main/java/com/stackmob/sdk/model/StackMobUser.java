@@ -339,6 +339,25 @@ public abstract class StackMobUser extends StackMobModel {
     }
 
     /**
+     * login to StackMob with gigya credentials. If a corresponding StackMob user didn't exist before, it will
+     * be created.
+     * @param gigyaUid The parameter UID
+     * @param timestamp The parameter signatureTimestamp
+     * @param sig The parameter UIDSignature
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void loginWithGigya(String gigyaUid, String timestamp, String sig, StackMobOptions options, StackMobCallback callback) {
+        StackMob.getStackMob().gigyaLogin(gigyaUid, timestamp, sig, options, new StackMobIntermediaryCallback(callback) {
+          @Override
+          public void success(String responseBody) {
+              fillUserFromJson(responseBody);
+              super.success(responseBody);
+          }
+        });
+    }
+
+    /**
      * Refresh the current OAuth2 login. This ordinarily happens automatically, but this method
      * can give you finer control if you need it. Logins last an hour by default. Once they expire
      * they need to be refreshed. Make sure not to send multiple refresh token requests.
