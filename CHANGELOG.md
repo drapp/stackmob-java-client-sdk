@@ -1,5 +1,9 @@
 ## Stackmob Java SDK Change Log
 
+### v1.1.2 --- Feb 14, 2013
+* New push API
+* Gigya login support
+
 ### v1.1.1 --- Jan 10, 2013
 * Add support for per-request https override
 
