@@ -39,15 +39,25 @@ public class StackMobQueryTests extends StackMobTestCommon {
                                          field + StackMobQuery.Operator.GTE.getOperatorForURL()));
     }
 
-    private void assertKeysAndValuesMatch(Map<String, String> map, ArrayList<String> expectedKeys, String expectedValue) {
+    private void assertKeysAndValuesMatch(List<Map.Entry<String, String>> map, ArrayList<String> expectedKeys, String expectedValue) {
         assertEquals(expectedKeys.size(), map.size());
         List<String> keysClone = new ArrayList<String>(expectedKeys);
-        for(String key: map.keySet()) {
-            String val = map.get(key);
+        for(Map.Entry<String, String> entry: map) {
+            String key = entry.getKey();
+            String val = entry.getValue();
             assertEquals(expectedValue, val);
             assertTrue(keysClone.remove(key));
         }
         assertEquals(0, keysClone.size());
+    }
+
+    private void assertKeysAndValuesMatch(List<Map.Entry<String, String>> map, List<String> expectedKeys, List<String> expectedValues) {
+        assertEquals(expectedKeys.size(), expectedValues.size());
+        assertEquals(expectedKeys.size(), map.size());
+        for(int i = 0; i < map.size(); i++) {
+            assertEquals(map.get(i).getKey(), expectedKeys.get(i));
+            assertEquals(map.get(i).getValue(), expectedValues.get(i));
+        }
     }
 
     @Test public void simpleStringQuery() {
@@ -58,11 +68,7 @@ public class StackMobQueryTests extends StackMobTestCommon {
                           .fieldIsGreaterThanOrEqualTo(field, value);
 
         assertEquals(object, q.getObjectName());
-        List<Map.Entry<String, String>> argList = q.getArguments();
-        Map<String, String> args = new HashMap<String, String>();
-        for(Map.Entry<String, String> entry : argList) {
-            args.put(entry.getKey(), entry.getValue());
-        }
+        List<Map.Entry<String, String>> args = q.getArguments();
         assertEquals(4, args.size());
         ArrayList<String> expectedKeys = getExpectedRelationalKeys();
         assertKeysAndValuesMatch(args, expectedKeys, value);
@@ -177,13 +183,42 @@ public class StackMobQueryTests extends StackMobTestCommon {
     @Test public void multiFieldQueries() {
         StackMobQuery q = new StackMobQuery(object).field(new StackMobQueryField(field).isLessThan(value)).field(new StackMobQueryField(otherField).isGreaterThan(value));
         ArrayList<String> expectedKeys = new ArrayList<String>(Arrays.asList(
-                                                                            field+StackMobQuery.Operator.LT.getOperatorForURL(),
-                                                                            otherField+StackMobQuery.Operator.GT.getOperatorForURL()));
-        List<Map.Entry<String, String>> argList = q.getArguments();
-        Map<String, String> args = new HashMap<String, String>();
-        for(Map.Entry<String, String> entry : argList) {
-            args.put(entry.getKey(), entry.getValue());
-        }
+                field+StackMobQuery.Operator.LT.getOperatorForURL(),
+                otherField+StackMobQuery.Operator.GT.getOperatorForURL()));
+        List<Map.Entry<String, String>> args = q.getArguments();
         assertKeysAndValuesMatch(args, expectedKeys, value);
+    }
+
+    @Test public void simpleOr() {
+        StackMobQuery q = new StackMobQuery(object).or(new StackMobQuery().fieldIsEqualTo("dog", "herc")
+                                                                          .fieldIsEqualTo("cat", "fluffy"));
+        List<String> expectedKeys = Arrays.asList("[or1].cat", "[or1].dog");
+        List<String> expectedValues = Arrays.asList("fluffy", "herc");
+        List<Map.Entry<String, String>> args = q.getArguments();
+        assertKeysAndValuesMatch(args, expectedKeys, expectedValues);
+    }
+
+    @Test public void nestedOr() {
+        StackMobQuery q = new StackMobQuery(object).or(new StackMobQuery().fieldIsEqualTo("dog", "herc")
+                                                                          .and(new StackMobQuery().fieldIsEqualTo("cat", "fluffy")
+                                                                                                  .fieldIsEqualTo("color", "grey")));
+        List<String> expectedKeys = Arrays.asList("[or1].[and1].color", "[or1].[and1].cat", "[or1].dog");
+        List<String> expectedValues = Arrays.asList("grey", "fluffy", "herc");
+        List<Map.Entry<String, String>> args = q.getArguments();
+        assertKeysAndValuesMatch(args, expectedKeys, expectedValues);
+    }
+    @Test public void complexOr() {
+        StackMobQuery q = new StackMobQuery(object).fieldIsGreaterThanOrEqualTo("age", 2)
+                                                   .or(new StackMobQuery().fieldIsEqualTo("dog", "herc")
+                                                                          .and(new StackMobQuery().fieldIsEqualTo("cat", "fluffy")
+                                                                                  .fieldIsEqualTo("color", "grey"))
+                                                                          .and(new StackMobQuery().fieldIsEqualTo("dog", "bodie")
+                                                                                  .fieldIsEqualTo("bodiness", 500)))
+                                                   .or(new StackMobQuery().fieldIsEqualTo("numberoflegs", 4)
+                                                                          .fieldIsEqualTo("numberofwings", 2));
+        List<String> expectedKeys = Arrays.asList("[or1].[and1].color", "[or2].numberoflegs", "[or1].[and2].dog", "[or1].[and2].bodiness", "[or1].[and1].cat", "age[gte]", "[or2].numberofwings", "[or1].dog");
+        List<String> expectedValues = Arrays.asList("grey", "4", "bodie", "500", "fluffy", "2", "2", "herc");
+        List<Map.Entry<String, String>> args = q.getArguments();
+        assertKeysAndValuesMatch(args, expectedKeys, expectedValues);
     }
 }

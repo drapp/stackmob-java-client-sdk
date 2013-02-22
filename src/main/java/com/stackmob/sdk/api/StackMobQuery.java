@@ -18,10 +18,7 @@ package com.stackmob.sdk.api;
 
 import com.stackmob.sdk.util.ListHelpers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A class that builds queries for data access methods like those in {@link StackMob}. Example usage:
@@ -54,6 +51,11 @@ public class StackMobQuery {
     private String objectName;
     private Map<String, String> headers = new HashMap<String, String>();
     private Map<String, String> args = new HashMap<String, String>();
+    private int orCount = 1;
+    private int andCount = 1;
+
+    private static final String OrFormat = "[or%d].";
+    private static final String AndFormat = "[and%d].";
 
     private static final String RangeHeader = "Range";
 
@@ -162,6 +164,25 @@ public class StackMobQuery {
     public StackMobQuery add(StackMobQuery other) {
         this.headers.putAll(other.headers);
         this.args.putAll(other.args);
+        return this;
+    }
+
+
+    public StackMobQuery or(StackMobQuery clauses) {
+        String orString = String.format(OrFormat, orCount);
+        for(Map.Entry<String, String> arg : clauses.getArguments()) {
+            this.args.put(orString + arg.getKey(), arg.getValue());
+        }
+        orCount++;
+        return this;
+    }
+
+    public StackMobQuery and(StackMobQuery clauses) {
+        String orString = String.format(AndFormat, andCount);
+        for(Map.Entry<String, String> arg : clauses.getArguments()) {
+            this.args.put(orString + arg.getKey(), arg.getValue());
+        }
+        andCount++;
         return this;
     }
 
@@ -387,6 +408,17 @@ public class StackMobQuery {
      */
     public StackMobQuery fieldIsEqualTo(String field, String val) {
         args.put(field, val);
+        return this;
+    }
+
+    /**
+     * add an "=" to your query. test whether the given field's value is equal to the given value
+     * @param field the field whose value to test
+     * @param val the value against which to test
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobQuery fieldIsEqualTo(String field, int val) {
+        args.put(field, String.valueOf(val));
         return this;
     }
 
