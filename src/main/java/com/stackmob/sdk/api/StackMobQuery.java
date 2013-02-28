@@ -168,6 +168,15 @@ public class StackMobQuery {
     }
 
 
+    /**
+     * Add a new condition that is the logical OR of a set of clauses.
+     * Use this to create an expression (A || B || ...). The statement
+     * will be joined to the top level query with AND, giving the form.
+     * (A || B || ...) && C && D. StackMob only supports one OR statement
+     * in a query, but it can contain any number of clauses.
+     * @param clauses a sub-query. Each constraint added to it is combined into an OR statement.
+     * @return A new query with the OR statement added.
+     */
     public StackMobQuery or(StackMobQuery clauses) {
         String orString = String.format(OrFormat, orCount);
         for(Map.Entry<String, String> arg : clauses.getArguments()) {
@@ -177,6 +186,15 @@ public class StackMobQuery {
         return this;
     }
 
+    /**
+     * Add a new condition that is the logical OR of a set of clauses. Since
+     * The constraints you add to a query are joined by AND by default, this
+     * only makes sense within an OR statement, allowing you to have logic
+     * like (A && B) || (C && D). Redundant nested AND statements will be
+     * rejected.
+     * @param clauses a sub-query. Each constraint added to it is combined into an AND statement.
+     * @return A new query with the OR statement added.
+     */
     public StackMobQuery and(StackMobQuery clauses) {
         String orString = String.format(AndFormat, andCount);
         for(Map.Entry<String, String> arg : clauses.getArguments()) {
@@ -274,13 +292,6 @@ public class StackMobQuery {
         arguments.addAll(upperRight.asList());
         return putInMap(field, Operator.WITHIN, ListHelpers.join(arguments, ","));
     }
-
-    /**
-     * add an "IN" to your query. test whether the given field's value is in the given list of possible values
-     * @param field the field whose value to test
-     * @param values the values against which to match
-     * @return the new query that resulted from adding this operation
-     */
 
     /**
      * add an "IN" to your query. test whether the given field's value is in the given list of possible values
