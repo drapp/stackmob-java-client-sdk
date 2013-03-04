@@ -36,8 +36,8 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
     public static StackMobAccessTokenRequest newRefreshTokenRequest(ExecutorService executor, StackMobSession session, StackMobRedirectedCallback redirectedCallback, StackMobRawCallback callback) {
 
         List<Map.Entry<String, String>> newParams = new LinkedList<Map.Entry<String, String>>();
-        newParams.add(new Pair("grant_type", "refresh_token"));
-        newParams.add(new Pair("refresh_token", session.getOAuth2RefreshToken()));
+        newParams.add(new Pair<String, String>("grant_type", "refresh_token"));
+        newParams.add(new Pair<String, String>("refresh_token", session.getOAuth2RefreshToken()));
 
         return new StackMobAccessTokenRequest(executor,
                 session,
@@ -63,8 +63,8 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
     }
 
     private static List<Map.Entry<String, String>> addAuthConfig(List<Map.Entry<String, String>> params) {
-        params.add(new Pair("token_type", "mac"));
-        params.add(new Pair("mac_algorithm", "hmac-sha-1"));
+        params.add(new Pair<String, String>("token_type", "mac"));
+        params.add(new Pair<String, String>("mac_algorithm", "hmac-sha-1"));
         return params;
     }
 

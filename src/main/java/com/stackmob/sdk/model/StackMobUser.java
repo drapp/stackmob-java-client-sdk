@@ -147,9 +147,11 @@ public abstract class StackMobUser extends StackMobModel {
     }
 
     /**
-     * get the username for the logged in user, if one exists
+     * Get the username for the logged in user, if one exists. This method is deprecated and
+     * {@link StackMob#getLoggedInUser(com.stackmob.sdk.callback.StackMobCallback)} should be used instead.
      * @return the logged in user's username
      */
+    @Deprecated
     public static String getLoggedInUsername() {
         return StackMob.getStackMob().getLoggedInUsername();
     }
