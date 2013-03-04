@@ -187,7 +187,7 @@ public class StackMobQuery {
     }
 
     /**
-     * Add a new condition that is the logical OR of a set of clauses. Since
+     * Add a new condition that is the logical AND of a set of clauses. Since
      * The constraints you add to a query are joined by AND by default, this
      * only makes sense within an OR statement, allowing you to have logic
      * like (A && B) || (C && D). Redundant nested AND statements will be
