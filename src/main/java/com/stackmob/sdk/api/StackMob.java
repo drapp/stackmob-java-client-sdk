@@ -453,6 +453,21 @@ public class StackMob {
     }
 
     /**
+     * Unlink the logged-in user from their Twitter token, if linked.
+     * @param callback callback to be called when the server returns. May execute in a separate thread.
+     */
+    public void unlinkUserFromTwitter(StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+
+        new StackMobUserBasedRequest(this.executor,
+                                     this.session,
+                                     "unlinkUserFromTwitter",
+                                     paramList,
+                                     callback,
+                                     this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
+    /**
      * Login to StackMob with Facebook credentials. The credentials should match a existing user object that has a
      * linked Facebook account, via either
      * {@link #registerWithFacebookToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
@@ -537,6 +552,21 @@ public class StackMob {
                                      paramList,
                                      callback,
                                      this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
+    /**
+     * Unlink the logged-in user from their Facebook token, if linked.
+     * @param callback callback to be called when the server returns. May execute in a separate thread.
+     */
+    public void unlinkUserFromFacebook(StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+
+        new StackMobUserBasedRequest(this.executor,
+                this.session,
+                "unlinkUserFromFacebook",
+                paramList,
+                callback,
+                this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
