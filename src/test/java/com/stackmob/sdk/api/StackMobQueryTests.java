@@ -190,8 +190,7 @@ public class StackMobQueryTests extends StackMobTestCommon {
     }
 
     @Test public void simpleOr() {
-        StackMobQuery q = new StackMobQuery(object).or(new StackMobQuery().fieldIsEqualTo("dog", "herc")
-                                                                          .fieldIsEqualTo("cat", "fluffy"));
+        StackMobQuery q = new StackMobQuery(object).fieldIsEqualTo("dog", "herc").or().fieldIsEqualTo("cat", "fluffy");
         List<String> expectedKeys = Arrays.asList("[or1].cat", "[or1].dog");
         List<String> expectedValues = Arrays.asList("fluffy", "herc");
         List<Map.Entry<String, String>> args = q.getArguments();
@@ -199,9 +198,8 @@ public class StackMobQueryTests extends StackMobTestCommon {
     }
 
     @Test public void nestedOr() {
-        StackMobQuery q = new StackMobQuery(object).or(new StackMobQuery().fieldIsEqualTo("dog", "herc")
-                                                                          .and(new StackMobQuery().fieldIsEqualTo("cat", "fluffy")
-                                                                                                  .fieldIsEqualTo("color", "grey")));
+        StackMobQuery q = new StackMobQuery(object).fieldIsEqualTo("dog", "herc").or(new StackMobQuery().fieldIsEqualTo("cat", "fluffy")
+                                                                                                  .and().fieldIsEqualTo("color", "grey"));
         List<String> expectedKeys = Arrays.asList("[or1].[and1].color", "[or1].[and1].cat", "[or1].dog");
         List<String> expectedValues = Arrays.asList("grey", "fluffy", "herc");
         List<Map.Entry<String, String>> args = q.getArguments();
@@ -209,15 +207,15 @@ public class StackMobQueryTests extends StackMobTestCommon {
     }
     @Test public void complexOr() {
         StackMobQuery q = new StackMobQuery(object).fieldIsGreaterThanOrEqualTo("age", 2)
-                                                   .or(new StackMobQuery().fieldIsEqualTo("dog", "herc")
-                                                                          .and(new StackMobQuery().fieldIsEqualTo("cat", "fluffy")
-                                                                                  .fieldIsEqualTo("color", "grey"))
-                                                                          .and(new StackMobQuery().fieldIsEqualTo("dog", "bodie")
-                                                                                  .fieldIsEqualTo("bodiness", 500)))
-                                                   .or(new StackMobQuery().fieldIsEqualTo("numberoflegs", 4)
-                                                                          .fieldIsEqualTo("numberofwings", 2));
-        List<String> expectedKeys = Arrays.asList("[or1].[and1].color", "[or2].numberoflegs", "[or1].[and2].dog", "[or1].[and2].bodiness", "[or1].[and1].cat", "age[gte]", "[or2].numberofwings", "[or1].dog");
-        List<String> expectedValues = Arrays.asList("grey", "4", "bodie", "500", "fluffy", "2", "2", "herc");
+                                                   .and(new StackMobQuery().fieldIsEqualTo("dog", "herc")
+                                                                          .or(new StackMobQuery().fieldIsEqualTo("cat", "fluffy")
+                                                                                           .and().fieldIsEqualTo("color", "grey"))
+                                                                          .or(new StackMobQuery().fieldIsEqualTo("dog", "bodie")
+                                                                                           .and().fieldIsEqualTo("bodiness", 500)))
+                                                   .and(new StackMobQuery().fieldIsEqualTo("numberoflegs", 4)
+                                                                      .or().fieldIsEqualTo("numberofwings", 2));
+        List<String> expectedKeys = Arrays.asList("[or1].[and1].color", "[or2].numberoflegs", "[or1].[and2].dog", "[or1].[and1].cat", "[or1].[and2].bodiness", "age[gte]", "[or2].numberofwings", "[or1].dog");
+        List<String> expectedValues = Arrays.asList("grey", "4", "bodie", "fluffy", "500", "2", "2", "herc");
         List<Map.Entry<String, String>> args = q.getArguments();
         assertKeysAndValuesMatch(args, expectedKeys, expectedValues);
     }

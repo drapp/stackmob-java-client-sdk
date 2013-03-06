@@ -17,6 +17,7 @@
 package com.stackmob.sdk.api;
 
 import com.stackmob.sdk.util.ListHelpers;
+import com.stackmob.sdk.util.Pair;
 
 import java.util.*;
 
@@ -53,6 +54,8 @@ public class StackMobQuery {
     private Map<String, String> args = new HashMap<String, String>();
     private int orCount = 1;
     private int andCount = 1;
+    private boolean isAnd = false;
+    private boolean isOr = false;
 
     private static final String OrFormat = "[or%d].";
     private static final String AndFormat = "[and%d].";
@@ -153,7 +156,13 @@ public class StackMobQuery {
      * @return arguments
      */
     public List<Map.Entry<String, String>> getArguments() {
-        return new ArrayList<Map.Entry<String, String>>(this.args.entrySet());
+        //If the top level was marked specifically as OR, we need to add an extra layer
+        Map<String, String> finalMap = isOr ? prependString(String.format(OrFormat, orCount), this.args) : this.args;
+        return new ArrayList<Map.Entry<String, String>>(finalMap.entrySet());
+    }
+
+    private Map<String, String> getNestedArguments() {
+        return this.args;
     }
 
     /**
@@ -167,38 +176,76 @@ public class StackMobQuery {
         return this;
     }
 
+    private Map<String,String> prependString(String prefix, Map<String, String> args) {
+        Map<String, String> newMap = new HashMap<String, String>();
+        for(String arg : args.keySet()) {
+            newMap.put(prefix + arg, args.get(arg));
+        }
+        return newMap;
+    }
 
     /**
-     * Add a new condition that is the logical OR of a set of clauses.
-     * Use this to create an expression (A || B || ...). The statement
-     * will be joined to the top level query with AND, giving the form.
-     * (A || B || ...) && C && D. StackMob only supports one OR statement
+     * Separate two constraints with an AND. Constraints are separated
+     * like this by default, but this allows your queries to read naturally.
+     * You cannot mix AND and OR at the same level of a query; instead you need to
+     * start a sub-expression with {@link #and(StackMobQuery clauses)},
+     * effectively adding parenthesis
+     * @return the query ready to accept another statement
+     */
+    public StackMobQuery and() {
+        if(this.isOr) throw new IllegalStateException("Mixing OR and AND on the same level is not allowed");
+        this.isAnd = true;
+        return this;
+    }
+
+    /**
+     * Add a new parenthesized expression to be joined by AND with the
+     * other constraints in the query. The sub-expression will be treated
+     * as the logical OR of a set of clauses, giving you A && (B || C || ...)
+     * StackMob only supports one such parenthesized OR block
      * in a query, but it can contain any number of clauses.
      * @param clauses a sub-query. Each constraint added to it is combined into an OR statement.
-     * @return A new query with the OR statement added.
+     * @return A new query with the OR statement joined with AND to the rest of the clauses.
      */
-    public StackMobQuery or(StackMobQuery clauses) {
+    public StackMobQuery and(StackMobQuery clauses) {
+        if(this.isOr) throw new IllegalStateException("Mixing OR and AND on the same level is not allowed");
+        this.isAnd = true;
         String orString = String.format(OrFormat, orCount);
-        for(Map.Entry<String, String> arg : clauses.getArguments()) {
-            this.args.put(orString + arg.getKey(), arg.getValue());
+        for(Map.Entry<String, String> arg : prependString(orString, clauses.getNestedArguments()).entrySet()) {
+            this.args.put(arg.getKey(), arg.getValue());
         }
         orCount++;
         return this;
     }
 
     /**
-     * Add a new condition that is the logical AND of a set of clauses. Since
-     * The constraints you add to a query are joined by AND by default, this
-     * only makes sense within an OR statement, allowing you to have logic
-     * like (A && B) || (C && D). Redundant nested AND statements will be
-     * rejected.
-     * @param clauses a sub-query. Each constraint added to it is combined into an AND statement.
-     * @return A new query with the OR statement added.
+     * Separate two constraints with an OR. This can be done at the top level
+     * of a query, or within a sub-query added with {@link #and(StackMobQuery clauses)}
+     * You cannot mix AND and OR at the same level of a query; instead you need to
+     * start a sub-expression with ,{@link #or(StackMobQuery clauses)}
+     * effectively adding parenthesis
+     * @return the query ready to accept another statement
      */
-    public StackMobQuery and(StackMobQuery clauses) {
-        String orString = String.format(AndFormat, andCount);
-        for(Map.Entry<String, String> arg : clauses.getArguments()) {
-            this.args.put(orString + arg.getKey(), arg.getValue());
+    public StackMobQuery or() {
+        if(this.isAnd) throw new IllegalStateException("Mixing OR and AND on the same level is not allowed");
+        this.isOr = true;
+        return this;
+    }
+
+    /**
+     * Add a new parenthesized expression to be joined by OR with the
+     * other constraints in the query. The sub-expression will be treated
+     * as the logical AND of a set of clauses, giving you A || (B && C && ...)
+     * Redundant nested AND statements will be rejected.
+     * @param clauses a sub-query. Each constraint added to it is combined into an AND statement.
+     * @return A new query with the AND statement joined with OR to the rest of the clauses
+     */
+    public StackMobQuery or(StackMobQuery clauses) {
+        if(this.isAnd) throw new IllegalStateException("Mixing OR and AND on the same level is not allowed");
+        this.isOr = true;
+        String andString = String.format(AndFormat, andCount);
+        for(Map.Entry<String, String> arg : prependString(andString, clauses.getNestedArguments()).entrySet()) {
+            this.args.put(arg.getKey(), arg.getValue());
         }
         andCount++;
         return this;
