@@ -287,7 +287,7 @@ public abstract class StackMobModel {
     }
 
     
-    private transient String id;
+    protected transient String id;
     private transient Class<? extends StackMobModel> actualClass;
     private transient String schemaName;
     private transient boolean hasData;
@@ -311,7 +311,7 @@ public abstract class StackMobModel {
         init(actualClass);
     }
 
-    private void init(Class<? extends StackMobModel> actualClass) {
+    protected void init(Class<? extends StackMobModel> actualClass) {
         this.actualClass = actualClass;
         schemaName = getSchemaName(actualClass);
         ensureValidName(schemaName, "model");
@@ -668,7 +668,7 @@ public abstract class StackMobModel {
         } catch (Exception ignore) { } //Should never happen
     }
 
-    private JsonElement toJsonElement(int depth, Selection selection, RelationMapping mapping) {
+    protected JsonElement toJsonElement(int depth, Selection selection, RelationMapping mapping) {
         // Set the id here as opposed to on the server to avoid a race condition
         if(getID() == null) setID(UUID.randomUUID().toString().replace("-",""));
         if(depth < 0) return new JsonPrimitive(getID());
