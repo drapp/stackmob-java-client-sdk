@@ -1,6 +1,6 @@
 # StackMob Java Client SDK
 
-[![Build Status](https://travis-ci.org/stackmob/stackmob-java-client-sdk.png)](https://travis-ci.org/stackmob/stackmob-java-client-sdk)
+[![Build Status](https://travis-ci.org/stackmob/stackmob-java-client-sdk.png?branch=master)](https://travis-ci.org/stackmob/stackmob-java-client-sdk)
 
 With the StackMob Java Client SDK, you can integrate StackMob into any Java / JVM application.
 
