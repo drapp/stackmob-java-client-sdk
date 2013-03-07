@@ -35,6 +35,7 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.stackmob.sdk.concurrencyutils.CountDownLatchUtils.latchOne;
 
+@SuppressWarnings("deprecation")
 public class StackMobTests extends StackMobTestCommon {
 
     @Test public void loginShouldFail() throws Exception {

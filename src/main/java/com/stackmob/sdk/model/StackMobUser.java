@@ -147,9 +147,11 @@ public abstract class StackMobUser extends StackMobModel {
     }
 
     /**
-     * get the username for the logged in user, if one exists
+     * Get the username for the logged in user, if one exists. This method is deprecated and
+     * {@link StackMob#getLoggedInUser(com.stackmob.sdk.callback.StackMobCallback)} should be used instead.
      * @return the logged in user's username
      */
+    @Deprecated
     public static String getLoggedInUsername() {
         return StackMob.getStackMob().getLoggedInUsername();
     }
@@ -441,6 +443,18 @@ public abstract class StackMobUser extends StackMobModel {
     }
 
     /**
+     * Unlink a user from their Facebook credentials, if linked. The user must be logged in.
+     * @param callback callback to be called when the server returns. May execute in a separate thread.
+     */
+    public void unlinkFromFacebook(StackMobCallback callback) {
+        if(isLoggedIn()) {
+            StackMob.getStackMob().unlinkUserFromFacebook(callback);
+        } else {
+            callback.unsent(new StackMobException("User not logged in"));
+        }
+    }
+
+    /**
      * link an user with an existing Facebook user via Facebook credentials. The user must be logged in
      * @param twitterToken the twitter session key (this is a per user key - different from the consumer key)
      * @param twitterSecret the twitter session secret (this is a per user secret - different from the consumer secret)
@@ -449,6 +463,18 @@ public abstract class StackMobUser extends StackMobModel {
     public void linkWithTwitter(String twitterToken, String twitterSecret, StackMobCallback callback) {
         if(isLoggedIn()) {
             StackMob.getStackMob().linkUserWithTwitterToken(twitterToken, twitterSecret, callback);
+        } else {
+            callback.unsent(new StackMobException("User not logged in"));
+        }
+    }
+
+    /**
+     * Unlink a user from their Twitter credentials, if linked. The user must be logged in.
+     * @param callback callback to be called when the server returns. May execute in a separate thread.
+     */
+    public void unlinkFromTwitter(StackMobCallback callback) {
+        if(isLoggedIn()) {
+            StackMob.getStackMob().unlinkUserFromTwitter(callback);
         } else {
             callback.unsent(new StackMobException("User not logged in"));
         }
