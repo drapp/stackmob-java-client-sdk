@@ -1,7 +1,6 @@
----
 language: java
 jdk:
-- openjdk6
+  - openjdk6
 env:
   global:
   - secure: ! 'Hq0y9e1h5ZeJt/yl4ektExvK7n0MF2cbrFx9tDaMGumBx52iQdUsLoQRjVCM
