@@ -1,0 +1,16 @@
+---
+language: java
+jdk:
+- openjdk6
+env:
+  global:
+  - secure: ! 'Hq0y9e1h5ZeJt/yl4ektExvK7n0MF2cbrFx9tDaMGumBx52iQdUsLoQRjVCM
+
+      bMnJ40kgMh1scup2O2CR/IAG58w9uik+MDXuMfW9cGB60dju6h6+10vqlNnY
+
+      B5Go+85RHptcKaHXyECJQbikgRB5vaexZkUiZekRlQe95oCfg1I='
+  - secure: ! 'kAJ/uW3+5wHyxMG31z/bjN7TFPbWRlX4HMr+nNpcoYMDOM5/UH+SVtpZk1gt
+
+      JPCP7ty0J82TlMABpC59HIo/BKcxpwPZ2WJyJBURu6qw3NoeskG+RdkvLpYm
+
+      hozm8jEcdeQUV1RD6lda0j4ol0hPWRNhWITHiLodUqSPW29zkGY='
