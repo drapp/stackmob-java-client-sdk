@@ -526,7 +526,9 @@ public class StackMob {
                                           StackMobRawCallback callback) {
         List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
         paramList.add(new Pair<String, String>("fb_at", token));
-        paramList.add(new Pair<String, String>("username", username));
+        if (username != null) {
+            paramList.add(new Pair<String, String>("username", username));
+        }
 
         new StackMobUserBasedRequest(this.executor,
                                      this.session,
