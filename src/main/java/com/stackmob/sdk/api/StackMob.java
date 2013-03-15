@@ -423,10 +423,14 @@ public class StackMob {
         paramList.add(new Pair<String, String>("tw_tk", token));
         paramList.add(new Pair<String, String>("tw_ts", secret));
         if(username != null) paramList.add(new Pair<String, String>("username", username));
+
         new StackMobUserBasedRequest(this.executor,
                                      this.session,
-                                     "createUserWithTwitter",
+                                     HttpVerbWithPayload.POST,
+                                     StackMobOptions.none(),
                                      paramList,
+                                     null,
+                                     "createUserWithTwitter",
                                      callback,
                                      this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
@@ -526,14 +530,15 @@ public class StackMob {
                                           StackMobRawCallback callback) {
         List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
         paramList.add(new Pair<String, String>("fb_at", token));
-        if (username != null) {
-            paramList.add(new Pair<String, String>("username", username));
-        }
+        if (username != null) paramList.add(new Pair<String, String>("username", username));
 
         new StackMobUserBasedRequest(this.executor,
                                      this.session,
-                                     "createUserWithFacebook",
+                                     HttpVerbWithPayload.POST,
+                                     StackMobOptions.none(),
                                      paramList,
+                                     null,
+                                     "createUserWithFacebook",
                                      callback,
                                      this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
