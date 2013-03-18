@@ -419,20 +419,21 @@ public class StackMob {
                                          String secret,
                                          String username,
                                          StackMobRawCallback callback) {
-        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
-        paramList.add(new Pair<String, String>("tw_tk", token));
-        paramList.add(new Pair<String, String>("tw_ts", secret));
-        if(username != null) paramList.add(new Pair<String, String>("username", username));
+
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("tw_tk", token);
+        params.put("tw_ts", secret);
+        if (username != null) params.put("username", username);
 
         new StackMobUserBasedRequest(this.executor,
-                                     this.session,
-                                     HttpVerbWithPayload.POST,
-                                     StackMobOptions.none(),
-                                     paramList,
-                                     null,
-                                     "createUserWithTwitter",
-                                     callback,
-                                     this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+                this.session,
+                HttpVerbWithPayload.POST,
+                StackMobOptions.https(true),
+                null,
+                params,
+                "createUserWithTwitter",
+                callback,
+                this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -528,16 +529,22 @@ public class StackMob {
     public void registerWithFacebookToken(String token,
                                           String username,
                                           StackMobRawCallback callback) {
+
+        /*
         List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
         paramList.add(new Pair<String, String>("fb_at", token));
         if (username != null) paramList.add(new Pair<String, String>("username", username));
+          */
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("fb_at", token);
+        if (username != null) params.put("username", username);
 
         new StackMobUserBasedRequest(this.executor,
                                      this.session,
                                      HttpVerbWithPayload.POST,
-                                     StackMobOptions.none(),
-                                     paramList,
+                                     StackMobOptions.https(true),
                                      null,
+                                     params,
                                      "createUserWithFacebook",
                                      callback,
                                      this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
