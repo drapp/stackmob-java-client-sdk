@@ -214,7 +214,7 @@ public class StackMobPush {
         finalPayload.put("payload", payload);
         finalPayload.put("users", userIds);
         if(fake) finalPayload.put("fake", fake);
-        sendWithPayload(HttpVerbWithPayload.POST, "tokens", finalPayload, callback);
+        sendWithPayload(HttpVerbWithPayload.POST, "notifications", finalPayload, callback);
     }
 
 
