@@ -286,19 +286,22 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void loginWithFacebook(String facebookToken, StackMobCallback callback) {
-        loginWithFacebook(facebookToken, new StackMobOptions(), callback);
+        loginWithFacebook(facebookToken, false, null, new StackMobOptions(), callback);
     }
 
     /**
-     * login to StackMob with Facebook credentials. The credentials should match a existing user object that has a linked Facebook
+     * login to StackMob with Facebook credentials. The method includes the option to create a StackMob user if one didn't exist before.
+     * Otherwise, the credentials should match a existing user object that has a linked Facebook
      * account, via either {@link #createWithFacebook(String, com.stackmob.sdk.callback.StackMobCallback)} or
      * {@link #linkWithFacebook(String, com.stackmob.sdk.callback.StackMobCallback)}
      * @param facebookToken the facebook user token
+     * @param createUser Pass true to create a new user if no existing user is associated with the provided token. This works with OAuth2 only.
+     * @param username If createUser is true, the primary key (username) to give the created user.
      * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void loginWithFacebook(String facebookToken, StackMobOptions options, StackMobCallback callback) {
-        StackMob.getStackMob().facebookLogin(facebookToken, new StackMobIntermediaryCallback(callback){
+    public void loginWithFacebook(String facebookToken, boolean createUser, String username, StackMobOptions options, StackMobCallback callback) {
+        StackMob.getStackMob().facebookLogin(facebookToken, createUser, username, options, new StackMobIntermediaryCallback(callback){
             @Override
             public void success(String responseBody) {
                 fillUserFromJson(responseBody);
@@ -317,20 +320,23 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void loginWithTwitter(String twitterToken, String twitterSecret, StackMobCallback callback) {
-        loginWithTwitter(twitterToken, twitterSecret, new StackMobOptions(), callback);
+        loginWithTwitter(twitterToken, twitterSecret, false, null,  new StackMobOptions(), callback);
     }
 
     /**
-     * login to StackMob with twitter credentials. The credentials should match a existing user object that has a linked Twitter
+     * login to StackMob with twitter credentials. The method includes the option to create a StackMob user if one didn't exist before.
+     * Otherwise, the credentials should match a existing user object that has a linked Twitter
      * account, via either {@link #createWithTwitter(String, String, com.stackmob.sdk.callback.StackMobCallback)} or
      * {@link #linkWithTwitter(String, String, com.stackmob.sdk.callback.StackMobCallback)}
      * @param twitterToken the twitter session key (this is a per user key - different from the consumer key)
      * @param twitterSecret the twitter session secret (this is a per user secret - different from the consumer secret)
+     * @param createUser Pass true to create a new user if no existing user is associated with the provided tokens. This works with OAuth2 only.
+     * @param username If createUser is true, the primary key (username) to give the created user.
      * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void loginWithTwitter(String twitterToken, String twitterSecret, StackMobOptions options, StackMobCallback callback) {
-        StackMob.getStackMob().twitterLogin(twitterToken, twitterSecret, new StackMobIntermediaryCallback(callback) {
+    public void loginWithTwitter(String twitterToken, String twitterSecret, boolean createUser, String username, StackMobOptions options, StackMobCallback callback) {
+        StackMob.getStackMob().twitterLogin(twitterToken, twitterSecret, createUser, username, options, new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 fillUserFromJson(responseBody);

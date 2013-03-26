@@ -340,47 +340,50 @@ public class StackMob {
     // Social API Integration
 
     /**
-     * Login to StackMob with Twitter credentials. The credentials should match an existing StackMob user object with a
-     * linked Twitter account, via either
+     * Login to StackMob with Twitter credentials. The method includes the option to create a StackMob user if one didn't exist before.
+     * Otherwise, the credentials should match an existing StackMob user object with a linked Twitter account, via either
      * {@link #registerWithTwitterToken(String, String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
      * {@link #linkUserWithTwitterToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)}.
      * @param token the Twitter session key (this is a per user key - different from the consumer key)
      * @param secret the Twitter session secret (this is a per user secret - different from the consumer secret)
-     * @param callback callback to be called when the server returns. May execute in a separate thread.
-     */
-    public void twitterLogin(String token,
-                             String secret,
-                             StackMobRawCallback callback) {
-        twitterLogin(token, secret, new StackMobOptions(), callback);
-    }
-
-    /**
-     * Login to StackMob with Twitter credentials. The credentials should match an existing StackMob user object with a
-     * linked Twitter account, via either
-     * {@link #registerWithTwitterToken(String, String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
-     * {@link #linkUserWithTwitterToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)}.
-     * @param token the Twitter session key (this is a per user key - different from the consumer key)
-     * @param secret the Twitter session secret (this is a per user secret - different from the consumer secret)
+     * @param createUser Pass true to create a new user if no existing user is associated with the provided tokens. This works with OAuth2 only.
+     * @param username If createUser is true, the primary key (username) to give the created user.
      * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. May execute in a separate thread.
      */
     public void twitterLogin(String token,
                              String secret,
+                             boolean createUser,
+                             String username,
                              StackMobOptions options,
-                             StackMobRawCallback callback) {
+                             StackMobRawCallback callback)  {
+
         List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
         paramList.add(new Pair<String, String>("tw_tk", token));
         paramList.add(new Pair<String, String>("tw_ts", secret));
 
         StackMobRequest req;
         if(getSession().isOAuth2()) {
-            req = new StackMobAccessTokenRequest(this.executor,
-                    this.session,
-                    "twitterAccessToken",
-                    options,
-                    paramList,
-                    callback,
-                    this.redirectedCallback);
+
+            if (createUser)  {
+                if(username != null) paramList.add(new Pair<String, String>("username", username));
+                req = new StackMobAccessTokenRequest(this.executor,
+                        this.session,
+                        "twitterAccessTokenWithCreate",
+                        options,
+                        paramList,
+                        callback,
+                        this.redirectedCallback);
+            }
+            else {
+                req = new StackMobAccessTokenRequest(this.executor,
+                        this.session,
+                        "twitterAccessToken",
+                        options,
+                        paramList,
+                        callback,
+                        this.redirectedCallback);
+            }
         } else {
             req = new StackMobUserBasedRequest(this.executor,
                     this.session,
@@ -473,28 +476,19 @@ public class StackMob {
     }
 
     /**
-     * Login to StackMob with Facebook credentials. The credentials should match a existing user object that has a
-     * linked Facebook account, via either
+     * Login to StackMob with Facebook credentials. The method includes the option to create a StackMob user if one didn't exist before.
+     * Otherwise, the credentials should match a existing user object that has a linked Facebook account, via either
      * {@link #registerWithFacebookToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
      * {@link #linkUserWithFacebookToken(String, com.stackmob.sdk.callback.StackMobRawCallback)}.
      * @param token the Facebook user token
-     * @param callback callback to be called when the server returns. May execute in a separate thread.
-     */
-    public void facebookLogin(String token,
-                              StackMobRawCallback callback) {
-        facebookLogin(token, new StackMobOptions(), callback);
-    }
-
-    /**
-     * Login to StackMob with Facebook credentials. The credentials should match a existing user object that has a
-     * linked Facebook account, via either
-     * {@link #registerWithFacebookToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
-     * {@link #linkUserWithFacebookToken(String, com.stackmob.sdk.callback.StackMobRawCallback)}.
-     * @param token the Facebook user token
+     * @param createUser Pass true to create a new user if no existing user is associated with the provided token. This works with OAuth2 only.
+     * @param username If createUser is true, the primary key (username) to give the created user.
      * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. May execute in a separate thread.
      */
     public void facebookLogin(String token,
+                              boolean createUser,
+                              String username,
                               StackMobOptions options,
                               StackMobRawCallback callback) {
         List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
@@ -502,13 +496,26 @@ public class StackMob {
 
         StackMobRequest req;
         if(getSession().isOAuth2()) {
-            req = new StackMobAccessTokenRequest(this.executor,
+
+            if (createUser)  {
+                if(username != null) paramList.add(new Pair<String, String>("username", username));
+                req = new StackMobAccessTokenRequest(this.executor,
+                        this.session,
+                        "facebookAccessTokenWithCreate",
+                        options,
+                        paramList,
+                        callback,
+                        this.redirectedCallback);
+            }
+            else {
+                req = new StackMobAccessTokenRequest(this.executor,
                                                  this.session,
                                                  "facebookAccessToken",
                                                  options,
                                                  paramList,
                                                  callback,
                                                  this.redirectedCallback);
+            }
         } else {
             req = new StackMobUserBasedRequest(this.executor,
                                                this.session,
