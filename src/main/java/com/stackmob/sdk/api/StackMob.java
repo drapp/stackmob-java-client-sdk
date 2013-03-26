@@ -644,6 +644,45 @@ public class StackMob {
     }
 
     /**
+     * Link an existing StackMob user with an existing Gigya user via Gigya credentials.
+     * @param gigyaUid The parameter UID
+     * @param timestamp The parameter signatureTimestamp
+     * @param sig The parameter UIDSignature
+     * @param callback callback to be called when the server returns. May execute in a separate thread.
+     */
+    public void linkUserWithGigya(String gigyaUid,
+                                  String timestamp,
+                                  String sig,
+                                  StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+        paramList.add(new Pair<String, String>("gigya_uid", gigyaUid));
+        paramList.add(new Pair<String, String>("gigya_ts", timestamp));
+        paramList.add(new Pair<String, String>("gigya_sig", sig));
+
+        new StackMobUserBasedRequest(this.executor,
+                this.session,
+                "linkUserWithGigya",
+                paramList,
+                callback,
+                this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
+    /**
+     * Unlink the logged-in user from their Gigya token, if linked.
+     * @param callback callback to be called when the server returns. May execute in a separate thread.
+     */
+    public void unlinkUserFromGigya(StackMobRawCallback callback) {
+        List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
+
+        new StackMobUserBasedRequest(this.executor,
+                this.session,
+                "unlinkUserFromGigya",
+                paramList,
+                callback,
+                this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+    }
+
+    /**
      * Get Facebook user info for the current user. This method will return nothing if there is no currently logged-in
      * Facebook user
      * @param callback callback to be called when the server returns. May execute in a separate thread.

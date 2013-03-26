@@ -91,7 +91,8 @@ public class StackMobQuery {
         NEAR("near"),
         WITHIN("within"),
         NE("ne"),
-        NULL("null");
+        NULL("null"),
+        EMPTY("empty");
 
         private String operator;
 
@@ -357,6 +358,12 @@ public class StackMobQuery {
      * @return the new query that resulted from adding this operation
      */
     public StackMobQuery fieldIsNotEqual(String field, String val) {
+        if(val == null) {
+            return fieldIsNotNull(field);
+        }
+        if(val.isEmpty()) {
+            return putInMap(field, Operator.EMPTY, "false");
+        }
         return putInMap(field, Operator.NE, val);
     }
 
@@ -465,6 +472,12 @@ public class StackMobQuery {
      * @return the new query that resulted from adding this operation
      */
     public StackMobQuery fieldIsEqualTo(String field, String val) {
+        if(val == null) {
+            return fieldIsNull(field);
+        }
+        if(val.isEmpty()) {
+            return putInMap(field, Operator.EMPTY, "true");
+        }
         args.put(field, val);
         return this;
     }
@@ -476,8 +489,7 @@ public class StackMobQuery {
      * @return the new query that resulted from adding this operation
      */
     public StackMobQuery fieldIsEqualTo(String field, int val) {
-        args.put(field, String.valueOf(val));
-        return this;
+        return fieldIsEqualTo(field, String.valueOf(val));
     }
 
     /**
