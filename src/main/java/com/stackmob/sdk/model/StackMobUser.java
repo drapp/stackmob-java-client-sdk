@@ -295,8 +295,8 @@ public abstract class StackMobUser extends StackMobModel {
      * account, via either {@link #createWithFacebook(String, com.stackmob.sdk.callback.StackMobCallback)} or
      * {@link #linkWithFacebook(String, com.stackmob.sdk.callback.StackMobCallback)}
      * @param facebookToken the facebook user token
-     * @param createUser Pass true to create a new user if no existing user is associated with the provided token. This works with OAuth2 only.
-     * @param username If createUser is true, the primary key (username) to give the created user.
+     * @param createUser pass true to create a new user if no existing user is associated with the provided token. This works with OAuth2 only.
+     * @param username if createUser is true, the primary key (username) to give the created user.
      * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
@@ -330,8 +330,8 @@ public abstract class StackMobUser extends StackMobModel {
      * {@link #linkWithTwitter(String, String, com.stackmob.sdk.callback.StackMobCallback)}
      * @param twitterToken the twitter session key (this is a per user key - different from the consumer key)
      * @param twitterSecret the twitter session secret (this is a per user secret - different from the consumer secret)
-     * @param createUser Pass true to create a new user if no existing user is associated with the provided tokens. This works with OAuth2 only.
-     * @param username If createUser is true, the primary key (username) to give the created user.
+     * @param createUser pass true to create a new user if no existing user is associated with the provided tokens. This works with OAuth2 only.
+     * @param username if createUser is true, the primary key (username) to give the created user.
      * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */

@@ -346,8 +346,8 @@ public class StackMob {
      * {@link #linkUserWithTwitterToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)}.
      * @param token the Twitter session key (this is a per user key - different from the consumer key)
      * @param secret the Twitter session secret (this is a per user secret - different from the consumer secret)
-     * @param createUser Pass true to create a new user if no existing user is associated with the provided tokens. This works with OAuth2 only.
-     * @param username If createUser is true, the primary key (username) to give the created user.
+     * @param createUser pass true to create a new user if no existing user is associated with the provided tokens. This works with OAuth2 only.
+     * @param username if createUser is true, the primary key (username) to give the created user.
      * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. May execute in a separate thread.
      */
@@ -481,8 +481,8 @@ public class StackMob {
      * {@link #registerWithFacebookToken(String, String, com.stackmob.sdk.callback.StackMobRawCallback)} or
      * {@link #linkUserWithFacebookToken(String, com.stackmob.sdk.callback.StackMobRawCallback)}.
      * @param token the Facebook user token
-     * @param createUser Pass true to create a new user if no existing user is associated with the provided token. This works with OAuth2 only.
-     * @param username If createUser is true, the primary key (username) to give the created user.
+     * @param createUser pass true to create a new user if no existing user is associated with the provided token. This works with OAuth2 only.
+     * @param username if createUser is true, the primary key (username) to give the created user.
      * @param options additional options, such as headers, to modify the request
      * @param callback callback to be called when the server returns. May execute in a separate thread.
      */
