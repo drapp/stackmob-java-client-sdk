@@ -20,19 +20,19 @@ Hopefully you can see the pattern here. With this library, you can connect almos
 <dependency>
     <groupId>com.stackmob</groupId>
     <artifactId>stackmob-java-client-sdk</artifactId>
-    <version>1.1.2</version>
+    <version>1.2.1</version>
 </dependency>
 ```
 
 ## With SBT
 
 ```scala
-libraryDependencies += "com.stackmob" % "stackmob-java-client-sdk" % "1.1.2"
+libraryDependencies += "com.stackmob" % "stackmob-java-client-sdk" % "1.2.1"
 ```
 
 ## Commandline (or Ant)
 
-Download the [StackMob Java SDK](http://search.maven.org/remotecontent?filepath=com/stackmob/stackmob-java-client-sdk/1.1.2/stackmob-java-client-sdk-1.1.2.jar) and the dependencies listed below and place them on your CLASSPATH:
+Download the [StackMob Java SDK](http://search.maven.org/remotecontent?filepath=com/stackmob/stackmob-java-client-sdk/1.2.1/stackmob-java-client-sdk-1.2.1.jar) and the dependencies listed below and place them on your CLASSPATH:
 
 * [Gson](http://search.maven.org/remotecontent?filepath=com/google/code/gson/gson/2.1/gson-2.1.jar)
 * [Scribe](http://search.maven.org/remotecontent?filepath=org/scribe/scribe/1.2.3/scribe-1.2.3.jar)
@@ -61,7 +61,7 @@ We encourage contributions to the StackMob SDK. If you'd like to contribute, for
 
 # Copyright
 
-Copyright 2011 StackMob
+Copyright 2011-2013 StackMob
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
