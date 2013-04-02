@@ -361,7 +361,7 @@ public class StackMobQuery {
         if(val == null) {
             return fieldIsNotNull(field);
         }
-        if(val.isEmpty()) {
+        if(val == "") {
             return putInMap(field, Operator.EMPTY, "false");
         }
         return putInMap(field, Operator.NE, val);
@@ -475,7 +475,7 @@ public class StackMobQuery {
         if(val == null) {
             return fieldIsNull(field);
         }
-        if(val.isEmpty()) {
+        if(val == "") {
             return putInMap(field, Operator.EMPTY, "true");
         }
         args.put(field, val);
