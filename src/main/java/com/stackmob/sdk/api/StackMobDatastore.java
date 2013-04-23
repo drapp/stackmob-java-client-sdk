@@ -401,15 +401,26 @@ public class StackMobDatastore {
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
     public void delete(String path, String id, StackMobRawCallback callback) {
-        new StackMobRequestWithoutPayload(this.executor,
-                                          this.session,
-                                          HttpVerbWithoutPayload.DELETE,
-                                          StackMobOptions.none(),
-                                          StackMobRequest.EmptyParams,
-                                          path + "/" + id,
-                                          callback,
-                                          this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+
+        delete(path + "/" + id, callback);
     }
+
+    /**
+     * do a DELETE request to the StackMob platform
+     * @param path the path to delete
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void delete(String path, StackMobRawCallback callback) {
+        new StackMobRequestWithoutPayload(this.executor,
+                this.session,
+                HttpVerbWithoutPayload.DELETE,
+                StackMobOptions.none(),
+                StackMobRequest.EmptyParams,
+                path,
+                callback,
+                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+    }
+
 
     /**
      * atomically remove elements from an array or has many relationship
