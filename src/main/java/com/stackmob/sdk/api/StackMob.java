@@ -470,7 +470,7 @@ public class StackMob {
 
         new StackMobUserBasedRequest(this.executor,
                                      this.session,
-                                     HttpVerbWithPayload.POST,
+                                     HttpVerbWithoutPayload.DELETE,
                                      StackMobOptions.https(true),
                                      null,
                                      paramList,
@@ -588,7 +588,7 @@ public class StackMob {
 
       new StackMobUserBasedRequest(this.executor,
               this.session,
-              HttpVerbWithPayload.POST,
+              HttpVerbWithoutPayload.DELETE,
               StackMobOptions.https(true),
               null,
               paramList,
@@ -683,7 +683,7 @@ public class StackMob {
 
       new StackMobUserBasedRequest(this.executor,
               this.session,
-              HttpVerbWithPayload.POST,
+              HttpVerbWithoutPayload.DELETE,
               StackMobOptions.https(true),
               null,
               paramList,
