@@ -19,6 +19,7 @@ package com.stackmob.sdk.api;
 import com.stackmob.sdk.callback.*;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.HttpVerbWithPayload;
+import com.stackmob.sdk.net.HttpVerbWithoutPayload;
 import com.stackmob.sdk.request.*;
 import com.stackmob.sdk.util.Pair;
 
@@ -469,8 +470,11 @@ public class StackMob {
 
         new StackMobUserBasedRequest(this.executor,
                                      this.session,
-                                     "unlinkUserFromTwitter",
+                                     HttpVerbWithPayload.POST,
+                                     StackMobOptions.https(true),
+                                     null,
                                      paramList,
+                                     "unlinkUserFromTwitter",
                                      callback,
                                      this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
@@ -582,12 +586,15 @@ public class StackMob {
     public void unlinkUserFromFacebook(StackMobRawCallback callback) {
         List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
 
-        new StackMobUserBasedRequest(this.executor,
-                this.session,
-                "unlinkUserFromFacebook",
-                paramList,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+      new StackMobUserBasedRequest(this.executor,
+              this.session,
+              HttpVerbWithPayload.POST,
+              StackMobOptions.https(true),
+              null,
+              paramList,
+              "unlinkUserFromFacebook",
+              callback,
+              this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
@@ -674,12 +681,15 @@ public class StackMob {
     public void unlinkUserFromGigya(StackMobRawCallback callback) {
         List<Map.Entry<String, String>> paramList = new LinkedList<Map.Entry<String, String>>();
 
-        new StackMobUserBasedRequest(this.executor,
-                this.session,
-                "unlinkUserFromGigya",
-                paramList,
-                callback,
-                this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
+      new StackMobUserBasedRequest(this.executor,
+              this.session,
+              HttpVerbWithPayload.POST,
+              StackMobOptions.https(true),
+              null,
+              paramList,
+              "unlinkUserFromGigya",
+              callback,
+              this.redirectedCallback).setUrlFormat(this.apiUrlFormat).sendRequest();
     }
 
     /**
