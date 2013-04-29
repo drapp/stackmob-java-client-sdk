@@ -393,18 +393,6 @@ public class StackMobDatastore {
                                        this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
-
-    /**
-     * do a DELETE request to the StackMob platform
-     * @param path the path to delete
-     * @param id the id of the object to put
-     * @param callback callback to be called when the server returns. may execute in a separate thread
-     */
-    public void delete(String path, String id, StackMobRawCallback callback) {
-
-        delete(path + "/" + id, callback);
-    }
-
     /**
      * do a DELETE request to the StackMob platform
      * @param path the path to delete
@@ -421,6 +409,15 @@ public class StackMobDatastore {
                 this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }
 
+    /**
+     * do a DELETE request to the StackMob platform
+     * @param path the path to delete
+     * @param id the id of the object to put
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void delete(String path, String id, StackMobRawCallback callback) {
+        delete(path + "/" + id, callback);
+    }
 
     /**
      * atomically remove elements from an array or has many relationship
