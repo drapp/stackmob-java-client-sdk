@@ -227,6 +227,16 @@ public class StackMobQueryField {
     }
 
     /**
+     * Constrain the field to be not in a set of values
+     * @param values the values against which to test
+     * @return a new query with the constraint
+     */
+    public StackMobQueryField isNotIn(List<String> values) {
+        this.q = this.q.fieldIsNotIn(this.field, values);
+        return this;
+    }
+
+    /**
      * add a less than constraint to the field
      * @param val the value against which to test
      * @return a new query with the constraint
