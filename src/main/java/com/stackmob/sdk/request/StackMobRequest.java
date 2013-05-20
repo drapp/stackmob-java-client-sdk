@@ -318,17 +318,20 @@ public abstract class StackMobRequest {
         if(!verb.equals(Verb.GET) && !verb.equals(Verb.DELETE)) {
             headerList.add(new Pair<String, String>("Content-Type", getContentType()));
         }
-        headerList.add(new Pair<String, String>("Accept", accept));
-        headerList.add(new Pair<String, String>("User-Agent", session.getUserAgent()));
-        String cookieHeader = session.getCookieManager().cookieHeader();
-        if(cookieHeader.length() > 0) headerList.add(new Pair<String, String>("Cookie", cookieHeader));
 
         //build user headers
+        boolean hasAcceptHeader = false;
         if(this.headers != null) {
             for(Map.Entry<String, String> header : this.headers) {
+                if(header.getKey().equals("Accept")) hasAcceptHeader = true;
                 headerList.add(new Pair<String, String>(header.getKey(), header.getValue()));
             }
         }
+
+        if(!hasAcceptHeader) headerList.add(new Pair<String, String>("Accept", accept));
+        headerList.add(new Pair<String, String>("User-Agent", session.getUserAgent()));
+        String cookieHeader = session.getCookieManager().cookieHeader();
+        if(cookieHeader.length() > 0) headerList.add(new Pair<String, String>("Cookie", cookieHeader));
 
         //add headers to request
         for(Map.Entry<String, String> header: headerList) {
