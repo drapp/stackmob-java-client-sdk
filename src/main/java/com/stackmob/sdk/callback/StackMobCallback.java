@@ -70,7 +70,7 @@ public abstract class StackMobCallback extends StackMobRawCallback {
         } else {
             StackMobException smException = new StackMobHTTPResponseException(responseStatusCode, responseHeaders, responseBody);
             try {
-                JsonElement errorDescription = new JsonParser().parse(new String(responseBody, "UTF-8")).getAsJsonObject().get("error");
+                JsonElement errorDescription = new JsonParser().parse(new String(responseBody, "UTF-8")).getAsJsonObject().get("error_description");
                 if(errorDescription != null &&
                         errorDescription.isJsonPrimitive() &&
                         errorDescription.getAsJsonPrimitive().isString() &&
