@@ -27,7 +27,7 @@ import com.stackmob.sdk.api.StackMobQuery;
 import com.stackmob.sdk.callback.*;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.util.Pair;
-import com.stackmob.sdk.util.RelationMapping;
+import com.stackmob.sdk.util.TypeHints;
 import com.stackmob.sdk.util.SerializationMetadata;
 
 import static com.stackmob.sdk.util.SerializationMetadata.*;
@@ -253,7 +253,7 @@ public abstract class StackMobModel {
     private static <T extends StackMobModel> String toJsonArray(List<T> models) {
         JsonArray array = new JsonArray();
         for(T model : models) {
-            array.add(model.toJsonElement(0, new Selection(null), new RelationMapping()));
+            array.add(model.toJsonElement(0, new Selection(null), new TypeHints(), new TypeHints()));
         }
         return array.toString();
     }
@@ -631,19 +631,22 @@ public abstract class StackMobModel {
         return list;
     }
 
-    private void replaceModelJson(JsonObject json, String fieldName, Selection selection, RelationMapping mapping, int depth) {
+    private void replaceModelJson(JsonObject json, String fieldName, Selection selection, TypeHints relationHints, TypeHints typeHints, int depth) {
         json.remove(fieldName);
         try {
             Field relationField = getField(fieldName);
             StackMobModel relatedModel = (StackMobModel) relationField.get(this);
-            mapping.add(fieldName,relatedModel.getSchemaName());
-            JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, selection.subSelection(fieldName), mapping);
-            mapping.leave();
+            relationHints.add(fieldName, relatedModel.getSchemaName());
+            relationHints.push(fieldName);
+            typeHints.push(fieldName);
+            JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, selection.subSelection(fieldName), relationHints, typeHints);
+            relationHints.pop();
+            typeHints.pop();
             if(relatedJson != null) json.add(fieldName, relatedJson);
         } catch (Exception ignore) { } //Should never happen
     }
 
-    private void replaceModelArrayJson(JsonObject json, String fieldName, Selection selection, RelationMapping mapping, int depth) {
+    private void replaceModelArrayJson(JsonObject json, String fieldName, Selection selection, TypeHints relationHints, TypeHints typeHints, int depth) {
         json.remove(fieldName);
         try {
             Field relationField = getField(fieldName);
@@ -657,18 +660,23 @@ public abstract class StackMobModel {
             boolean first = true;
             for(StackMobModel relatedModel : relatedModels) {
                 if(first) {
-                    mapping.add(fieldName,relatedModel.getSchemaName());
+                    relationHints.add(fieldName, relatedModel.getSchemaName());
+                    relationHints.push(fieldName);
+                    typeHints.push(fieldName);
                     first = false;
                 }
-                JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, selection.subSelection(fieldName), mapping);
+                JsonElement relatedJson = relatedModel.toJsonElement(depth - 1, selection.subSelection(fieldName), relationHints, typeHints);
                 if(relatedJson != null) array.add(relatedJson);
             }
-            if(!first) mapping.leave();
+            if(!first) {
+                relationHints.pop();
+                typeHints.pop();
+            }
             json.add(fieldName, array);
         } catch (Exception ignore) { } //Should never happen
     }
 
-    protected JsonElement toJsonElement(int depth, Selection selection, RelationMapping mapping) {
+    protected JsonElement toJsonElement(int depth, Selection selection, TypeHints relationHints, TypeHints typeHints) {
         // Set the id here as opposed to on the server to avoid a race condition
         if(getID() == null) setID(UUID.randomUUID().toString().replace("-",""));
         if(depth < 0) return new JsonPrimitive(getID());
@@ -680,9 +688,9 @@ public abstract class StackMobModel {
             ensureValidFieldName(fieldName);
             JsonElement value = json.get(fieldName);
             if(getMetadata(fieldName) == MODEL) {
-                replaceModelJson(json, fieldName, selection, mapping, depth);
+                replaceModelJson(json, fieldName, selection, relationHints, typeHints, depth);
             } else if(getMetadata(fieldName) == MODEL_ARRAY) {
-                replaceModelArrayJson(json, fieldName, selection, mapping, depth);
+                replaceModelArrayJson(json, fieldName, selection, relationHints, typeHints, depth);
             } else if(getMetadata(fieldName) == OBJECT) {
                 //We don't support subobjects. Gson automatically converts a few types like
                 //Date and BigInteger to primitive types, but anything else has to be an error.
@@ -705,6 +713,7 @@ public abstract class StackMobModel {
 
                 } catch (Exception ignore) { } //Should never happen
             } else if(getMetadata(fieldName) == BINARY) {
+                typeHints.add(fieldName, BINARY.name().toLowerCase());
                 json.remove(fieldName);
                 try {
                     StackMobFile file = (StackMobFile) getField(fieldName).get(this);
@@ -718,6 +727,10 @@ public abstract class StackMobModel {
                 } catch(Exception e) {
                     StackMob.getStackMob().getSession().getLogger().logWarning("Got exception while serializing binary file " + e);
                 } //Should never happen
+            } else if(getMetadata(fieldName) == GEOPOINT) {
+                typeHints.add(fieldName, GEOPOINT.name().toLowerCase());
+            } else if(getMetadata(fieldName) == FORGOT_PASSWORD_EMAIL) {
+                typeHints.add(fieldName, FORGOT_PASSWORD_EMAIL.name().toLowerCase().replace("_", ""));
             }
             if(newFieldName != null) outgoing.add(newFieldName.toLowerCase(), json.get(fieldName));
         }
@@ -741,11 +754,11 @@ public abstract class StackMobModel {
      * @return a json representation of the object and its children to the depth
      */
     public String toJson(StackMobOptions options) {
-        return toJson(options, new RelationMapping());
+        return toJson(options, new TypeHints(), new TypeHints());
     }
 
-    String toJson(StackMobOptions options, RelationMapping mapping) {
-        return toJsonElement(options.getExpandDepth(), new Selection(options.getSelection()), mapping).toString();
+    String toJson(StackMobOptions options, TypeHints relationHints, TypeHints typeHints) {
+        return toJsonElement(options.getExpandDepth(), new Selection(options.getSelection()), relationHints, typeHints).toString();
     }
 
     /**
@@ -808,10 +821,11 @@ public abstract class StackMobModel {
      * @param callback invoked when the save is complete
      */
     public void save(StackMobOptions options, StackMobCallback callback) {
-        RelationMapping mapping = new RelationMapping();
-        String json = toJson(options, mapping);
+        TypeHints relationHints = new TypeHints();
+        TypeHints typeHints = new TypeHints();
+        String json = toJson(options, relationHints, typeHints);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
-        headers.add(new Pair<String,String>("X-StackMob-Relations", mapping.toHeaderString()));
+        headers.add(new Pair<String,String>("X-StackMob-Relations", relationHints.toHeaderString()));
         StackMob.getStackMob().getDatastore().post(getSchemaName(), json, options.withHeaders(headers), new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {

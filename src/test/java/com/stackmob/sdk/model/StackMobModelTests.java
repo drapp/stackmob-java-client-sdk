@@ -28,7 +28,7 @@ import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.testobjects.Author;
 import com.stackmob.sdk.testobjects.Book;
 import com.stackmob.sdk.testobjects.Library;
-import com.stackmob.sdk.util.RelationMapping;
+import com.stackmob.sdk.util.TypeHints;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -36,7 +36,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static com.stackmob.sdk.concurrencyutils.CountDownLatchUtils.latch;
 import static com.stackmob.sdk.concurrencyutils.CountDownLatchUtils.latchOne;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -67,7 +66,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         Simple simple = new Simple("foo");
         assertEquals("simple", simple.getSchemaName());
         assertEquals("simple_id", simple.getIDFieldName());
-        RelationMapping mapping = new RelationMapping();
+        TypeHints mapping = new TypeHints();
         JsonObject obj = new JsonParser().parse(simple.toJson(StackMobOptions.none(), mapping)).getAsJsonObject();
         assertEquals("test", obj.get("foo").getAsString());
         assertEquals(5, obj.get("bar").getAsInt());
@@ -79,7 +78,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         Simple simple = new Simple("foo");
         assertEquals("simple", simple.getSchemaName());
         assertEquals("simple_id", simple.getIDFieldName());
-        RelationMapping mapping = new RelationMapping();
+        TypeHints mapping = new TypeHints();
         JsonObject obj = new JsonParser().parse(simple.toJson(StackMobOptions.selectedFields(Arrays.asList("foo")), mapping)).getAsJsonObject();
         assertEquals("test", obj.get("foo").getAsString());
         assertEquals(null, obj.get("bar"));
@@ -100,7 +99,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     }
     
     @Test public void testComplicatedTypes() throws Exception {
-        RelationMapping mapping = new RelationMapping();
+        TypeHints mapping = new TypeHints();
         String json = new Complicated().toJson(StackMobOptions.none(), mapping);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("foo").getAsJsonPrimitive().isString());
@@ -123,7 +122,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     
     @Test public void testSubobject() throws Exception {
         try {
-            new Subobject().toJson(StackMobOptions.none(), new RelationMapping());
+            new Subobject().toJson(StackMobOptions.none(), new TypeHints());
             assertTrue(false);
         } catch(Exception e) {
             assertTrue(e instanceof IllegalStateException);
@@ -204,7 +203,7 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testBadSchemaName() throws Exception {
         try {
-            new REALLY_SUPER_LONG_NAME_THAT_IS_SIMPLY_TOO_LONG().toJson(StackMobOptions.none(), new RelationMapping());
+            new REALLY_SUPER_LONG_NAME_THAT_IS_SIMPLY_TOO_LONG().toJson(StackMobOptions.none(), new TypeHints());
             assertTrue(false);
         } catch(Exception e) { }
     }
@@ -218,7 +217,7 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testBadFieldName() throws Exception {
         try {
-            new BadFieldName().toJson(StackMobOptions.none(), new RelationMapping());
+            new BadFieldName().toJson(StackMobOptions.none(), new TypeHints());
             assertTrue(false);
         } catch(Exception e) { }
     }
@@ -231,7 +230,7 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testNestedModels() throws Exception {
         Book b = testBook();
-        RelationMapping mapping = new RelationMapping();
+        TypeHints mapping = new TypeHints();
         String json = ((StackMobModel)b).toJson(StackMobOptions.none(), mapping);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("title").getAsJsonPrimitive().getAsString().equals("Mort"));
@@ -242,7 +241,7 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testNestedModelsSelection() throws Exception {
         Book b = testBook();
-        RelationMapping mapping = new RelationMapping();
+        TypeHints mapping = new TypeHints();
         String json = ((StackMobModel)b).toJson(StackMobOptions.selectedFields(Arrays.asList("title", "author")), mapping);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("title").getAsJsonPrimitive().getAsString().equals("Mort"));
@@ -253,7 +252,7 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testNestedModelsSelectionNoObject() throws Exception {
         Book b = testBook();
-        RelationMapping mapping = new RelationMapping();
+        TypeHints mapping = new TypeHints();
         String json = ((StackMobModel)b).toJson(StackMobOptions.selectedFields(Arrays.asList("title")), mapping);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("title").getAsJsonPrimitive().getAsString().equals("Mort"));
@@ -271,7 +270,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         Book b2 = new Book("foo2", "bar2", a);
         b2.setID("foo2bar2");
         lib.books = new Book[] {b1, b2};
-        RelationMapping mapping = new RelationMapping();
+        TypeHints mapping = new TypeHints();
         JsonElement json = new JsonParser().parse(((StackMobModel)lib).toJson(StackMobOptions.depthOf(2), mapping));
         assertNotNull(json);
         assertTrue(json.isJsonObject());
@@ -323,7 +322,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     
     @Test public void noIDChildrenToJSON() throws Exception {
         Book b = new Book("Oliver","Penguin",new Author("Dickens"));
-        JsonElement json = new JsonParser().parse(((StackMobModel)b).toJson(StackMobOptions.depthOf(1), new RelationMapping()));
+        JsonElement json = new JsonParser().parse(((StackMobModel)b).toJson(StackMobOptions.depthOf(1), new TypeHints()));
         JsonObject authorObject =  json.getAsJsonObject().get("author").getAsJsonObject();
         assertEquals("Dickens",authorObject.get("name").getAsString());
         assertNotNull(authorObject.get("author_id"));

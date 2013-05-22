@@ -105,8 +105,10 @@ public abstract class StackMobRequest {
         this.oauthVersionOverride = oauthVersionOverride;
 
         GsonBuilder gsonBuilder = new GsonBuilder()
-                                  .registerTypeAdapter(StackMobPushToken.class, new StackMobPushTokenDeserializer())
-                                  .registerTypeAdapter(StackMobPushToken.class, new StackMobPushTokenSerializer())
+                                  .registerTypeAdapter(StackMobPushToken.class, new StackMobPushToken.Deserializer())
+                                  .registerTypeAdapter(StackMobPushToken.class, new StackMobPushToken.Serializer())
+                                  .registerTypeAdapter(StackMobForgotPasswordEmail.class, new StackMobForgotPasswordEmail.Deserializer())
+                                  .registerTypeAdapter(StackMobForgotPasswordEmail.class, new StackMobForgotPasswordEmail.Serializer())
                                   .registerTypeAdapter(StackMobNull.class, new StackMobNull.Adapter())
                                   .excludeFieldsWithModifiers(Modifier.PRIVATE, Modifier.PROTECTED, Modifier.TRANSIENT, Modifier.STATIC);
         gson = gsonBuilder.create();

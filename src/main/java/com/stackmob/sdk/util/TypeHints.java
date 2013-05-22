@@ -17,19 +17,28 @@ package com.stackmob.sdk.util;
 
 import java.util.*;
 
-public class RelationMapping {
+public class TypeHints {
     private Map<String,String> relations = new HashMap<String, String>();
     private String basePath = "";
 
-
-    public void add(String path, String schemaName) {
-        String newPath = basePath + path.toLowerCase();
-        relations.put(newPath, schemaName);
-        basePath = newPath + ".";
+    public void add(String field, String item) {
+        relations.put(appendToPath(field), item);
     }
 
-    public void leave() {
-        basePath = basePath.substring(0,basePath.lastIndexOf(".", basePath.length() - 2) + 1);
+    public void push(String path) {
+        basePath = appendToPath(path);
+    }
+
+    public void pop() {
+        basePath = basePath.substring(0, basePath.lastIndexOf(".") + 1);
+    }
+
+    private String appendToPath(String next) {
+        if(basePath.isEmpty()) {
+            return next;
+        } else {
+            return basePath + "." + next;
+        }
     }
 
     public boolean isEmpty() {

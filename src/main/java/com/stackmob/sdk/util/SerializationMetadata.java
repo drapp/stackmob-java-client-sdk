@@ -18,6 +18,7 @@ package com.stackmob.sdk.util;
 
 import com.stackmob.sdk.api.StackMob;
 import com.stackmob.sdk.api.StackMobFile;
+import com.stackmob.sdk.api.StackMobForgotPasswordEmail;
 import com.stackmob.sdk.api.StackMobGeoPoint;
 import com.stackmob.sdk.model.StackMobCounter;
 import com.stackmob.sdk.model.StackMobModel;
@@ -40,6 +41,7 @@ public enum SerializationMetadata {
     COUNTER,
     GEOPOINT,
     BINARY,
+    FORGOT_PASSWORD_EMAIL,
     PRIMITIVE_ARRAY,
     OBJECT_ARRAY,
     MODEL_ARRAY;
@@ -93,6 +95,8 @@ public enum SerializationMetadata {
             return GEOPOINT;
         } else if(StackMobFile.class.isAssignableFrom(field.getType())) {
             return BINARY;
+        } else if(StackMobForgotPasswordEmail.class.isAssignableFrom(field.getType())) {
+            return FORGOT_PASSWORD_EMAIL;
         } else {
             return OBJECT;
         }
