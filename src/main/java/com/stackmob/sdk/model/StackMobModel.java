@@ -878,6 +878,7 @@ public abstract class StackMobModel {
         String json = toJson(options, relationHints, typeHints);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
         headers.add(new Pair<String,String>("X-StackMob-Relations", relationHints.toHeaderString()));
+        headers.add(new Pair<String,String>("X-StackMob-FieldTypes", typeHints.toHeaderString()));
         stackmob.getDatastore().post(getSchemaName(), json, options.withHeaders(headers), new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
