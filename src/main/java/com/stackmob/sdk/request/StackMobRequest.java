@@ -127,7 +127,7 @@ public abstract class StackMobRequest {
             if(HttpVerbWithoutPayload.GET == httpVerb) {
                 sendGetRequest();
             }
-            if(HttpVerbWithoutPayload.HEAD == httpVerb) {
+            else if(HttpVerbWithoutPayload.HEAD == httpVerb) {
                 sendHeadRequest();
             }
             else if(HttpVerbWithPayload.POST == httpVerb) {
