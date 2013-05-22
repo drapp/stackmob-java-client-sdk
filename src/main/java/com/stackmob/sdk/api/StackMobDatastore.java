@@ -142,6 +142,88 @@ public class StackMobDatastore {
         this.get("/"+query.getObjectName(), query.getArguments(), options.withHeaders(query.getHeaders()).getHeaders(), callback);
     }
 
+    /**
+     * do a head request on the StackMob platform
+     * @param path the path to head
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void head(String path, StackMobRawCallback callback) {
+        new StackMobRequestWithoutPayload(this.executor,
+                this.session,
+                HttpVerbWithoutPayload.HEAD,
+                StackMobOptions.none(),
+                StackMobRequest.EmptyParams,
+                path,
+                callback,
+                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+    }
+
+    /**
+     * do a head request on the StackMob platform
+     * @param path the path to head
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void head(String path, StackMobOptions options, StackMobRawCallback callback) {
+        head(path, StackMobRequest.EmptyParams, options, callback);
+    }
+
+    /**
+     * do a head request on the StackMob platform
+     * @param path the path to head
+     * @param arguments arguments to be encoded into the query string of the head request
+     * @param headers any additional headers to send
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    private void head(String path, List<Map.Entry<String, String>> arguments, List<Map.Entry<String, String>> headers, StackMobRawCallback callback) {
+        new StackMobRequestWithoutPayload(this.executor,
+                this.session,
+                HttpVerbWithoutPayload.HEAD,
+                StackMobOptions.headers(headers),
+                arguments,
+                path,
+                callback,
+                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+    }
+
+    /**
+     * do a head request on the StackMob platform
+     * @param path the path to head
+     * @param arguments arguments to be encoded into the query string of the head request
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    private void head(String path, List<Map.Entry<String, String>> arguments, StackMobOptions options, StackMobRawCallback callback) {
+        new StackMobRequestWithoutPayload(this.executor,
+                this.session,
+                HttpVerbWithoutPayload.HEAD,
+                options,
+                arguments,
+                path,
+                callback,
+                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+    }
+
+    /**
+     * do a head request on the StackMob platform
+     * @param query the query to run
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void head(StackMobQuery query, StackMobRawCallback callback) {
+        StackMobOptions options = StackMobOptions.headers(query.getHeaders());
+        this.head("/"+query.getObjectName(), query.getArguments(), options.getHeaders(), callback);
+    }
+
+    /**
+     * do a head request on the StackMob platform
+     * @param query the query to run
+     * @param options additional options, such as headers, to modify the request
+     * @param callback callback to be called when the server returns. may execute in a separate thread
+     */
+    public void head(StackMobQuery query, StackMobOptions options, StackMobRawCallback callback) {
+        this.head("/"+query.getObjectName(), query.getArguments(), options.withHeaders(query.getHeaders()).getHeaders(), callback);
+    }
+
 
     /**
      * do a post request on the StackMob platform for a single object
@@ -502,7 +584,7 @@ public class StackMobDatastore {
      */
     public void count(StackMobQuery query, StackMobRawCallback callback) {
         final StackMobRawCallback userCallback = callback;
-        get(query.isInRange(0, 0), new StackMobRawCallback() {
+        head(query.isInRange(0, 0), new StackMobRawCallback() {
             @Override
             public void unsent(StackMobException e) {
                 userCallback.unsent(e);

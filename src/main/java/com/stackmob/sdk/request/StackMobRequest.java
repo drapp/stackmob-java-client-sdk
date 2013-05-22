@@ -127,6 +127,9 @@ public abstract class StackMobRequest {
             if(HttpVerbWithoutPayload.GET == httpVerb) {
                 sendGetRequest();
             }
+            if(HttpVerbWithoutPayload.HEAD == httpVerb) {
+                sendHeadRequest();
+            }
             else if(HttpVerbWithPayload.POST == httpVerb) {
                 sendPostRequest();
             }
@@ -151,6 +154,24 @@ public abstract class StackMobRequest {
             String query = formatQueryString(this.params);
             URI uri = createURI(getScheme(), urlFormat, getPath(), query);
             OAuthRequest req = getOAuthRequest(HttpVerbWithoutPayload.GET, uri.toString());
+            sendRequest(req);
+        }
+        catch (URISyntaxException e) {
+            throw new StackMobException(e.getMessage());
+        }
+        catch (InterruptedException e) {
+            throw new StackMobException(e.getMessage());
+        }
+        catch (ExecutionException e) {
+            throw new StackMobException(e.getMessage());
+        }
+    }
+
+    protected void sendHeadRequest() throws StackMobException {
+        try {
+            String query = formatQueryString(this.params);
+            URI uri = createURI(getScheme(), urlFormat, getPath(), query);
+            OAuthRequest req = getOAuthRequest(HttpVerbWithoutPayload.HEAD, uri.toString());
             sendRequest(req);
         }
         catch (URISyntaxException e) {

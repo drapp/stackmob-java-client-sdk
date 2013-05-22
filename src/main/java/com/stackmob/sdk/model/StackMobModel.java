@@ -166,6 +166,17 @@ public abstract class StackMobModel {
         query(theClass, q, new StackMobOptions(), callback);
     }
 
+    /**
+     * run a query on the server to get all the instances of your model within certain constraints
+     * @param stackmob The stackmob instance to run requests on
+     * @param theClass The class of your model
+     * @param q The query to run
+     * @param callback The callback to be invoked upon returning
+     */
+    public static <T extends StackMobModel> void query(StackMob stackmob, final Class<T> theClass, StackMobQuery q, final StackMobQueryCallback<T> callback) {
+        query(stackmob, theClass, q, new StackMobOptions(), callback);
+    }
+
 
     private static <T extends StackMobModel> String getSchemaName(Class<T> theClass) {
         try {
@@ -184,8 +195,19 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void query(final Class<T> theClass, StackMobQuery q, StackMobOptions options, final StackMobQueryCallback<T> callback) {
+        query(StackMob.getStackMob(), theClass, q, options, callback);
+    }
+    /**
+     * run a query on the server to get all the instances of your model within certain constraints
+     * @param stackmob The stackmob instance to run requests on
+     * @param theClass The class of your model
+     * @param q The query to run
+     * @param options options, such as select and expand, to apply to the request
+     * @param callback The callback to be invoked upon returning
+     */
+    public static <T extends StackMobModel> void query(StackMob stackmob, final Class<T> theClass, StackMobQuery q, StackMobOptions options, final StackMobQueryCallback<T> callback) {
         q.setObjectName(getSchemaName(theClass));
-        StackMob.getStackMob().getDatastore().get(q, options, new StackMobCallback() {
+        stackmob.getDatastore().get(q, options, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 JsonArray array = new JsonParser().parse(responseBody).getAsJsonArray();
@@ -212,8 +234,18 @@ public abstract class StackMobModel {
      * @param callback The callback to be invoked upon returning
      */
     public static <T extends StackMobModel> void count(Class<T> theClass, StackMobQuery q, StackMobCountCallback callback) {
+        count(StackMob.getStackMob(), theClass, q, callback);
+    }
+
+    /**
+     * run a count query on the server to count all the instances of your model within certain constraints
+     * @param theClass The class of your model
+     * @param q The query to run
+     * @param callback The callback to be invoked upon returning
+     */
+    public static <T extends StackMobModel> void count(StackMob stackmob, Class<T> theClass, StackMobQuery q, StackMobCountCallback callback) {
         q.setObjectName(getSchemaName(theClass));
-        StackMob.getStackMob().getDatastore().count(q, callback);
+        stackmob.getDatastore().count(q, callback);
     }
 
     /**
@@ -236,7 +268,6 @@ public abstract class StackMobModel {
         return newObject;
     }
 
-
     /**
      * save multiple objects in one batch. This is equivalent to calling save on each
      * @param models
@@ -244,8 +275,19 @@ public abstract class StackMobModel {
      * @param <T>
      */
     public static <T extends StackMobModel> void saveMultiple(List<T> models, StackMobCallback callback) {
+        saveMultiple(StackMob.getStackMob(), models, callback);
+
+    }
+
+    /**
+     * save multiple objects in one batch. This is equivalent to calling save on each
+     * @param models
+     * @param callback
+     * @param <T>
+     */
+    public static <T extends StackMobModel> void saveMultiple(StackMob stackmob, List<T> models, StackMobCallback callback) {
         if(models.size() == 0) throw new IllegalArgumentException("Empty list");
-        StackMob.getStackMob().getDatastore().post(models.get(0).getSchemaName(), toJsonArray(models), callback);
+        stackmob.getDatastore().post(models.get(0).getSchemaName(), toJsonArray(models), callback);
 
     }
 
@@ -291,7 +333,17 @@ public abstract class StackMobModel {
     private transient Class<? extends StackMobModel> actualClass;
     private transient String schemaName;
     private transient boolean hasData;
+    private transient StackMob stackmob = StackMob.getStackMob();
     private static final Gson gson = getGson();
+
+    /**
+     * Have this model use a specific StackMob instance when making requests. Useful if you want
+     * to access more than one StackMob application from the same app
+     * @param stackmob the StackMob instance
+     */
+    public void setStackMob(StackMob stackmob) {
+        this.stackmob = stackmob;
+    }
 
     /**
      * create a new model of the specified class with an id overriding the default, automatically
@@ -464,9 +516,9 @@ public abstract class StackMobModel {
                 }
             }
         } catch(NoSuchFieldException e) {
-            StackMob.getStackMob().getSession().getLogger().logDebug(String.format("Ignoring extraneous json field:\nfield: %s\ndata: %s", jsonName, json.toString()));
+            stackmob.getSession().getLogger().logDebug(String.format("Ignoring extraneous json field:\nfield: %s\ndata: %s", jsonName, json.toString()));
         } catch(JsonSyntaxException e) {
-            StackMob.getStackMob().getSession().getLogger().logWarning(String.format("Incoming data does not match data model:\nfield: %s\ndata: %s", jsonName, json.toString()));
+            stackmob.getSession().getLogger().logWarning(String.format("Incoming data does not match data model:\nfield: %s\ndata: %s", jsonName, json.toString()));
         } catch(IllegalAccessException e) {
             throw new StackMobException(e.getMessage());
         } catch (InstantiationException e) {
@@ -725,7 +777,7 @@ public abstract class StackMobModel {
                     }
 
                 } catch(Exception e) {
-                    StackMob.getStackMob().getSession().getLogger().logWarning("Got exception while serializing binary file " + e);
+                    stackmob.getSession().getLogger().logWarning("Got exception while serializing binary file " + e);
                 } //Should never happen
             } else if(getMetadata(fieldName) == GEOPOINT) {
                 typeHints.add(fieldName, GEOPOINT.name().toLowerCase());
@@ -777,7 +829,7 @@ public abstract class StackMobModel {
      * @param callback invoked when the load is complete
      */
     public void fetch(StackMobOptions options, StackMobCallback callback) {
-        StackMob.getStackMob().getDatastore().get(getSchemaName() + "/" + id, options, new StackMobIntermediaryCallback(callback) {
+        stackmob.getDatastore().get(getSchemaName() + "/" + id, options, new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;
@@ -826,7 +878,7 @@ public abstract class StackMobModel {
         String json = toJson(options, relationHints, typeHints);
         List<Map.Entry<String,String>> headers= new ArrayList<Map.Entry<String,String>>();
         headers.add(new Pair<String,String>("X-StackMob-Relations", relationHints.toHeaderString()));
-        StackMob.getStackMob().getDatastore().post(getSchemaName(), json, options.withHeaders(headers), new StackMobIntermediaryCallback(callback) {
+        stackmob.getDatastore().post(getSchemaName(), json, options.withHeaders(headers), new StackMobIntermediaryCallback(callback) {
             @Override
             public void success(String responseBody) {
                 boolean fillSucceeded = false;
@@ -853,7 +905,11 @@ public abstract class StackMobModel {
      * @param callback invoked when the delete is complete
      */
     public void destroy(StackMobCallback callback) {
-        StackMob.getStackMob().getDatastore().delete(getSchemaName(), id, callback);
+        stackmob.getDatastore().delete(getSchemaName(), id, callback);
+    }
+
+    public void exists(StackMobExistsCallback callback) {
+        stackmob.getDatastore().head(getSchemaName() + "/" + id, callback);
     }
 
 
@@ -886,7 +942,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().getDatastore().putRelated(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), callback);
+        stackmob.getDatastore().putRelated(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), callback);
     }
 
     /**
@@ -909,7 +965,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().getDatastore().postRelated(schemaName, id, field.toLowerCase(), toJsonArray(objs), callback);
+        stackmob.getDatastore().postRelated(schemaName, id, field.toLowerCase(), toJsonArray(objs), callback);
     }
 
     /**
@@ -931,7 +987,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().getDatastore().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), false, callback);
+        stackmob.getDatastore().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), false, callback);
 
     }
 
@@ -954,7 +1010,7 @@ public abstract class StackMobModel {
         } catch (Exception e) {
             throw new IllegalArgumentException("Type of input objects does not match the type of the field");
         }
-        StackMob.getStackMob().getDatastore().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), true, callback);
+        stackmob.getDatastore().deleteIdsFrom(schemaName, id, field.toLowerCase(), getIdsFromModels(objs), true, callback);
     }
 
     /*
