@@ -894,6 +894,10 @@ public abstract class StackMobModel {
         stackmob.getDatastore().delete(getSchemaName(), id, callback);
     }
 
+    public void exists(StackMobExistsCallback callback) {
+        stackmob.getDatastore().head(getSchemaName() + "/" + id, callback);
+    }
+
 
     private <T extends StackMobModel> List<String> getIdsFromModels(List<T> models) {
         List<String> ids = new ArrayList<String>();

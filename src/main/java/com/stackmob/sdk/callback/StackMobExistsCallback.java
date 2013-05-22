@@ -1,5 +1,5 @@
 /**
- * Copyright 2011 StackMob
+ * Copyright 2012 StackMob
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.stackmob.sdk.callback;
 
-package com.stackmob.sdk.net;
+import com.stackmob.sdk.util.Http;
 
-public enum HttpVerbWithoutPayload implements HttpVerb {
-    GET,
-    HEAD,
-    DELETE
+public abstract class StackMobExistsCallback extends StackMobCallback {
+
+    public abstract void success(boolean exists);
+
+    @Override
+    public void success(String responseBody) {
+        success(Http.isSuccess(responseStatusCode));
+    }
+
 }
