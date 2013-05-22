@@ -16,6 +16,10 @@
 
 package com.stackmob.sdk.push;
 
+import com.google.gson.*;
+
+import java.lang.reflect.Type;
+
 /**
  * A push token identifies a specific device for push on a particular platform. The token can then be registered with StackMob and pushed to.
  *
@@ -96,6 +100,29 @@ public class StackMobPushToken {
      */
     public void setTokenType(TokenType type) {
         this.type = type;
+    }
+
+    public static class Serializer implements JsonSerializer<StackMobPushToken>{
+        public JsonElement serialize(StackMobPushToken token, Type typeOfSrc, JsonSerializationContext context) {
+            JsonObject object = new JsonObject();
+            object.add("type", new JsonPrimitive(token.getTokenType().toString()));
+            object.add("token", new JsonPrimitive(token.getToken()));
+            return object;
+        }
+    }
+
+    public static class Deserializer implements JsonDeserializer<StackMobPushToken> {
+        public StackMobPushToken deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
+            JsonObject obj = json.getAsJsonObject();
+
+            JsonPrimitive tokenStringPrimitive = obj.getAsJsonPrimitive("token");
+            String tokenString = tokenStringPrimitive.getAsString();
+
+            JsonPrimitive tokenTypePrimitive = obj.getAsJsonPrimitive("type");
+            StackMobPushToken.TokenType tokenType = StackMobPushToken.TokenType.valueOf(tokenTypePrimitive.getAsString());
+
+            return new StackMobPushToken(tokenString, tokenType);
+        }
     }
 
 }
