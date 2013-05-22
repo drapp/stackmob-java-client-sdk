@@ -22,7 +22,7 @@ public class TypeHints {
     private String basePath = "";
 
     public void add(String field, String item) {
-        relations.put(appendToPath(field), item);
+        relations.put(appendToPath(field), item.toLowerCase());
     }
 
     public void push(String path) {
@@ -30,14 +30,18 @@ public class TypeHints {
     }
 
     public void pop() {
-        basePath = basePath.substring(0, basePath.lastIndexOf(".") + 1);
+        if(basePath.contains(".")) {
+            basePath = basePath.substring(0, basePath.lastIndexOf("."));
+        } else {
+            basePath = "";
+        }
     }
 
     private String appendToPath(String next) {
         if(basePath.isEmpty()) {
-            return next;
+            return next.toLowerCase();
         } else {
-            return basePath + "." + next;
+            return basePath + "." + next.toLowerCase();
         }
     }
 

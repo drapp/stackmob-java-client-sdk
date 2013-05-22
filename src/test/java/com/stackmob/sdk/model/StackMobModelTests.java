@@ -19,6 +19,7 @@ package com.stackmob.sdk.model;
 import com.google.gson.*;
 import com.stackmob.sdk.StackMobTestCommon;
 import com.stackmob.sdk.api.StackMobFile;
+import com.stackmob.sdk.api.StackMobForgotPasswordEmail;
 import com.stackmob.sdk.api.StackMobGeoPoint;
 import com.stackmob.sdk.api.StackMobOptions;
 import com.stackmob.sdk.callback.StackMobCallback;
@@ -66,24 +67,28 @@ public class StackMobModelTests extends StackMobTestCommon {
         Simple simple = new Simple("foo");
         assertEquals("simple", simple.getSchemaName());
         assertEquals("simple_id", simple.getIDFieldName());
-        TypeHints mapping = new TypeHints();
-        JsonObject obj = new JsonParser().parse(simple.toJson(StackMobOptions.none(), mapping)).getAsJsonObject();
+        TypeHints relations = new TypeHints();
+        TypeHints types = new TypeHints();
+        JsonObject obj = new JsonParser().parse(simple.toJson(StackMobOptions.none(), relations, types)).getAsJsonObject();
         assertEquals("test", obj.get("foo").getAsString());
         assertEquals(5, obj.get("bar").getAsInt());
         assertNotNull(obj.get("simple_id").getAsString());
-        assertEquals("",mapping.toHeaderString());
+        assertEquals("", relations.toHeaderString());
+        assertEquals("", types.toHeaderString());
     }
 
     @Test public void testSelectedFields() throws Exception {
         Simple simple = new Simple("foo");
         assertEquals("simple", simple.getSchemaName());
         assertEquals("simple_id", simple.getIDFieldName());
-        TypeHints mapping = new TypeHints();
-        JsonObject obj = new JsonParser().parse(simple.toJson(StackMobOptions.selectedFields(Arrays.asList("foo")), mapping)).getAsJsonObject();
+        TypeHints relations = new TypeHints();
+        TypeHints types = new TypeHints();
+        JsonObject obj = new JsonParser().parse(simple.toJson(StackMobOptions.selectedFields(Arrays.asList("foo")), relations, types)).getAsJsonObject();
         assertEquals("test", obj.get("foo").getAsString());
         assertEquals(null, obj.get("bar"));
         assertNotNull(obj.get("simple_id").getAsString());
-        assertEquals("",mapping.toHeaderString());
+        assertEquals("", relations.toHeaderString());
+        assertEquals("", types.toHeaderString());
     }
 
     private class Complicated extends Simple {
@@ -96,11 +101,15 @@ public class StackMobModelTests extends StackMobTestCommon {
         private boolean test = false;
         private byte[] myBytes = new byte[] {(byte)0xaf, (byte)0x45, (byte)0xf3};
         protected Date date = new Date();
+        protected StackMobGeoPoint geo = new StackMobGeoPoint(10.0, 10.0);
+        protected StackMobFile file = new StackMobFile("text/plain", "foo.txt", "hello world".getBytes());
+        protected StackMobForgotPasswordEmail email = new StackMobForgotPasswordEmail("foo@bar.com");
     }
     
     @Test public void testComplicatedTypes() throws Exception {
-        TypeHints mapping = new TypeHints();
-        String json = new Complicated().toJson(StackMobOptions.none(), mapping);
+        TypeHints relations = new TypeHints();
+        TypeHints types = new TypeHints();
+        String json = new Complicated().toJson(StackMobOptions.none(), relations, types);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("foo").getAsJsonPrimitive().isString());
         assertTrue(object.get("bar").getAsJsonPrimitive().isNumber());
@@ -110,7 +119,8 @@ public class StackMobModelTests extends StackMobTestCommon {
         assertTrue(object.get("test").getAsJsonPrimitive().isBoolean());
         assertTrue(object.get("mybytes").isJsonArray() && object.get("mybytes").getAsJsonArray().iterator().next().getAsJsonPrimitive().isNumber());
         assertTrue(object.get("date").getAsJsonPrimitive().isNumber());
-        assertEquals("",mapping.toHeaderString());
+        assertEquals("", relations.toHeaderString());
+        assertEquals("geo=geopoint&email=forgotpassword&file=binary", types.toHeaderString());
     }
 
     private class Subobject extends StackMobModel {
@@ -122,7 +132,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     
     @Test public void testSubobject() throws Exception {
         try {
-            new Subobject().toJson(StackMobOptions.none(), new TypeHints());
+            new Subobject().toJson(StackMobOptions.none(), new TypeHints(), new TypeHints());
             assertTrue(false);
         } catch(Exception e) {
             assertTrue(e instanceof IllegalStateException);
@@ -203,7 +213,7 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testBadSchemaName() throws Exception {
         try {
-            new REALLY_SUPER_LONG_NAME_THAT_IS_SIMPLY_TOO_LONG().toJson(StackMobOptions.none(), new TypeHints());
+            new REALLY_SUPER_LONG_NAME_THAT_IS_SIMPLY_TOO_LONG().toJson(StackMobOptions.none(), new TypeHints(), new TypeHints());
             assertTrue(false);
         } catch(Exception e) { }
     }
@@ -217,43 +227,48 @@ public class StackMobModelTests extends StackMobTestCommon {
 
     @Test public void testBadFieldName() throws Exception {
         try {
-            new BadFieldName().toJson(StackMobOptions.none(), new TypeHints());
+            new BadFieldName().toJson(StackMobOptions.none(), new TypeHints(), new TypeHints());
             assertTrue(false);
         } catch(Exception e) { }
     }
 
     private Book testBook() {
-        Author a = new Author("Terry Pratchett");
+        Author a = new Author("Terry Pratchett", new StackMobGeoPoint(10.0, 10.0));
         a.setID("pratchett");
         return new Book("Mort", "Harper Collins", a);
     }
 
     @Test public void testNestedModels() throws Exception {
         Book b = testBook();
-        TypeHints mapping = new TypeHints();
-        String json = ((StackMobModel)b).toJson(StackMobOptions.none(), mapping);
+        TypeHints relations = new TypeHints();
+        TypeHints types = new TypeHints();
+        String json = ((StackMobModel)b).toJson(StackMobOptions.depthOf(1), relations, types);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("title").getAsJsonPrimitive().getAsString().equals("Mort"));
         assertTrue(object.get("publisher").getAsJsonPrimitive().getAsString().equals("Harper Collins"));
-        assertTrue(object.get("author").getAsJsonPrimitive().getAsString().equals("pratchett"));
-        assertEquals("author=author", mapping.toHeaderString());
+        assertTrue(object.get("author").isJsonObject());
+        assertEquals("author=author", relations.toHeaderString());
+        assertEquals("author.birthplace=geopoint", types.toHeaderString());
     }
 
     @Test public void testNestedModelsSelection() throws Exception {
         Book b = testBook();
-        TypeHints mapping = new TypeHints();
-        String json = ((StackMobModel)b).toJson(StackMobOptions.selectedFields(Arrays.asList("title", "author")), mapping);
+        TypeHints relations = new TypeHints();
+        TypeHints types = new TypeHints();
+        String json = ((StackMobModel)b).toJson(StackMobOptions.selectedFields(Arrays.asList("title", "author")), relations, types);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("title").getAsJsonPrimitive().getAsString().equals("Mort"));
         assertNull(object.get("publisher"));
         assertTrue(object.get("author").getAsJsonPrimitive().getAsString().equals("pratchett"));
-        assertEquals("author=author", mapping.toHeaderString());
+        assertEquals("author=author", relations.toHeaderString());
+        assertEquals("", types.toHeaderString());
     }
 
     @Test public void testNestedModelsSelectionNoObject() throws Exception {
         Book b = testBook();
-        TypeHints mapping = new TypeHints();
-        String json = ((StackMobModel)b).toJson(StackMobOptions.selectedFields(Arrays.asList("title")), mapping);
+        TypeHints relations = new TypeHints();
+        TypeHints types = new TypeHints();
+        String json = ((StackMobModel)b).toJson(StackMobOptions.selectedFields(Arrays.asList("title")), relations, types);
         JsonObject object = new JsonParser().parse(json).getAsJsonObject();
         assertTrue(object.get("title").getAsJsonPrimitive().getAsString().equals("Mort"));
         assertNull(object.get("publisher"));
@@ -270,8 +285,9 @@ public class StackMobModelTests extends StackMobTestCommon {
         Book b2 = new Book("foo2", "bar2", a);
         b2.setID("foo2bar2");
         lib.books = new Book[] {b1, b2};
-        TypeHints mapping = new TypeHints();
-        JsonElement json = new JsonParser().parse(((StackMobModel)lib).toJson(StackMobOptions.depthOf(2), mapping));
+        TypeHints relations = new TypeHints();
+        TypeHints types = new TypeHints();
+        JsonElement json = new JsonParser().parse(((StackMobModel)lib).toJson(StackMobOptions.depthOf(2), relations, types));
         assertNotNull(json);
         assertTrue(json.isJsonObject());
         JsonObject jsonObject = json.getAsJsonObject();
@@ -293,7 +309,8 @@ public class StackMobModelTests extends StackMobTestCommon {
         JsonObject author2 = book2.get("author").getAsJsonObject();
         assertEquals("baz", author2.get("author_id").getAsString());
         assertEquals("baz", author2.get("name").getAsString());
-        assertEquals("books=book&books.author=author",mapping.toHeaderString());
+        assertEquals("books=book&books.author=author",relations.toHeaderString());
+        assertEquals("", types.toHeaderString());
 
     }
     
@@ -322,7 +339,7 @@ public class StackMobModelTests extends StackMobTestCommon {
     
     @Test public void noIDChildrenToJSON() throws Exception {
         Book b = new Book("Oliver","Penguin",new Author("Dickens"));
-        JsonElement json = new JsonParser().parse(((StackMobModel)b).toJson(StackMobOptions.depthOf(1), new TypeHints()));
+        JsonElement json = new JsonParser().parse(((StackMobModel)b).toJson(StackMobOptions.depthOf(1), new TypeHints(), new TypeHints()));
         JsonObject authorObject =  json.getAsJsonObject().get("author").getAsJsonObject();
         assertEquals("Dickens",authorObject.get("name").getAsString());
         assertNotNull(authorObject.get("author_id"));

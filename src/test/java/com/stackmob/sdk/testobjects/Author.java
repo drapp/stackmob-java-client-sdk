@@ -15,15 +15,23 @@
  */
 package com.stackmob.sdk.testobjects;
 
+import com.stackmob.sdk.api.StackMobGeoPoint;
 import com.stackmob.sdk.model.StackMobModel;
 
 public class Author extends StackMobModel {
 
     private String name;
+    private StackMobGeoPoint birthPlace;
+
 
     public Author(String name) {
+        this(name, null);
+    }
+
+    public Author(String name, StackMobGeoPoint birthPlace) {
         super(Author.class);
         setName(name);
+        this.birthPlace = birthPlace;
     }
 
     public String getName() {

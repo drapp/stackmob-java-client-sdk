@@ -25,8 +25,6 @@ import com.stackmob.sdk.callback.StackMobRedirectedCallback;
 import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.net.*;
 import com.stackmob.sdk.push.StackMobPushToken;
-import com.stackmob.sdk.push.StackMobPushTokenDeserializer;
-import com.stackmob.sdk.push.StackMobPushTokenSerializer;
 import com.stackmob.sdk.util.*;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.exceptions.OAuthException;
