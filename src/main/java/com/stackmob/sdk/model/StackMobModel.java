@@ -729,8 +729,8 @@ public abstract class StackMobModel {
                 } //Should never happen
             } else if(getMetadata(fieldName) == GEOPOINT) {
                 typeHints.add(fieldName, GEOPOINT.name().toLowerCase());
-            } else if(getMetadata(fieldName) == FORGOT_PASSWORD_EMAIL) {
-                typeHints.add(fieldName, FORGOT_PASSWORD_EMAIL.name().toLowerCase().replace("_", ""));
+            } else if(getMetadata(fieldName) == FORGOT_PASSWORD) {
+                typeHints.add(fieldName, FORGOT_PASSWORD.name().toLowerCase().replace("_", ""));
             }
             if(newFieldName != null) outgoing.add(newFieldName.toLowerCase(), json.get(fieldName));
         }

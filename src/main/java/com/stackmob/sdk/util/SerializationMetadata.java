@@ -41,7 +41,7 @@ public enum SerializationMetadata {
     COUNTER,
     GEOPOINT,
     BINARY,
-    FORGOT_PASSWORD_EMAIL,
+    FORGOT_PASSWORD,
     PRIMITIVE_ARRAY,
     OBJECT_ARRAY,
     MODEL_ARRAY;
@@ -96,7 +96,7 @@ public enum SerializationMetadata {
         } else if(StackMobFile.class.isAssignableFrom(field.getType())) {
             return BINARY;
         } else if(StackMobForgotPasswordEmail.class.isAssignableFrom(field.getType())) {
-            return FORGOT_PASSWORD_EMAIL;
+            return FORGOT_PASSWORD;
         } else {
             return OBJECT;
         }
