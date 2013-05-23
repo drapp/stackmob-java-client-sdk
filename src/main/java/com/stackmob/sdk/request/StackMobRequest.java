@@ -336,7 +336,7 @@ public abstract class StackMobRequest {
         List<Map.Entry<String, String>> headerList = new ArrayList<Map.Entry<String, String>>();
 
         //build basic headers
-        if(!verb.equals(Verb.GET) && !verb.equals(Verb.DELETE)) {
+        if(!verb.equals(Verb.GET) && !verb.equals(Verb.DELETE) && !verb.equals(Verb.HEAD)) {
             headerList.add(new Pair<String, String>("Content-Type", getContentType()));
         }
 
@@ -399,6 +399,7 @@ public abstract class StackMobRequest {
         if(req.getVerb() == Verb.POST) requestVerb = HttpVerbWithPayload.POST;
         else if(req.getVerb() == Verb.PUT) requestVerb = HttpVerbWithPayload.PUT;
         else if(req.getVerb() == Verb.DELETE) requestVerb = HttpVerbWithoutPayload.DELETE;
+        else if(req.getVerb() == Verb.HEAD) requestVerb = HttpVerbWithoutPayload.HEAD;
         return requestVerb;
     }
     
