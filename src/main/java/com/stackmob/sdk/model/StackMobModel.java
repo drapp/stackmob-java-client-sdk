@@ -325,6 +325,8 @@ public abstract class StackMobModel {
     private static Gson getGson() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Date.class, new DateAsNumberTypeAdapter());
+        gsonBuilder.registerTypeAdapter(StackMobForgotPasswordEmail.class, new StackMobForgotPasswordEmail.Deserializer());
+        gsonBuilder.registerTypeAdapter(StackMobForgotPasswordEmail.class, new StackMobForgotPasswordEmail.Serializer());
         return gsonBuilder.create();
     }
 
