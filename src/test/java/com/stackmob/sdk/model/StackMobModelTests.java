@@ -525,6 +525,7 @@ public class StackMobModelTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
     }
 
+    @Ignore
     @Test public void saveComplicatedTypesToServer()  throws Exception {
         final Complicated ls = new Complicated();
 
