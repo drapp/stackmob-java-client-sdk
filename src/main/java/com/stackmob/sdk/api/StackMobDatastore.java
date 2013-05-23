@@ -584,7 +584,7 @@ public class StackMobDatastore {
      */
     public void count(StackMobQuery query, StackMobRawCallback callback) {
         final StackMobRawCallback userCallback = callback;
-        head(query.isInRange(0, 0), new StackMobRawCallback() {
+        get(query.isInRange(0, 0), new StackMobRawCallback() {
             @Override
             public void unsent(StackMobException e) {
                 userCallback.unsent(e);
