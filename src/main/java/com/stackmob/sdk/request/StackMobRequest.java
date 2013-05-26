@@ -34,6 +34,9 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Modifier;
 import java.net.HttpURLConnection;
@@ -388,6 +391,24 @@ public abstract class StackMobRequest {
         }
     }
 
+    private byte[] getByteArray(InputStream is) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        int nRead;
+        byte[] data = new byte[16384];
+
+        try {
+            while ((nRead = is.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            buffer.flush();
+        } catch (IOException ex) {
+            return new byte[0];
+        }
+
+        return buffer.toByteArray();
+    }
+
     protected OAuthRequest getOAuthRequest(HttpVerb method, String url, String payload) {
         OAuthRequest req = getOAuthRequest(method, url);
         req.addPayload(payload);
@@ -451,14 +472,17 @@ public abstract class StackMobRequest {
                     try {
                         session.getLogger().logInfo("%s", "Request URL: " + req.getUrl() + "\nRequest Verb: " + getRequestVerb(req) + "\nRequest Headers: " + getRequestHeaders(req) + "\nRequest Body: " + req.getBodyContents());
                         Response ret = req.send();
-                        String body;
+                        byte[] rawBody;
+                        String stringBody;
                         try {
                            // Apparently sometime this just NPEs
-                           body = ret.getBody();
+                           rawBody = getByteArray(ret.getStream());
+                           stringBody = new String(rawBody);
                         } catch(Exception e) {
-                           body = "{}";
+                           stringBody = "{}";
+                           rawBody = new byte[0];
                         }
-                        String trimmedBody = body.length() < 1000 ? body : (body.subSequence(0, 1000) + " (truncated)");
+                        String trimmedBody = stringBody.length() < 1000 ? stringBody : (stringBody.subSequence(0, 1000) + " (truncated)");
                         session.getLogger().logInfo("%s", "Response StatusCode: " + ret.getCode() + "\nResponse Headers: " + ret.getHeaders() + "\nResponse: " + trimmedBody);
                         if(!isOAuth2() && ret.getHeaders() != null) session.recordServerTimeDiff(ret.getHeader("Date"));
                         if(HttpRedirectHelper.isRedirected(ret.getCode())) {
@@ -470,7 +494,7 @@ public abstract class StackMobRequest {
                                 newReq = getOAuthRequest(verb, newLocation, req.getBodyContents());
                             }
                             //does NOT protect against circular redirects
-                            redirectedCallback.redirected(req.getUrl(), ret.getHeaders(), body, newReq.getUrl());
+                            redirectedCallback.redirected(req.getUrl(), ret.getHeaders(), stringBody, newReq.getUrl());
                             sendRequest(newReq);
                         }
                         else {
@@ -513,7 +537,7 @@ public abstract class StackMobRequest {
                                                 req.getBodyContents(),
                                                 ret.getCode(),
                                                 headers,
-                                                body.getBytes());
+                                                rawBody);
                                     }
                                     catch(Throwable t) {
                                         session.getLogger().logError("Callback threw error %s", StackMobLogger.getStackTrace(t));
