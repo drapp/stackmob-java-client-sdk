@@ -25,6 +25,7 @@ import com.stackmob.sdk.exception.StackMobException;
 import com.stackmob.sdk.testobjects.Author;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -91,6 +92,44 @@ public class StackMobModelQueryTests extends StackMobTestCommon {
             @Override
             public void success(long count) {
                 asserter.markEquals(3, (int)count);
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
+    @Test public void testInQuery() throws Exception {
+        Author.query(Author.class, new StackMobQuery().fieldIsIn("name", Arrays.asList("Larry Wall")), new StackMobQueryCallback<Author>() {
+            @Override
+            public void success(List<Author> result) {
+                asserter.markTrue(result.size() > 0);
+                for (Author a : result) {
+                    asserter.markTrue("Larry Wall".equals(a.getName()));
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
+    @Test public void testNotInQuery() throws Exception {
+        Author.query(Author.class, new StackMobQuery().fieldIsNotIn("name", Arrays.asList("tolstoy")), new StackMobQueryCallback<Author>() {
+            @Override
+            public void success(List<Author> result) {
+                asserter.markTrue(result.size() > 0);
+                for (Author a : result) {
+                    asserter.markFalse("tolstoy".equals(a.getName()));
+                }
                 latch.countDown();
             }
 
