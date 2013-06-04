@@ -1,12 +1,17 @@
 <h2>StackMob Java SDK Change Log</h2>
 
+<h3> v1.3.1 - June 4, 2013</h3>
+
+**Features**
+
+* Added ability to access raw binary response body
+
 <h3>v1.3.0 - May 31, 2013</h3>
 
 **Features**
 
 * Added "not in" support
 * Added HEAD request support
-* Added ability to access raw binary response body
 
 <h3>v1.2.1 - March 27, 2013</h3>
 
