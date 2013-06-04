@@ -3,6 +3,7 @@
 *.iws
 *.iml
 *.idea
+release.properties
 target
 out
 *.class
