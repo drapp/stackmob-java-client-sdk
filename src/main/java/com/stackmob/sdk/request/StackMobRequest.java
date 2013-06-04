@@ -477,7 +477,7 @@ public abstract class StackMobRequest {
                         try {
                            // Apparently sometime this just NPEs
                            rawBody = getByteArray(ret.getStream());
-                           stringBody = new String(rawBody);
+                           stringBody = new String(rawBody, "UTF-8");
                         } catch(Exception e) {
                            stringBody = "{}";
                            rawBody = new byte[0];
