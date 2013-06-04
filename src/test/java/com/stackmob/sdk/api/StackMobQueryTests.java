@@ -89,6 +89,21 @@ public class StackMobQueryTests extends StackMobTestCommon {
         assertEquals(valueArr, valSplit);
     }
 
+    @Test public void ninQuery() {
+        StackMobQuery q = new StackMobQuery(object).fieldIsNotIn(field, valueArr);
+        assertEquals(object, q.getObjectName());
+        List<Map.Entry<String, String>> argList = q.getArguments();
+        Map<String, String> args = new HashMap<String, String>();
+        for(Map.Entry<String, String> entry : argList) {
+            args.put(entry.getKey(), entry.getValue());
+        }
+        assertEquals(1, args.size());
+        assertTrue(args.containsKey(field+StackMobQuery.Operator.NIN.getOperatorForURL()));
+        String val = args.get(field+StackMobQuery.Operator.NIN.getOperatorForURL());
+        List<String> valSplit = Arrays.asList(val.split(","));
+        assertEquals(valueArr, valSplit);
+    }
+
     @Test public void notEqualQuery() {
         StackMobQuery q = new StackMobQuery(object).fieldIsNotEqual(field, "foo");
         assertEquals(object, q.getObjectName());

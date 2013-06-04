@@ -17,7 +17,6 @@
 package com.stackmob.sdk.api;
 
 import com.stackmob.sdk.util.ListHelpers;
-import com.stackmob.sdk.util.Pair;
 
 import java.util.*;
 
@@ -88,6 +87,7 @@ public class StackMobQuery {
         LTE("lte"),
         GTE("gte"),
         IN("in"),
+        NIN("nin"),
         NEAR("near"),
         WITHIN("within"),
         NE("ne"),
@@ -349,6 +349,16 @@ public class StackMobQuery {
      */
     public StackMobQuery fieldIsIn(String field, List<String> values) {
         return putInMap(field, Operator.IN, ListHelpers.join(values, ","));
+    }
+
+    /**
+     * add a "NIN" to your query. test whether the given field's value is not in the given list of possible values
+     * @param field the field whose value to test
+     * @param values the values against which to match
+     * @return the new query that resulted from adding this operation
+     */
+    public StackMobQuery fieldIsNotIn(String field, List<String> values) {
+        return putInMap(field, Operator.NIN, ListHelpers.join(values, ","));
     }
 
     /**
