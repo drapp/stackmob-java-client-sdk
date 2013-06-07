@@ -1,6 +1,6 @@
 <h2>StackMob Java SDK Change Log</h2>
 
-<h3> v1.3.1 - June 4, 2013</h3>
+<h3> v1.3.4 - June 7, 2013</h3>
 
 **Features**
 
