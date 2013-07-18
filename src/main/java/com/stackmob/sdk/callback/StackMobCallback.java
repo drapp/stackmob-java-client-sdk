@@ -78,14 +78,13 @@ public abstract class StackMobCallback extends StackMobRawCallback {
     }
 
     private boolean isTemporaryPasswordMessage(String name) {
+        boolean matched = false;
         try {
-            String test = new String(responseBody, "UTF-8");
             JsonElement message = new JsonParser().parse(new String(responseBody, "UTF-8")).getAsJsonObject().get(name);
-            return message != null && message.isJsonPrimitive() && message.getAsJsonPrimitive().isString() &&
-                   message.getAsString().startsWith("Temporary password reset required.");
-        } catch(Exception e) {
-            return false;
-        }
+            matched = message != null && message.isJsonPrimitive() && message.getAsJsonPrimitive().isString() &&
+                      message.getAsString().startsWith("Temporary password reset required.");
+        } catch(Throwable ignore) { }
+        return matched;
     }
 
     /**
