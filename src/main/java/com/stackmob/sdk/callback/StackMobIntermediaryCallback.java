@@ -36,12 +36,23 @@ public class StackMobIntermediaryCallback extends StackMobCallback {
         return this.furtherCallback;
     }
 
+    private void copyEverything() {
+        furtherCallback.requestVerb = requestVerb;
+        furtherCallback.requestURL = requestURL;
+        furtherCallback.requestHeaders = requestHeaders;
+        furtherCallback.requestBody = requestBody;
+        furtherCallback.responseStatusCode = responseStatusCode;
+        furtherCallback.responseHeaders = responseHeaders;
+        furtherCallback.responseBody= responseBody;
+    }
+
     /**
      * override and call super to inject custom logic before success
      * @param responseBody the response string received from StackMob
      */
     @Override
     public void success(String responseBody) {
+        copyEverything();
         furtherCallback.success(responseBody);
     }
 
@@ -51,6 +62,7 @@ public class StackMobIntermediaryCallback extends StackMobCallback {
      */
     @Override
     public void failure(StackMobException e) {
+        copyEverything();
         furtherCallback.failure(e);
     }
 }
