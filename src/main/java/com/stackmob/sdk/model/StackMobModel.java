@@ -211,7 +211,7 @@ public abstract class StackMobModel {
                 List<T> resultList = new ArrayList<T>();
                 for(JsonElement elt : array) {
                     try {
-                        resultList.add(StackMobModel.newFromJson(theClass, elt.toString()));
+                        resultList.add(StackMobModel.newFromJson(stackmob, theClass, elt.toString()));
                     } catch (StackMobException ignore) { }
                 }
                 callback.success(resultList);
@@ -253,8 +253,9 @@ public abstract class StackMobModel {
      * @return A new instance of the class based on the json
      * @throws StackMobException
      */
-    public static <T extends StackMobModel> T newFromJson(Class<T> classOfT, String json) throws StackMobException {
+    public static <T extends StackMobModel> T newFromJson(StackMob stackmob, Class<T> classOfT, String json) throws StackMobException {
         T newObject = newInstance(classOfT);
+        newObject.stackmob = stackmob;
         newObject.fillFromJson(json);
         return newObject;
     }

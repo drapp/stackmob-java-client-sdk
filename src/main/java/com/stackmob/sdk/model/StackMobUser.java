@@ -127,12 +127,22 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback The callback to invoke with the user model
      */
     public static <T extends StackMobUser> void getLoggedInUser(final Class<T> classOfT, StackMobOptions options, final StackMobQueryCallback<T> callback) {
+       getLoggedInUser(StackMob.getStackMob(), classOfT, options, callback);
+    }
+
+    /**
+     * Get the currently logged in user. Use to get the user object in place of login when you're starting your app and you find that you're still logged in (via {@link com.stackmob.sdk.api.StackMob#isLoggedIn()}).
+     * @param classOfT The class of the user model
+     * @param options Additional options, such as headers, to modify the request
+     * @param callback The callback to invoke with the user model
+     */
+    public static <T extends StackMobUser> void getLoggedInUser(final StackMob stackmob, final Class<T> classOfT, StackMobOptions options, final StackMobQueryCallback<T> callback) {
         StackMob.getStackMob().getLoggedInUser(options, new StackMobCallback(){
             @Override
             public void success(String responseBody) {
                 List<T> list = new ArrayList<T>();
                 try {
-                    list.add(StackMobModel.newFromJson(classOfT, responseBody));
+                    list.add(StackMobModel.newFromJson(stackmob, classOfT, responseBody));
                     callback.success(list);
                 } catch(Exception e) {
                     callback.failure(new StackMobException(e.getMessage()));
