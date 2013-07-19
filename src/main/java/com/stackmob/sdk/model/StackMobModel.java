@@ -202,7 +202,7 @@ public abstract class StackMobModel {
      * @param options options, such as select and expand, to apply to the request
      * @param callback The callback to be invoked upon returning
      */
-    public static <T extends StackMobModel> void query(StackMob stackmob, final Class<T> theClass, StackMobQuery q, StackMobOptions options, final StackMobQueryCallback<T> callback) {
+    public static <T extends StackMobModel> void query(final StackMob stackmob, final Class<T> theClass, StackMobQuery q, StackMobOptions options, final StackMobQueryCallback<T> callback) {
         q.setObjectName(getSchemaName(theClass));
         stackmob.getDatastore().get(q, options, new StackMobCallback() {
             @Override
