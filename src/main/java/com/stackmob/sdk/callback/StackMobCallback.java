@@ -53,8 +53,14 @@ public abstract class StackMobCallback extends StackMobRawCallback {
         failure(e);
     }
 
-    @Override public void temporaryPasswordResetRequired(StackMobException e) {
+    @Override
+    public void temporaryPasswordResetRequired(StackMobException e) {
         failure(e);
+    }
+
+    @Override
+    public void circularRedirect(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
+        failure(new StackMobException("Circular redirect detected from " + originalUrl + " to " + newURL));
     }
 
     @Override

@@ -117,6 +117,26 @@ public abstract class StackMobRawCallback {
     }
 
     /**
+     * Invoked when a redirect has been issued. Return false to not have StackMob cache the redirect
+     * @param originalUrl the url being redirected from
+     * @param redirectHeaders headers that came with the redirect
+     * @param redirectBody the body that came with the redirect
+     * @param newURL the url being redirected to
+     */
+    public boolean redirected(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
+        return true;
+    }
+
+    /**
+     * Invoked when a circular redirect has been detected.
+     * @param originalUrl the url being redirected from
+     * @param redirectHeaders headers that came with the redirect
+     * @param redirectBody the body that came with the redirect
+     * @param newURL the url being redirected to
+     */
+    public abstract void circularRedirect(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL);
+
+    /**
      * get the number of times the request will be automatically retried if necessary
      * @return remaining triest
      */

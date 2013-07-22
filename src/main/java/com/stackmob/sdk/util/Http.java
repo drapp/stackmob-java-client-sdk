@@ -42,4 +42,8 @@ public class Http {
     public static boolean isRetryAfterHeader(String headerName) {
         return headerName != null && headerName.toLowerCase().equals(RetryAfterLowercase);
     }
+
+    public static String fullDomain(String scheme, String domain) {
+        return String.format("%s://%s", scheme, domain);
+    }
 }

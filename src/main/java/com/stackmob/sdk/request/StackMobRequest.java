@@ -39,10 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Modifier;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -156,7 +153,7 @@ public abstract class StackMobRequest {
         try {
             String query = formatQueryString(this.params);
             URI uri = createURI(getScheme(), urlFormat, getPath(), query);
-            OAuthRequest req = getOAuthRequest(HttpVerbWithoutPayload.GET, uri.toString());
+            OAuthRequest req = getOAuthRequest(uri.getScheme(), HttpVerbWithoutPayload.GET, uri.toString());
             sendRequest(req);
         }
         catch (URISyntaxException e) {
@@ -174,7 +171,7 @@ public abstract class StackMobRequest {
         try {
             String query = formatQueryString(this.params);
             URI uri = createURI(getScheme(), urlFormat, getPath(), query);
-            OAuthRequest req = getOAuthRequest(HttpVerbWithoutPayload.HEAD, uri.toString());
+            OAuthRequest req = getOAuthRequest(uri.getScheme(), HttpVerbWithoutPayload.HEAD, uri.toString());
             sendRequest(req);
         }
         catch (URISyntaxException e) {
@@ -192,7 +189,7 @@ public abstract class StackMobRequest {
         try {
             URI uri = createURI(getScheme(), urlFormat, getPath(), "");
             String payload = getRequestBody();
-            OAuthRequest req = getOAuthRequest(HttpVerbWithPayload.POST, uri.toString(), payload);
+            OAuthRequest req = getOAuthRequest(uri.getScheme(), HttpVerbWithPayload.POST, uri.toString(), payload);
             sendRequest(req);
         }
         catch (URISyntaxException e) {
@@ -210,7 +207,7 @@ public abstract class StackMobRequest {
         try {
             URI uri = createURI(getScheme(), urlFormat, getPath(), "");
             String payload = getRequestBody();
-            OAuthRequest req = getOAuthRequest(HttpVerbWithPayload.PUT, uri.toString(), payload);
+            OAuthRequest req = getOAuthRequest(uri.getScheme(), HttpVerbWithPayload.PUT, uri.toString(), payload);
             sendRequest(req);
         }
         catch (URISyntaxException e) {
@@ -228,7 +225,7 @@ public abstract class StackMobRequest {
         try {
             String query = formatQueryString(this.params);
             URI uri = createURI(getScheme(), urlFormat, getPath(), query);
-            OAuthRequest req = getOAuthRequest(HttpVerbWithoutPayload.DELETE, uri.toString());
+            OAuthRequest req = getOAuthRequest(uri.getScheme(), HttpVerbWithoutPayload.DELETE, uri.toString());
             sendRequest(req);
         }
         catch (URISyntaxException e) {
@@ -243,7 +240,8 @@ public abstract class StackMobRequest {
     }
 
     protected URI createURI(String scheme, String host, String path, String query) throws URISyntaxException {
-        StringBuilder uriBuilder = new StringBuilder().append(scheme).append("://").append(host);
+        String domain = Http.fullDomain(scheme, host);
+        StringBuilder uriBuilder = new StringBuilder().append(session.getRedirect(domain));
         if(!path.startsWith("/")) {
             uriBuilder.append("/");
         }
@@ -330,7 +328,7 @@ public abstract class StackMobRequest {
         return getOAuthVersion() == OAuthVersion.Two;
     }
 
-    protected OAuthRequest getOAuthRequest(HttpVerb method, String url) {
+    protected OAuthRequest getOAuthRequest(String scheme, HttpVerb method, String url) {
         Verb verb = Verb.valueOf(method.toString());
         OAuthRequest oReq = new OAuthRequest(verb, url);
         int apiVersion = session.getApiVersionNumber();
@@ -367,11 +365,11 @@ public abstract class StackMobRequest {
             case Two: {
                 oReq.addHeader(API_KEY_HEADER, session.getKey());
                 if(session.oauth2TokenValid()) {
-                    String urlNoScheme = url.substring(getScheme().length() + 3);
+                    String urlNoScheme = url.substring(scheme.length() + 3);
                     int firstSlash = urlNoScheme.indexOf("/");
                     String[] hostAndPort = urlNoScheme.substring(0, firstSlash).split(":");
                     String host = hostAndPort[0];
-                    String port = getPort(hostAndPort);
+                    String port = getPort(scheme, hostAndPort);
                     String uri = urlNoScheme.substring(firstSlash);
 
                     oReq.addHeader(AUTHORIZATION_HEADER, session.generateMacToken(method.toString(), uri, host, port));
@@ -383,11 +381,11 @@ public abstract class StackMobRequest {
         return oReq;
     }
 
-    private String getPort(String[] hostAndPort) {
+    private String getPort(String scheme, String[] hostAndPort) {
         if(hostAndPort.length > 1) {
             return hostAndPort[1];
         } else {
-            return getScheme().equals(SECURE_SCHEME) ? "443" : "80";
+            return scheme.equals(SECURE_SCHEME) ? "443" : "80";
         }
     }
 
@@ -409,8 +407,8 @@ public abstract class StackMobRequest {
         return buffer.toByteArray();
     }
 
-    protected OAuthRequest getOAuthRequest(HttpVerb method, String url, String payload) {
-        OAuthRequest req = getOAuthRequest(method, url);
+    protected OAuthRequest getOAuthRequest(String scheme, HttpVerb method, String url, String payload) {
+        OAuthRequest req = getOAuthRequest(scheme, method, url);
         req.addPayload(payload);
         return req;
     }
@@ -457,6 +455,11 @@ public abstract class StackMobRequest {
             public void done(HttpVerb requestVerb, String requestURL, List<Map.Entry<String, String>> requestHeaders, String requestBody, Integer responseStatusCode, List<Map.Entry<String, String>> responseHeaders, byte[] responseBody) {
                 sendRequest();
             }
+
+            @Override
+            public void circularRedirect(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
+
+            }
         }).setUrlFormat(urlFormat).sendRequest();
     }
     
@@ -488,14 +491,23 @@ public abstract class StackMobRequest {
                         if(HttpRedirectHelper.isRedirected(ret.getCode())) {
                             session.getLogger().logInfo("Response was redirected");
                             String newLocation = HttpRedirectHelper.getNewLocation(ret.getHeaders());
-                            HttpVerb verb = HttpVerbHelper.valueOf(req.getVerb().toString());
-                            OAuthRequest newReq = getOAuthRequest(verb, newLocation);
-                            if(req.getBodyContents() != null && req.getBodyContents().length() > 0) {
-                                newReq = getOAuthRequest(verb, newLocation, req.getBodyContents());
+                            URL url = new URL(newLocation);
+                            String oldDomain = Http.fullDomain(getScheme(), urlFormat);
+                            String newDomain = Http.fullDomain(url.getProtocol(), url.getAuthority());
+                            if(session.getRedirect(oldDomain).equals(newDomain)) {
+                                callback.circularRedirect(req.getUrl(), ret.getHeaders(), stringBody, newLocation);
+                            } else {
+                                session.setRedirect(oldDomain, newDomain, HttpRedirectHelper.isPermanentRedirect(ret.getCode()));
+                                HttpVerb verb = HttpVerbHelper.valueOf(req.getVerb().toString());
+                                OAuthRequest newReq = getOAuthRequest(url.getProtocol(), verb, newLocation);
+                                if(req.getBodyContents() != null && req.getBodyContents().length() > 0) {
+                                    newReq = getOAuthRequest(url.getProtocol(), verb, newLocation, req.getBodyContents());
+                                }
+                                redirectedCallback.redirected(req.getUrl(), ret.getHeaders(), stringBody, newReq.getUrl());
+                                if(callback.redirected(req.getUrl(), ret.getHeaders(), stringBody, newReq.getUrl())) {
+                                    sendRequest(newReq);
+                                }
                             }
-                            //does NOT protect against circular redirects
-                            redirectedCallback.redirected(req.getUrl(), ret.getHeaders(), stringBody, newReq.getUrl());
-                            sendRequest(newReq);
                         }
                         else {
                             List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();

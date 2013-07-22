@@ -20,6 +20,9 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.stackmob.sdk.api.StackMob.OAuthVersion;
 import com.stackmob.sdk.util.StackMobCookieManager;
 import com.stackmob.sdk.util.StackMobLogger;
@@ -51,6 +54,7 @@ public class StackMobSession {
     private StackMobCookieManager cookieManager = new StackMobCookieManager();
     private StackMobLogger logger = new StackMobLogger();
     protected String userAgentName = "Java Client";
+    protected Map<String, String> cachedRedirects = new HashMap<String, String>();
 
     public StackMobSession(OAuthVersion oauthVersion, int apiVersionNumber, String key, String secret, String userObjectName, String userIdName) {
         this.oauthVersion = oauthVersion;
@@ -184,6 +188,17 @@ public class StackMobSession {
         return oauth2RefreshToken;
     }
 
+    public void setRedirect(String oldHost, String newHost, boolean persist) {
+        cachedRedirects.put(oldHost, newHost);
+    }
+
+    public String getRedirect(String host) {
+        if(cachedRedirects.containsKey(host)) {
+            return cachedRedirects.get(host);
+        } else {
+            return host;
+        }
+    }
 
     public void setCookieManager(StackMobCookieManager store) {
         cookieManager = store;

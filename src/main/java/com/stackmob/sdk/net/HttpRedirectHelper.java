@@ -16,12 +16,14 @@
 
 package com.stackmob.sdk.net;
 
+import com.stackmob.sdk.util.Http;
+
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Map;
 import java.net.HttpURLConnection;
 
 public class HttpRedirectHelper {
-    public static final int RedirectStatusCode = HttpURLConnection.HTTP_MOVED_TEMP;
 
     /**
      * get the new request that represents the redirect if there is one
@@ -45,7 +47,11 @@ public class HttpRedirectHelper {
     }
 
     public static boolean isRedirected(int responseCode) {
-        return responseCode == RedirectStatusCode;
+        return responseCode == HttpURLConnection.HTTP_MOVED_TEMP || isPermanentRedirect(responseCode);
+    }
+
+    public static boolean isPermanentRedirect(int responseCode) {
+        return responseCode == HttpURLConnection.HTTP_MOVED_PERM;
     }
 
 }
