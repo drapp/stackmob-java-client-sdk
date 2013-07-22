@@ -608,6 +608,11 @@ public class StackMobDatastore {
                 }
                 userCallback.setDone(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, responseBody);
             }
+
+            @Override
+            public void circularRedirect(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
+                userCallback.circularRedirect(originalUrl, redirectHeaders, redirectBody, newURL);
+            }
         });
     }
 

@@ -109,6 +109,11 @@ public class StackMobAccessTokenRequest extends StackMobRequest {
                 }
                 callback.setDone(requestVerb, requestURL, requestHeaders, requestBody, responseStatusCode, responseHeaders, finalResponseBody);
             }
+
+            @Override
+            public void circularRedirect(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
+                callback.circularRedirect(originalUrl, redirectHeaders, redirectBody, newURL);
+            }
         };
     }
 
