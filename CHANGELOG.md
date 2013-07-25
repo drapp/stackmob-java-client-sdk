@@ -1,5 +1,13 @@
 <h2>StackMob Java SDK Change Log</h2>
 
+<h3> v1.3.5 - July 25, 2013</h3>
+
+**Fixes**
+
+* Worked around possible android bug in forgot password
+* Fixed NPE in queried objects
+* Made cluster redirect feature more functional
+
 <h3> v1.3.4 - June 7, 2013</h3>
 
 **Features**
