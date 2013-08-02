@@ -38,7 +38,7 @@ public class TypeHints {
     }
 
     private String appendToPath(String next) {
-        if(basePath.isEmpty()) {
+        if("".equals(basePath)) {
             return next.toLowerCase();
         } else {
             return basePath + "." + next.toLowerCase();
