@@ -322,7 +322,7 @@ public abstract class StackMobRequest {
 
 
     protected String getContentType() {
-        return "application/json; charset=utf-8";
+        return "application/json";
     }
 
     protected OAuthVersion getOAuthVersion() {
