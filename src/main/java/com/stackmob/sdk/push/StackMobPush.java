@@ -60,6 +60,7 @@ public class StackMobPush {
     private ExecutorService executor;
     private StackMobSession session;
     private String host;
+    private String refreshHost;
     private StackMobRedirectedCallback redirectedCallback;
 
     private static StackMobPush push;
@@ -93,7 +94,17 @@ public class StackMobPush {
     }
 
     /**
-     * the most complete constructor
+     * a minimal constructor, using defaults for everything else
+     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
+     * @param apiKey the api key for your app
+     */
+    public StackMobPush(int apiVersionNumber, String apiKey) {
+        this(StackMob.OAuthVersion.Two, apiVersionNumber, apiKey, "", DEFAULT_PUSH_HOST, StackMob.DEFAULT_REDIRECTED_CALLBACK);
+        // Some internal things depend on a stackmob having been created
+        new StackMob(apiVersionNumber, apiKey);
+    }
+
+    /**
      * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
      * @param apiKey the api key for your app
      * @param apiSecret the api secret for your app
@@ -116,9 +127,53 @@ public class StackMobPush {
      * note that this callback may be called in a background thread
      */
     public StackMobPush(int apiVersionNumber, String apiKey, String apiSecret, String host, StackMobRedirectedCallback redirectedCallback) {
+        this(StackMob.OAuthVersion.One, apiVersionNumber, apiKey, apiSecret, host, redirectedCallback);
+    }
+
+    /**
+     * another constructor
+     * @param oauth the auth to sign requests with
+     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
+     * @param apiKey the api key for your app
+     * @param apiSecret the api secret for your app
+     * @param host the base url for requests
+     * @param redirectedCallback callback to be called if the StackMob platform issues a redirect. you should use this callback to cache the new URLs. here is a sample callback:
+     * note that this callback may be called in a background thread
+     */
+    public StackMobPush(StackMob.OAuthVersion oauth, int apiVersionNumber, String apiKey, String apiSecret, String host, StackMobRedirectedCallback redirectedCallback) {
+        this(oauth, apiVersionNumber, apiKey, apiSecret, host, StackMob.DEFAULT_API_HOST, redirectedCallback);
+
+    }
+
+    /**
+     * the most complete constructor
+     * @param oauth the auth to sign requests with
+     * @param apiVersionNumber the version of your app's API that you want to use with this StackMob session. pass 0 for sandbox
+     * @param apiKey the api key for your app
+     * @param apiSecret the api secret for your app
+     * @param host the base url for requests
+     * @param redirectedCallback callback to be called if the StackMob platform issues a redirect. you should use this callback to cache the new URLs. here is a sample callback:
+     * <code>
+     * new StackMobRedirectedCallback() {
+     *   public void redirected(HttpRequest origRequest, HttpResponse response, HttpRequest newRequest) {
+     *       try {
+     *           URI uri = new URI(newRequest.getRequestLine().getUri());
+     *           cache(uri.getHost);
+     *       }
+     *        catch (URISyntaxException e) {
+     *           handleException(e);
+     *       }
+     *   }
+     * }
+     * }
+     * </code>
+     * note that this callback may be called in a background thread
+     */
+    public StackMobPush(StackMob.OAuthVersion oauth, int apiVersionNumber, String apiKey, String apiSecret, String host, String refreshHost, StackMobRedirectedCallback redirectedCallback) {
         this.executor = Executors.newCachedThreadPool();
-        this.session = new StackMobSession(StackMob.OAuthVersion.One, apiVersionNumber, apiKey, apiSecret, StackMob.DEFAULT_USER_SCHEMA_NAME, StackMob.DEFAULT_USER_ID);
+        this.session = new StackMobSession(oauth, apiVersionNumber, apiKey, apiSecret, StackMob.DEFAULT_USER_SCHEMA_NAME, StackMob.DEFAULT_USER_ID);
         this.host = host;
+        this.refreshHost = refreshHost;
         this.redirectedCallback = redirectedCallback;
         if(push == null) push = this;
     }
@@ -140,6 +195,7 @@ public class StackMobPush {
         this.executor = stackmob.getExecutor();
         this.session = stackmob.getSession();
         this.host = host;
+        this.refreshHost = stackmob.getHost();
         this.redirectedCallback = stackmob.getRedirectedCallback();
         if(push == null) push = this;
     }
@@ -244,14 +300,14 @@ public class StackMobPush {
     private void sendWithPayload(HttpVerbWithPayload verb, String path, Object requestObject, StackMobRawCallback callback) {
         new StackMobRequestWithPayload(this.executor,
                 this.session,
-                StackMob.OAuthVersion.One,
+                this.session.getOAuthVersion(),
                 verb,
                 StackMobOptions.none(),
                 StackMobRequest.EmptyParams,
                 requestObject,
                 path,
                 callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                this.redirectedCallback).setUrlFormat(this.host).setRefreshUrlFormat(refreshHost).sendRequest();
     }
     /**
      * do a GET request to the stackmob push service
@@ -263,13 +319,13 @@ public class StackMobPush {
     private void sendWithoutPayload(HttpVerbWithoutPayload verb, String path, List<Map.Entry<String, String>> arguments, StackMobRawCallback callback) {
         new StackMobRequestWithoutPayload(this.executor,
                 this.session,
-                StackMob.OAuthVersion.One,
+                this.session.getOAuthVersion(),
                 verb,
                 StackMobOptions.none(),
                 arguments,
                 path,
                 callback,
-                this.redirectedCallback).setUrlFormat(this.host).sendRequest();
+                this.redirectedCallback).setUrlFormat(this.host).setRefreshUrlFormat(refreshHost).sendRequest();
     }
 
 }

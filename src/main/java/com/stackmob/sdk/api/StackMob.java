@@ -262,6 +262,14 @@ public class StackMob {
        return datastore;
     }
 
+    /**
+     * The host used for requests
+     * @return
+     */
+    public String getHost() {
+        return apiUrlFormat;
+    }
+
     // ================================================================================================================
     // Session & login/logout
 

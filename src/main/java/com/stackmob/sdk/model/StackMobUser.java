@@ -566,7 +566,7 @@ public abstract class StackMobUser extends StackMobModel {
      * @param callback Invoked when the operation is complete
      */
     public void registerForPush(StackMobPushToken token, StackMobRawCallback callback) {
-        StackMobPush.getPush().registerForPushWithUser(token, getID(), callback);
+        StackMobPush.getPush().registerForPushWithUser(token, getID(), true, callback);
     }
 
     /**

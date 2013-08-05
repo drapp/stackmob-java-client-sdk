@@ -69,6 +69,7 @@ public abstract class StackMobRequest {
     protected String methodName;
 
     protected String urlFormat = StackMob.DEFAULT_API_HOST;
+    protected String refreshUrlFormat = StackMob.DEFAULT_API_HOST;
     protected Boolean isSecure = false;
     protected List<Map.Entry<String, String>> params = new ArrayList<Map.Entry<String, String>>();
     protected List<Map.Entry<String, String>> headers = new ArrayList<Map.Entry<String, String>>();
@@ -117,6 +118,11 @@ public abstract class StackMobRequest {
 
     public StackMobRequest setUrlFormat(String urlFmt) {
         this.urlFormat = urlFmt;
+        return this;
+    }
+
+    public StackMobRequest setRefreshUrlFormat(String urlFmt) {
+        this.refreshUrlFormat= urlFmt;
         return this;
     }
 
@@ -460,7 +466,7 @@ public abstract class StackMobRequest {
             public void circularRedirect(String originalUrl, Map<String, String> redirectHeaders, String redirectBody, String newURL) {
 
             }
-        }).setUrlFormat(urlFormat).sendRequest();
+        }).setUrlFormat(refreshUrlFormat).sendRequest();
     }
     
     protected void sendRequest(final OAuthRequest req) throws InterruptedException, ExecutionException {
