@@ -246,6 +246,35 @@ public abstract class StackMobModel {
     }
 
     /**
+     * run a delete request with query parameters on the server.
+     *
+     * warning! this has the ability to delete a substantial amount of data in one request. use with care!
+     *
+     * @param theClass The class of your model
+     * @param q The query on which to match objects for deletion
+     * @param callback The callback to be invoked upon finishing
+     */
+    public static <T extends StackMobModel> void delete(Class<T> theClass, StackMobQuery q, StackMobCountCallback callback) {
+        delete(StackMob.getStackMob(), theClass, q, callback);
+    }
+
+    /**
+     * run a delete request with query parameters on the server.
+     *
+     * warning! this has the ability to delete a substantial amount of data in one request. use with care!
+     *
+     * @param stackmob The stackmob instance to run requests on
+     * @param theClass The class of your model
+     * @param q The query on which to match objects for deletion
+     * @param callback The callback to be invoked upon finishing
+     */
+    public static <T extends StackMobModel> void delete(StackMob stackmob, Class<T> theClass, StackMobQuery q, StackMobCallback callback) {
+        String schemaName = getSchemaName(theClass);
+        q.setObjectName(schemaName);
+        stackmob.getDatastore().delete(q, callback);
+    }
+
+    /**
      * create a new instance of the specified model class from a json string. Useful if you've serialized a model class for some
      * reason and now want to deserialize it.
      * @param classOfT The class to instantiate
@@ -255,7 +284,7 @@ public abstract class StackMobModel {
      */
     public static <T extends StackMobModel> T newFromJson(StackMob stackmob, Class<T> classOfT, String json) throws StackMobException {
         T newObject = newInstance(classOfT);
-        newObject.stackmob = stackmob;
+        newObject.setStackMob(stackmob);
         newObject.fillFromJson(json);
         return newObject;
     }

@@ -815,6 +815,32 @@ public class StackMobTests extends StackMobTestCommon {
         asserter.assertLatchFinished(latch);
     }
 
+    @Test public void deleteByQuery() throws Exception {
+        final String gameOneId = "gameByQueryOne";
+        final String gameTwoId = "gameByQueryTwo";
+        final Game gameOne = new Game(new ArrayList<String>(), gameOneId);
+        final Game gameTwo = new Game(new ArrayList<String>(), gameTwoId);
+        final StackMobObjectOnServer<Game> objectOnServerOne = createOnServer(gameOne, Game.class);
+        final StackMobObjectOnServer<Game> objectOnServerTwo = createOnServer(gameTwo, Game.class);
+        StackMobQuery query = new StackMobQuery("game").field(new StackMobQueryField("name").isIn(Arrays.asList(gameOneId, gameTwoId)));
+        final CountDownLatch latch = latchOne();
+        final MultiThreadAsserter asserter = new MultiThreadAsserter();
+
+        stackmob.getDatastore().delete(query, new StackMobCallback() {
+            @Override
+            public void success(String responseBody) {
+                asserter.markNotJsonError(responseBody);
+                latch.countDown();
+            }
+
+            @Override
+            public void failure(StackMobException e) {
+                asserter.markException(e);
+            }
+        });
+        asserter.assertLatchFinished(latch);
+    }
+
     @Test public void put() throws Exception {
         final String oldName = "oldGameName";
         final String newName = "newGameName";
