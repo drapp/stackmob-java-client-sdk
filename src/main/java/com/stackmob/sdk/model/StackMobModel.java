@@ -284,7 +284,7 @@ public abstract class StackMobModel {
      */
     public static <T extends StackMobModel> T newFromJson(StackMob stackmob, Class<T> classOfT, String json) throws StackMobException {
         T newObject = newInstance(classOfT);
-        newObject.stackmob = stackmob;
+        newObject.setStackMob(stackmob);
         newObject.fillFromJson(json);
         return newObject;
     }
