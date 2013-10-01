@@ -573,12 +573,10 @@ public class StackMobDatastore {
      *
      * warning! this has the ability to delete a substantial amount of data in one request. use with care!
      *
-     * @param path the path to delete
      * @param query the query on which to match elements to be deleted
      * @param callback callback to be called when the server returns. may execute in a separate thread
      */
-    public void delete(String path,
-                       StackMobQuery query,
+    public void delete(StackMobQuery query,
                        StackMobRawCallback callback) {
         new StackMobRequestWithoutPayload(
                 this.executor,
@@ -586,7 +584,7 @@ public class StackMobDatastore {
                 HttpVerbWithoutPayload.DELETE,
                 StackMobOptions.none(),
                 query.getArguments(),
-                path,
+                query.getObjectName(),
                 callback,
                 this.redirectedCallback).setUrlFormat(this.host).sendRequest();
     }

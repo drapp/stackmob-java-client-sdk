@@ -822,11 +822,11 @@ public class StackMobTests extends StackMobTestCommon {
         final Game gameTwo = new Game(new ArrayList<String>(), gameTwoId);
         final StackMobObjectOnServer<Game> objectOnServerOne = createOnServer(gameOne, Game.class);
         final StackMobObjectOnServer<Game> objectOnServerTwo = createOnServer(gameTwo, Game.class);
-        StackMobQuery query = new StackMobQuery("game").field(new StackMobQueryField("game_id").isIn(Arrays.asList(gameOneId, gameTwoId)));
+        StackMobQuery query = new StackMobQuery("game").field(new StackMobQueryField("name").isIn(Arrays.asList(gameOneId, gameTwoId)));
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
 
-        stackmob.getDatastore().delete("game", query, new StackMobCallback() {
+        stackmob.getDatastore().delete(query, new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 asserter.markNotJsonError(responseBody);

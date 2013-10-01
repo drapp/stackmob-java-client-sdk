@@ -271,7 +271,7 @@ public abstract class StackMobModel {
     public static <T extends StackMobModel> void delete(StackMob stackmob, Class<T> theClass, StackMobQuery q, StackMobCallback callback) {
         String schemaName = getSchemaName(theClass);
         q.setObjectName(schemaName);
-        stackmob.getDatastore().delete(schemaName, q, callback);
+        stackmob.getDatastore().delete(q, callback);
     }
 
     /**
