@@ -66,7 +66,6 @@ public class StackMobTestCommon {
         }
 
         StackMob.setStackMob(new StackMob(StackMob.OAuthVersion.One, apiVersion, apiKey, apiSecret));
-        StackMob.getStackMob().getSession().setEnableHTTPS(false);
         StackMob.getStackMob().getSession().getLogger().setLogging(true);
         StackMobPush.setPush(new StackMobPush(StackMob.getStackMob()));
         StackMobPush.getPush().setFake(true);
