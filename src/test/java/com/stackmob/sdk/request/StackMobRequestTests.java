@@ -29,6 +29,8 @@ import static org.junit.Assert.*;
 import com.stackmob.sdk.callback.StackMobCallback;
 import com.stackmob.sdk.exception.StackMobException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -44,12 +46,13 @@ public class StackMobRequestTests extends StackMobTestCommon {
 
     private StackMobSession session = stackmob.getSession();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final List emptyParams = new ArrayList<Map.Entry<String, String>>();
 
     @Test public void testListapiSecureGetRequest() throws InterruptedException, StackMobException{
 
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, null, HttpVerbWithoutPayload.GET, "listapi", new StackMobCallback() {
+        StackMobRequest request = new StackMobRequestWithoutPayload(executor, session, null, HttpVerbWithoutPayload.GET, StackMobOptions.https(true), emptyParams, "listapi", new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 assertNotNull(responseBody);
@@ -68,7 +71,7 @@ public class StackMobRequestTests extends StackMobTestCommon {
     @Test public void testListapiSecurePostRequest() throws InterruptedException, StackMobException {
         final CountDownLatch latch = latchOne();
         final MultiThreadAsserter asserter = new MultiThreadAsserter();
-        StackMobRequest request = new StackMobRequestWithPayload(executor, session, null, HttpVerbWithPayload.POST, "listapi", new StackMobCallback() {
+        StackMobRequest request = new StackMobRequestWithPayload(executor, session, null, HttpVerbWithPayload.POST, StackMobOptions.https(true), emptyParams, null, "listapi", new StackMobCallback() {
             @Override
             public void success(String responseBody) {
                 assertNotNull(responseBody);
